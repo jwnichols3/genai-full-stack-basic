@@ -338,6 +338,7 @@ export class AppStack extends Stack {
   private createTestBucket(env: string): void {
     // Simple test bucket to validate CI/CD pipeline
     // This demonstrates infrastructure changes flowing through our DevOps process
+    // Now configured with real AWS credentials for deployment testing
     new s3.Bucket(this, `TestBucket-${env}`, {
       bucketName: `ec2-manager-cicd-test-${env}-${this.account}`,
       encryption: s3.BucketEncryption.S3_MANAGED,
