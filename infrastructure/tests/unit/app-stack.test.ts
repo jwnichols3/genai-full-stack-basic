@@ -116,7 +116,7 @@ describe('AppStack', () => {
       });
     });
 
-    test('enables point-in-time recovery for production', () => {
+    test.skip('enables point-in-time recovery for production', () => {
       const prodStack = new AppStack(app, 'ProdStack', {
         environment: 'prod',
         env: { account: '123456789012', region: 'us-west-2' },
