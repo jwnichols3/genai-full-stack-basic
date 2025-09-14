@@ -1,1 +1,6 @@
-console.log('API Lambda Handler');
+export const handler = async () => {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: 'EC2 Manager API' }),
+  };
+};
