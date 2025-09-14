@@ -1,4 +1,4 @@
-import { Stack, StackProps, RemovalPolicy, Duration } from 'aws-cdk-lib';
+import { Stack, StackProps, RemovalPolicy, Duration, CfnOutput } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
@@ -19,6 +19,8 @@ interface AppStackProps extends StackProps {
 export class AppStack extends Stack {
   public readonly vpc: ec2.Vpc;
   public readonly userPool: cognito.UserPool;
+  public readonly userPoolClient: cognito.UserPoolClient;
+  public readonly userPoolDomain: cognito.UserPoolDomain;
   public readonly auditTable: dynamodb.Table;
   public readonly webBucket: s3.Bucket;
   public readonly distribution: cloudfront.Distribution;
@@ -42,7 +44,10 @@ export class AppStack extends Stack {
     this.dbSecurityGroup = securityGroups.dbSecurityGroup;
 
     // 2. Authentication - Cognito User Pool
-    this.userPool = this.createUserPool(env);
+    const { userPool, userPoolClient, userPoolDomain } = this.createUserPool(env);
+    this.userPool = userPool;
+    this.userPoolClient = userPoolClient;
+    this.userPoolDomain = userPoolDomain;
 
     // 3. Data Layer - DynamoDB Tables
     this.auditTable = this.createAuditTable(env);
@@ -65,6 +70,9 @@ export class AppStack extends Stack {
 
     // 8. CI/CD Pipeline Test - Simple S3 Bucket for testing
     this.createTestBucket(env);
+
+    // 9. Stack Outputs for cross-stack references
+    this.createStackOutputs(env);
   }
 
   private createVpc(env: string): ec2.Vpc {
@@ -155,35 +163,68 @@ export class AppStack extends Stack {
     return { lambdaSecurityGroup, dbSecurityGroup };
   }
 
-  private createUserPool(env: string): cognito.UserPool {
-    const userPool = new cognito.UserPool(this, `UserPool-${env}`, {
+  private createUserPool(env: string): {
+    userPool: cognito.UserPool;
+    userPoolClient: cognito.UserPoolClient;
+    userPoolDomain: cognito.UserPoolDomain;
+  } {
+    const userPool = new cognito.UserPool(this, `UserPoolV2-${env}`, {
       userPoolName: `ec2-manager-${env}`,
-      selfSignUpEnabled: true,
+      selfSignUpEnabled: false, // Only pre-registered users
       signInAliases: { email: true },
       passwordPolicy: {
         minLength: 8,
         requireLowercase: true,
         requireUppercase: true,
         requireDigits: true,
-        requireSymbols: true,
+        requireSymbols: false, // Per story requirements - no symbols required
       },
-      mfa: env === 'prod' ? cognito.Mfa.REQUIRED : cognito.Mfa.OPTIONAL,
+      mfa: cognito.Mfa.OPTIONAL, // Optional MFA per AC 5
       mfaSecondFactor: {
         sms: true,
         otp: true,
       },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
+      autoVerify: {
+        email: true,
+      },
+      standardAttributes: {
+        email: {
+          required: true,
+          mutable: true,
+        },
+        givenName: {
+          required: false,
+          mutable: true,
+        },
+        familyName: {
+          required: false,
+          mutable: true,
+        },
+      },
+      customAttributes: {
+        role: new cognito.StringAttribute({
+          minLen: 1,
+          maxLen: 20,
+          mutable: true,
+        }),
+      },
       removalPolicy: env === 'prod' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
     });
 
-    // User Pool Client
-    new cognito.UserPoolClient(this, `UserPoolClient-${env}`, {
+    // User Pool Client with 8 hour token expiration
+    const userPoolClient = new cognito.UserPoolClient(this, `UserPoolClientV2-${env}`, {
       userPool,
       userPoolClientName: `ec2-manager-client-${env}`,
       generateSecret: false,
       authFlows: {
         userSrp: true,
+        userPassword: true, // Allow username/password auth for seeding
+        adminUserPassword: true, // Allow admin to set passwords
       },
+      accessTokenValidity: Duration.hours(8), // AC 4: 8 hours token expiration
+      idTokenValidity: Duration.hours(8), // AC 4: 8 hours token expiration
+      refreshTokenValidity: Duration.days(30), // 30 days for refresh tokens
       oAuth: {
         flows: {
           authorizationCodeGrant: true,
@@ -192,7 +233,15 @@ export class AppStack extends Stack {
       },
     });
 
-    return userPool;
+    // User Pool Domain for hosted UI (AC 7)
+    const userPoolDomain = new cognito.UserPoolDomain(this, `UserPoolDomainV2-${env}`, {
+      userPool,
+      cognitoDomain: {
+        domainPrefix: `ec2-manager-${env}-${this.account}`,
+      },
+    });
+
+    return { userPool, userPoolClient, userPoolDomain };
   }
 
   private createAuditTable(env: string): dynamodb.Table {
@@ -433,7 +482,7 @@ export class AppStack extends Stack {
               transitionAfter: Duration.days(90),
             },
           ],
-          expiration: env === 'prod' ? Duration.days(2555) : Duration.days(90), // 7 years for prod
+          expiration: env === 'prod' ? Duration.days(2555) : Duration.days(365), // 7 years for prod, 1 year for non-prod
         },
       ],
     });
@@ -531,6 +580,46 @@ export class AppStack extends Stack {
       evaluationPeriods: 1,
       alarmDescription: `CI/CD Test - Monitor test bucket size in ${env}`,
       treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    });
+  }
+
+  private createStackOutputs(env: string): void {
+    // Cognito User Pool outputs for API Gateway authorizer
+    new CfnOutput(this, 'CognitoUserPoolId', {
+      value: this.userPool.userPoolId,
+      exportName: `EC2Manager-${env}-UserPoolId`,
+      description: 'Cognito User Pool ID for API Gateway authorizer',
+    });
+
+    new CfnOutput(this, 'CognitoClientId', {
+      value: this.userPoolClient.userPoolClientId,
+      exportName: `EC2Manager-${env}-ClientId`,
+      description: 'Cognito User Pool Client ID for frontend authentication',
+    });
+
+    new CfnOutput(this, 'CognitoUserPoolDomain', {
+      value: `https://${this.userPoolDomain.domainName}.auth.${this.region}.amazoncognito.com`,
+      exportName: `EC2Manager-${env}-UserPoolDomain`,
+      description: 'Cognito User Pool hosted UI domain URL',
+    });
+
+    // Additional outputs for cross-stack references
+    new CfnOutput(this, 'VpcId', {
+      value: this.vpc.vpcId,
+      exportName: `EC2Manager-${env}-VpcId`,
+      description: 'VPC ID for Lambda functions',
+    });
+
+    new CfnOutput(this, 'AuditTableName', {
+      value: this.auditTable.tableName,
+      exportName: `EC2Manager-${env}-AuditTableName`,
+      description: 'DynamoDB audit table name for Lambda functions',
+    });
+
+    new CfnOutput(this, 'ApiGatewayUrl', {
+      value: this.api.url,
+      exportName: `EC2Manager-${env}-ApiUrl`,
+      description: 'API Gateway URL for frontend integration',
     });
   }
 }

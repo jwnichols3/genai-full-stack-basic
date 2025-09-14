@@ -74,23 +74,89 @@ describe('AppStack', () => {
             MinimumLength: 8,
             RequireLowercase: true,
             RequireNumbers: true,
-            RequireSymbols: true,
+            RequireSymbols: false, // Updated per story requirements - no symbols required
             RequireUppercase: true,
           },
         },
         UsernameAttributes: ['email'],
+        AdminCreateUserConfig: {
+          AllowAdminCreateUserOnly: true, // Only pre-registered users
+        },
       });
     });
 
-    test('creates user pool client', () => {
+    test('creates custom role attribute', () => {
+      // Check that custom attributes exist in the schema
+      const userPoolResources = template.findResources('AWS::Cognito::UserPool');
+      const userPool = Object.values(userPoolResources)[0];
+      expect(userPool).toBeDefined();
+
+      if (userPool) {
+        const schema = userPool.Properties?.Schema;
+        expect(schema).toBeDefined();
+
+        // Check that role attribute exists
+        const roleAttribute = schema.find((attr: any) => attr.Name === 'role');
+        expect(roleAttribute).toBeDefined();
+        expect(roleAttribute.AttributeDataType).toBe('String');
+        expect(roleAttribute.Mutable).toBe(true);
+      }
+    });
+
+    test('creates user pool client with 8-hour token expiration', () => {
       template.hasResourceProperties('AWS::Cognito::UserPoolClient', {
         ClientName: 'ec2-manager-client-test',
-        ExplicitAuthFlows: ['ALLOW_USER_SRP_AUTH', 'ALLOW_REFRESH_TOKEN_AUTH'],
         GenerateSecret: false,
+        AccessTokenValidity: 480, // 8 hours = 480 minutes (CDK converts to minutes)
+        IdTokenValidity: 480, // 8 hours = 480 minutes (CDK converts to minutes)
+        RefreshTokenValidity: 43200, // 30 days = 43200 minutes (CDK converts to minutes)
+        SupportedIdentityProviders: ['COGNITO'],
+      });
+
+      // Verify auth flows contain the required flows
+      const clientResources = template.findResources('AWS::Cognito::UserPoolClient');
+      const client = Object.values(clientResources)[0];
+      expect(client).toBeDefined();
+
+      if (client) {
+        const authFlows = client.Properties?.ExplicitAuthFlows;
+        expect(authFlows).toBeDefined();
+        expect(authFlows).toContain('ALLOW_USER_SRP_AUTH');
+        expect(authFlows).toContain('ALLOW_USER_PASSWORD_AUTH');
+        expect(authFlows).toContain('ALLOW_ADMIN_USER_PASSWORD_AUTH');
+        expect(authFlows).toContain('ALLOW_REFRESH_TOKEN_AUTH');
+      }
+    });
+
+    test('creates user pool domain for hosted UI', () => {
+      template.hasResourceProperties('AWS::Cognito::UserPoolDomain', {
+        Domain: 'ec2-manager-test-161521808930',
       });
     });
 
-    test('enables MFA for production environment', () => {
+    test('disables self sign-up for pre-registered users only', () => {
+      template.hasResourceProperties('AWS::Cognito::UserPool', {
+        AdminCreateUserConfig: {
+          AllowAdminCreateUserOnly: true, // Only pre-registered users
+        },
+      });
+    });
+
+    test('configures OAuth flows correctly', () => {
+      template.hasResourceProperties('AWS::Cognito::UserPoolClient', {
+        AllowedOAuthFlows: ['code'],
+        AllowedOAuthScopes: ['email', 'openid', 'profile'],
+        AllowedOAuthFlowsUserPoolClient: true,
+      });
+    });
+
+    test('enables optional MFA for all environments', () => {
+      template.hasResourceProperties('AWS::Cognito::UserPool', {
+        MfaConfiguration: 'OPTIONAL', // Optional MFA per AC 5
+        EnabledMfas: ['SMS_MFA', 'SOFTWARE_TOKEN_MFA'],
+      });
+
+      // Test production also uses optional MFA (not required per story)
       const prodApp = new App();
       const prodStack = new AppStack(prodApp, 'ProdStack', {
         environment: 'prod',
@@ -99,7 +165,20 @@ describe('AppStack', () => {
       const prodTemplate = Template.fromStack(prodStack);
 
       prodTemplate.hasResourceProperties('AWS::Cognito::UserPool', {
-        MfaConfiguration: 'ON',
+        MfaConfiguration: 'OPTIONAL', // Updated per story - optional in all environments
+      });
+    });
+
+    test('configures password reset via email only', () => {
+      template.hasResourceProperties('AWS::Cognito::UserPool', {
+        AccountRecoverySetting: {
+          RecoveryMechanisms: [
+            {
+              Name: 'verified_email',
+              Priority: 1,
+            },
+          ],
+        },
       });
     });
   });
@@ -521,9 +600,36 @@ describe('Stack Integration', () => {
     // Verify stack has expected public properties
     expect(stack.vpc).toBeDefined();
     expect(stack.userPool).toBeDefined();
+    expect(stack.userPoolClient).toBeDefined();
+    expect(stack.userPoolDomain).toBeDefined();
     expect(stack.auditTable).toBeDefined();
     expect(stack.webBucket).toBeDefined();
     expect(stack.distribution).toBeDefined();
     expect(stack.api).toBeDefined();
+  });
+
+  test('creates stack outputs for cross-stack references', () => {
+    const app = new App();
+    const stack = new AppStack(app, 'OutputTestStack', {
+      environment: 'test',
+      env: { account: '123456789012', region: 'us-west-2' },
+    });
+    const template = Template.fromStack(stack);
+
+    // Test that Cognito outputs exist
+    const outputs = template.findOutputs('*');
+    expect(outputs.CognitoUserPoolId).toBeDefined();
+    expect(outputs.CognitoClientId).toBeDefined();
+    expect(outputs.CognitoUserPoolDomain).toBeDefined();
+
+    // Verify export names
+    expect(outputs.CognitoUserPoolId?.Export?.Name).toBe('EC2Manager-test-UserPoolId');
+    expect(outputs.CognitoClientId?.Export?.Name).toBe('EC2Manager-test-ClientId');
+    expect(outputs.CognitoUserPoolDomain?.Export?.Name).toBe('EC2Manager-test-UserPoolDomain');
+
+    // Test additional stack outputs exist
+    template.hasOutput('VpcId', {});
+    template.hasOutput('AuditTableName', {});
+    template.hasOutput('ApiGatewayUrl', {});
   });
 });
