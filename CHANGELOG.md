@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CloudWatch alarm monitoring for test resources
 - Automated lifecycle management for test resources (30-day expiration)
 - Unit tests for CI/CD test resources validation
+- Real AWS deployment with dedicated GitHub Actions IAM user
+- GitHub repository secrets configured for automated deployment
 
 ### Technical Details
 - Added `createTestBucket()` method in AppStack
