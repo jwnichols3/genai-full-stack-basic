@@ -22,6 +22,12 @@
     "lint": "npm run lint --workspaces --if-present",
     "format": "npm run format --workspaces --if-present",
     "type-check": "npm run type-check --workspaces --if-present",
+    "deploy:dev": "npm run deploy:dev --workspace=infrastructure",
+    "deploy:prod": "npm run deploy:prod --workspace=infrastructure",
+    "destroy:dev": "npm run destroy:dev --workspace=infrastructure",
+    "destroy:prod": "npm run destroy:prod --workspace=infrastructure",
+    "infra:validate": "npm run validate --workspace=infrastructure",
+    "cleanup:wrong-account": "./scripts/cleanup-wrong-account.sh",
     "prepare": "husky install"
   },
   "devDependencies": {

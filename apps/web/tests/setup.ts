@@ -16,20 +16,37 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock IntersectionObserver
+interface MockIntersectionObserverEntry {
+  boundingClientRect: DOMRectReadOnly;
+  intersectionRatio: number;
+  intersectionRect: DOMRectReadOnly;
+  isIntersecting: boolean;
+  rootBounds: DOMRectReadOnly | null;
+  target: Element;
+  time: number;
+}
+
 interface MockIntersectionObserver {
+  root: Element | null;
+  rootMargin: string;
+  thresholds: ReadonlyArray<number>;
   disconnect: () => void;
-  observe: () => void;
-  unobserve: () => void;
-  takeRecords: () => IntersectionObserverEntry[];
+  observe: (target: Element) => void;
+  unobserve: (target: Element) => void;
+  takeRecords: () => MockIntersectionObserverEntry[];
 }
 
 (globalThis as typeof globalThis & { IntersectionObserver: unknown }).IntersectionObserver =
   class IntersectionObserver implements MockIntersectionObserver {
+    root: Element | null = null;
+    rootMargin: string = '0px';
+    thresholds: ReadonlyArray<number> = [];
+
     constructor() {}
     disconnect() {}
-    observe() {}
-    unobserve() {}
-    takeRecords() {
+    observe(_target: Element) {}
+    unobserve(_target: Element) {}
+    takeRecords(): MockIntersectionObserverEntry[] {
       return [];
     }
   };

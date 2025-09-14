@@ -121,6 +121,7 @@ npm run type-check
 
 ```bash
 cd infrastructure
+npm run build          # Always build before deploying
 npm run deploy:dev
 ```
 
@@ -128,8 +129,11 @@ npm run deploy:dev
 
 ```bash
 cd infrastructure
+npm run build          # Always build before deploying
 npm run deploy:prod
 ```
+
+**Note:** Always run `npm run build` before deploying to ensure TypeScript is compiled.
 
 ## Available Scripts
 
@@ -183,12 +187,25 @@ This project uses Husky for pre-commit hooks to ensure code quality:
 - Formatting check
 - Type checking
 
+## Troubleshooting
+
+For common deployment issues and their solutions, see:
+
+- [CDK Deployment Issues](docs/troubleshooting/cdk-deployment-issues.md)
+
+### Common Issues
+
+- **S3 Lifecycle Errors**: Ensure expiration days > transition days
+- **Build Process**: Always run `npm run build` before CDK deployment
+- **AWS Profile**: Use explicit `--profile jnicamzn-sso-ec2` flag
+- **Orphaned Resources**: Clean up failed deployment artifacts
+
 ## Environment Variables
 
 See `.env.example` for all available environment variables. Key variables include:
 
-- `AWS_PROFILE`: AWS profile for deployment
-- `AWS_REGION`: AWS region (default: us-west-2)
+- `AWS_PROFILE`: AWS profile for deployment (jnicamzn-sso-ec2)
+- `AWS_REGION`: AWS region (us-west-2)
 - `NODE_ENV`: Environment (development/production)
 - `VITE_API_URL`: API endpoint for frontend
 
