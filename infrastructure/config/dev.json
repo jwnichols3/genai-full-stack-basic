@@ -1,0 +1,26 @@
+{
+  "environment": "dev",
+  "region": "us-west-2",
+  "vpc": {
+    "cidr": "10.0.0.0/16",
+    "maxAzs": 2
+  },
+  "cognito": {
+    "mfaRequired": false,
+    "selfSignUpEnabled": true
+  },
+  "dynamodb": {
+    "pointInTimeRecovery": false,
+    "retentionDays": 7
+  },
+  "apiGateway": {
+    "throttle": {
+      "rateLimit": 100,
+      "burstLimit": 200
+    }
+  },
+  "monitoring": {
+    "detailedMonitoring": false,
+    "logRetentionDays": 7
+  }
+}

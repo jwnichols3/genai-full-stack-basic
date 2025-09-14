@@ -1,0 +1,32 @@
+{
+  "environment": "staging",
+  "region": "us-west-2",
+  "vpc": {
+    "cidr": "10.0.0.0/16",
+    "maxAzs": 2
+  },
+  "cognito": {
+    "mfaRequired": true,
+    "selfSignUpEnabled": false
+  },
+  "dynamodb": {
+    "pointInTimeRecovery": true,
+    "retentionDays": 30
+  },
+  "apiGateway": {
+    "throttle": {
+      "rateLimit": 500,
+      "burstLimit": 1000
+    }
+  },
+  "monitoring": {
+    "detailedMonitoring": true,
+    "logRetentionDays": 30,
+    "alertEmail": "devops@company.com"
+  },
+  "security": {
+    "requireTls": true,
+    "enableCloudTrail": true,
+    "enableGuardDuty": true
+  }
+}

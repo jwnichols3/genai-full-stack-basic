@@ -1,0 +1,38 @@
+{
+  "environment": "prod",
+  "region": "us-west-2",
+  "vpc": {
+    "cidr": "10.0.0.0/16",
+    "maxAzs": 3
+  },
+  "cognito": {
+    "mfaRequired": true,
+    "selfSignUpEnabled": false
+  },
+  "dynamodb": {
+    "pointInTimeRecovery": true,
+    "retentionDays": 2555
+  },
+  "apiGateway": {
+    "throttle": {
+      "rateLimit": 1000,
+      "burstLimit": 2000
+    }
+  },
+  "monitoring": {
+    "detailedMonitoring": true,
+    "logRetentionDays": 90,
+    "alertEmail": "alerts@company.com"
+  },
+  "security": {
+    "requireTls": true,
+    "enableCloudTrail": true,
+    "enableGuardDuty": true,
+    "enableCloudFormationDriftDetection": true
+  },
+  "backup": {
+    "enableAutomatedBackups": true,
+    "backupRetentionDays": 30,
+    "crossRegionBackup": true
+  }
+}

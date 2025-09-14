@@ -1,0 +1,207 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened]
+
+env:
+  NODE_VERSION: '20.x'
+  AWS_REGION: us-west-2
+
+jobs:
+  # Fast feedback - runs immediately
+  quick-validation:
+    name: Quick Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Quick lint check
+        run: npm run lint
+
+      - name: Quick type check
+        run: npm run type-check
+
+      - name: Basic build test
+        run: npm run build
+
+  # Security and compliance checks
+  security-validation:
+    name: Security Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for secrets in code
+        run: |
+          # Check for common secret patterns
+          if grep -r -E "(password|secret|key|token).*=.*(sk_|pk_|akia|[0-9a-f]{32,})" . --exclude-dir=node_modules --exclude-dir=.git; then
+            echo "❌ Potential secrets found in code"
+            exit 1
+          fi
+          echo "✅ No hardcoded secrets detected"
+
+      - name: Check for sensitive file types
+        run: |
+          # Check for files that shouldn't be committed
+          if find . -name "*.pem" -o -name "*.key" -o -name ".env.local" -o -name ".env.production" | grep -v node_modules; then
+            echo "❌ Sensitive files found"
+            exit 1
+          fi
+          echo "✅ No sensitive files detected"
+
+      - name: Validate environment files
+        run: |
+          # Check that example env files don't contain real values
+          if grep -E "(AKIA|sk_|pk_)" .env.example .env.dev; then
+            echo "❌ Environment example files contain real credentials"
+            exit 1
+          fi
+          echo "✅ Environment files are clean"
+
+  # Infrastructure validation for PRs
+  infrastructure-pr-validation:
+    name: Infrastructure PR Validation
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.changed_files, 'infrastructure/')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Configure AWS credentials (read-only)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Infrastructure tests
+        run: npm run test:infra
+
+      - name: CDK diff analysis
+        run: |
+          cd infrastructure
+          echo "## Infrastructure Changes" >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          npm run diff -- --context environment=dev >> $GITHUB_STEP_SUMMARY || true
+          echo "```" >> $GITHUB_STEP_SUMMARY
+
+      - name: Resource impact analysis
+        run: |
+          cd infrastructure
+          # Check for destructive changes
+          if npm run diff -- --context environment=dev 2>&1 | grep -i "destroy\|delete\|replace"; then
+            echo "⚠️ This change includes destructive operations" >> $GITHUB_STEP_SUMMARY
+            echo "Please review carefully before merging" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Code quality analysis
+  code-analysis:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better analysis
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run comprehensive tests
+        run: |
+          npm run test
+          npm run test:coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+
+  # Size and performance impact
+  bundle-analysis:
+    name: Bundle Size Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web application
+        run: npm run build:web
+
+      - name: Analyze bundle size
+        run: |
+          # Check if bundle sizes are reasonable
+          WEB_DIST_SIZE=$(du -sh apps/web/dist | cut -f1)
+          echo "📦 Web bundle size: $WEB_DIST_SIZE" >> $GITHUB_STEP_SUMMARY
+
+          # Check for large files
+          echo "## Large Files (>1MB)" >> $GITHUB_STEP_SUMMARY
+          find apps/web/dist -size +1M -type f -exec ls -lh {} \; >> $GITHUB_STEP_SUMMARY || echo "No large files found" >> $GITHUB_STEP_SUMMARY
+
+  # Final validation summary
+  pr-summary:
+    name: PR Validation Summary
+    runs-on: ubuntu-latest
+    needs: [quick-validation, security-validation, code-analysis, bundle-analysis]
+    if: always()
+    steps:
+      - name: Generate PR summary
+        run: |
+          echo "# Pull Request Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Quick Validation | ${{ needs.quick-validation.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Validation | ${{ needs.security-validation.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Analysis | ${{ needs.code-analysis.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Bundle Analysis | ${{ needs.bundle-analysis.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Overall status
+          if [[ "${{ needs.quick-validation.result }}" == "success" &&
+                "${{ needs.security-validation.result }}" == "success" &&
+                "${{ needs.code-analysis.result }}" == "success" &&
+                "${{ needs.bundle-analysis.result }}" == "success" ]]; then
+            echo "🎉 **All checks passed!** This PR is ready for review." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Some checks failed.** Please fix the issues before merging." >> $GITHUB_STEP_SUMMARY
+          fi

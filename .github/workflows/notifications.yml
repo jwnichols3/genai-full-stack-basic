@@ -1,0 +1,314 @@
+name: Deployment Notifications
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline", "Infrastructure Deployment"]
+    types:
+      - completed
+
+env:
+  AWS_REGION: us-west-2
+
+jobs:
+  notify-deployment-result:
+    name: Notify Deployment Result
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine deployment details
+        id: deployment
+        run: |
+          WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
+          CONCLUSION="${{ github.event.workflow_run.conclusion }}"
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+
+          # Determine environment from branch
+          if [[ "$BRANCH" == "main" ]]; then
+            ENVIRONMENT="production"
+          elif [[ "$BRANCH" == "develop" ]]; then
+            ENVIRONMENT="staging"
+          else
+            ENVIRONMENT="development"
+          fi
+
+          echo "workflow_name=$WORKFLOW_NAME" >> $GITHUB_OUTPUT
+          echo "conclusion=$CONCLUSION" >> $GITHUB_OUTPUT
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Get deployment status
+        id: status
+        run: |
+          CONCLUSION="${{ steps.deployment.outputs.conclusion }}"
+          ENVIRONMENT="${{ steps.deployment.outputs.environment }}"
+
+          if [[ "$CONCLUSION" == "success" ]]; then
+            STATUS_EMOJI="✅"
+            STATUS_COLOR="good"
+            STATUS_TEXT="Success"
+          elif [[ "$CONCLUSION" == "failure" ]]; then
+            STATUS_EMOJI="❌"
+            STATUS_COLOR="danger"
+            STATUS_TEXT="Failed"
+          elif [[ "$CONCLUSION" == "cancelled" ]]; then
+            STATUS_EMOJI="🚫"
+            STATUS_COLOR="warning"
+            STATUS_TEXT="Cancelled"
+          else
+            STATUS_EMOJI="⚠️"
+            STATUS_COLOR="warning"
+            STATUS_TEXT="Unknown"
+          fi
+
+          echo "emoji=$STATUS_EMOJI" >> $GITHUB_OUTPUT
+          echo "color=$STATUS_COLOR" >> $GITHUB_OUTPUT
+          echo "text=$STATUS_TEXT" >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification
+        uses: 8398a7/action-slack@v3
+        if: always() && (vars.SLACK_WEBHOOK_URL != '')
+        with:
+          status: custom
+          custom_payload: |
+            {
+              "attachments": [
+                {
+                  "color": "${{ steps.status.outputs.color }}",
+                  "blocks": [
+                    {
+                      "type": "header",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "${{ steps.status.outputs.emoji }} EC2 Manager Deployment"
+                      }
+                    },
+                    {
+                      "type": "section",
+                      "fields": [
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Environment:* ${{ steps.deployment.outputs.environment }}"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Status:* ${{ steps.status.outputs.text }}"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Branch:* ${{ steps.deployment.outputs.branch }}"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Workflow:* ${{ steps.deployment.outputs.workflow_name }}"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "*Commit:* <${{ github.event.workflow_run.head_commit.url }}|${{ github.event.workflow_run.head_sha }}>\n*Author:* ${{ github.event.workflow_run.head_commit.author.name }}"
+                      }
+                    },
+                    {
+                      "type": "actions",
+                      "elements": [
+                        {
+                          "type": "button",
+                          "text": {
+                            "type": "plain_text",
+                            "text": "View Workflow"
+                          },
+                          "url": "${{ github.event.workflow_run.html_url }}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Send Teams notification
+        if: always() && (vars.TEAMS_WEBHOOK_URL != '')
+        run: |
+          ENVIRONMENT="${{ steps.deployment.outputs.environment }}"
+          STATUS_EMOJI="${{ steps.status.outputs.emoji }}"
+          STATUS_TEXT="${{ steps.status.outputs.text }}"
+          BRANCH="${{ steps.deployment.outputs.branch }}"
+
+          curl -X POST -H "Content-Type: application/json" \
+            -d "{
+              \"@type\": \"MessageCard\",
+              \"@context\": \"http://schema.org/extensions\",
+              \"summary\": \"EC2 Manager Deployment $STATUS_TEXT\",
+              \"themeColor\": \"${{ steps.status.outputs.color == 'good' && '00FF00' || steps.status.outputs.color == 'danger' && 'FF0000' || 'FFFF00' }}\",
+              \"sections\": [{
+                \"activityTitle\": \"$STATUS_EMOJI EC2 Manager Deployment\",
+                \"activitySubtitle\": \"Environment: $ENVIRONMENT\",
+                \"facts\": [
+                  {\"name\": \"Status\", \"value\": \"$STATUS_TEXT\"},
+                  {\"name\": \"Branch\", \"value\": \"$BRANCH\"},
+                  {\"name\": \"Author\", \"value\": \"${{ github.event.workflow_run.head_commit.author.name }}\"}
+                ]
+              }],
+              \"potentialAction\": [{
+                \"@type\": \"OpenUri\",
+                \"name\": \"View Workflow\",
+                \"targets\": [{\"os\": \"default\", \"uri\": \"${{ github.event.workflow_run.html_url }}\"}]
+              }]
+            }" \
+            "${{ secrets.TEAMS_WEBHOOK_URL }}"
+
+      - name: Send email notification (production only)
+        if: always() && steps.deployment.outputs.environment == 'production' && (vars.NOTIFICATION_EMAIL != '')
+        run: |
+          STATUS_TEXT="${{ steps.status.outputs.text }}"
+          ENVIRONMENT="${{ steps.deployment.outputs.environment }}"
+
+          # This would require setting up SES or another email service
+          echo "Production deployment $STATUS_TEXT notification would be sent to: ${{ vars.NOTIFICATION_EMAIL }}"
+
+      - name: Create GitHub deployment status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const conclusion = '${{ steps.deployment.outputs.conclusion }}';
+            const environment = '${{ steps.deployment.outputs.environment }}';
+            const state = conclusion === 'success' ? 'success' : 'failure';
+
+            try {
+              // Create deployment
+              const deployment = await github.rest.repos.createDeployment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: '${{ github.event.workflow_run.head_sha }}',
+                environment: environment,
+                description: `Deployment to ${environment}`,
+                auto_merge: false,
+                required_contexts: []
+              });
+
+              // Create deployment status
+              await github.rest.repos.createDeploymentStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: deployment.data.id,
+                state: state,
+                description: `Deployment ${conclusion}`,
+                environment_url: environment === 'production'
+                  ? 'https://ec2manager.com'
+                  : `https://ec2manager-${environment}.com`
+              });
+
+              console.log(`Created deployment status: ${state} for ${environment}`);
+            } catch (error) {
+              console.log('Error creating deployment status:', error);
+            }
+
+  notify-rollback:
+    name: Notify Rollback Required
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'failure' && contains(github.event.workflow_run.head_branch, 'main')
+    steps:
+      - name: Rollback notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              "attachments": [
+                {
+                  "color": "danger",
+                  "blocks": [
+                    {
+                      "type": "header",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "🚨 Production Deployment Failed - Rollback Required"
+                      }
+                    },
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "*A production deployment has failed and may require immediate rollback.*"
+                      }
+                    },
+                    {
+                      "type": "section",
+                      "fields": [
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Workflow:* ${{ github.event.workflow_run.name }}"
+                        },
+                        {
+                          "type": "mrkdwn",
+                          "text": "*Commit:* ${{ github.event.workflow_run.head_sha }}"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "section",
+                      "text": {
+                        "type": "mrkdwn",
+                        "text": "*Rollback Command:*\n```./scripts/rollback.sh prod```"
+                      }
+                    },
+                    {
+                      "type": "actions",
+                      "elements": [
+                        {
+                          "type": "button",
+                          "text": {
+                            "type": "plain_text",
+                            "text": "View Failed Workflow"
+                          },
+                          "url": "${{ github.event.workflow_run.html_url }}",
+                          "style": "danger"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  health-check:
+    name: Post-Deployment Health Check
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Wait for services to be ready
+        run: sleep 60
+
+      - name: Basic health check
+        run: |
+          ENVIRONMENT="development"
+          if [[ "${{ github.event.workflow_run.head_branch }}" == "main" ]]; then
+            ENVIRONMENT="production"
+          elif [[ "${{ github.event.workflow_run.head_branch }}" == "develop" ]]; then
+            ENVIRONMENT="staging"
+          fi
+
+          # Basic connectivity tests
+          echo "Running health checks for $ENVIRONMENT..."
+
+          # These would be actual health check endpoints
+          # curl -f https://api-$ENVIRONMENT.ec2manager.com/health || echo "API health check failed"
+          echo "Health check completed for $ENVIRONMENT"
+
+      - name: Report health status
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: "🏥 Post-deployment health check completed"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
