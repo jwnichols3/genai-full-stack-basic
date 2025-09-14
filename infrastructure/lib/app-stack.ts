@@ -43,18 +43,18 @@ export class AppStack extends Stack {
     this.lambdaSecurityGroup = securityGroups.lambdaSecurityGroup;
     this.dbSecurityGroup = securityGroups.dbSecurityGroup;
 
-    // 2. Authentication - Cognito User Pool
+    // 2. Web Hosting - S3 + CloudFront (needed for Cognito callback URLs)
+    this.webBucket = this.createWebBucket(env);
+    this.distribution = this.createCloudFrontDistribution();
+
+    // 3. Authentication - Cognito User Pool (with CloudFront callback URLs)
     const { userPool, userPoolClient, userPoolDomain } = this.createUserPool(env);
     this.userPool = userPool;
     this.userPoolClient = userPoolClient;
     this.userPoolDomain = userPoolDomain;
 
-    // 3. Data Layer - DynamoDB Tables
+    // 4. Data Layer - DynamoDB Tables
     this.auditTable = this.createAuditTable(env);
-
-    // 4. Web Hosting - S3 + CloudFront
-    this.webBucket = this.createWebBucket(env);
-    this.distribution = this.createCloudFrontDistribution();
 
     // 5. API Layer - API Gateway + Lambda
     this.api = this.createApiGateway(env);
@@ -230,6 +230,13 @@ export class AppStack extends Stack {
           authorizationCodeGrant: true,
         },
         scopes: [cognito.OAuthScope.EMAIL, cognito.OAuthScope.OPENID, cognito.OAuthScope.PROFILE],
+        callbackUrls: [
+          `https://${this.distribution.distributionDomainName}/auth/callback`, // CloudFront distribution
+          `https://${this.distribution.distributionDomainName}/`, // Fallback to root
+        ],
+        logoutUrls: [
+          `https://${this.distribution.distributionDomainName}/`, // CloudFront distribution
+        ],
       },
     });
 
@@ -601,6 +608,12 @@ export class AppStack extends Stack {
       value: `https://${this.userPoolDomain.domainName}.auth.${this.region}.amazoncognito.com`,
       exportName: `EC2Manager-${env}-UserPoolDomain`,
       description: 'Cognito User Pool hosted UI domain URL',
+    });
+
+    new CfnOutput(this, 'CloudFrontUrl', {
+      value: `https://${this.distribution.distributionDomainName}`,
+      exportName: `EC2Manager-${env}-CloudFrontUrl`,
+      description: 'CloudFront distribution URL for web frontend',
     });
 
     // Additional outputs for cross-stack references

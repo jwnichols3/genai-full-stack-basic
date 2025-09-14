@@ -2,7 +2,8 @@
 import {
   CognitoIdentityProviderClient,
   AdminCreateUserCommand,
-  AdminSetUserAttributesCommand,
+  AdminUpdateUserAttributesCommand,
+  MessageActionType,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
 
@@ -63,6 +64,9 @@ async function getStackOutputs(
     }
 
     const stack = response.Stacks[0];
+    if (!stack) {
+      throw new Error(`Stack ${stackName} not found`);
+    }
     const outputs = stack.Outputs || [];
 
     const userPoolId = outputs.find(
@@ -118,7 +122,7 @@ async function createUser(
         },
       ],
       TemporaryPassword: user.temporaryPassword,
-      MessageAction: 'SUPPRESS', // Don't send welcome email
+      MessageAction: MessageActionType.SUPPRESS, // Don't send welcome email
       ForceAliasCreation: false,
     };
 
@@ -148,7 +152,7 @@ async function createUser(
         ],
       };
 
-      await cognitoClient.send(new AdminSetUserAttributesCommand(updateParams));
+      await cognitoClient.send(new AdminUpdateUserAttributesCommand(updateParams));
       console.log(`✓ User ${user.email} attributes updated`);
     } else {
       console.error(`✗ Failed to create user ${user.email}:`, error.message);
@@ -199,7 +203,7 @@ async function main() {
 }
 
 // Execute if run directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
