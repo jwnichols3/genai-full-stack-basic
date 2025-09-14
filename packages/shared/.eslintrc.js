@@ -6,7 +6,7 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -25,6 +25,7 @@ module.exports = {
   ignorePatterns: [
     'dist/',
     'node_modules/',
-    '*.js'
+    '*.js',
+    'tests/**/*'
   ]
 };

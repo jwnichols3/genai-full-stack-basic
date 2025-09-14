@@ -6,11 +6,11 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 12,
+    ecmaVersion: 2021,
     sourceType: 'module',
     project: './tsconfig.json',
   },
@@ -26,6 +26,7 @@ module.exports = {
     'dist/',
     'node_modules/',
     'cdk.out/',
-    '*.js'
+    '*.js',
+    'tests/**/*'
   ]
 };

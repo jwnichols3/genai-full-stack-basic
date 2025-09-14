@@ -41,6 +41,9 @@ module.exports = {
     '*.js',
     '*.cjs',
     '*.mjs',
-    'cdk.out'
+    'cdk.out',
+    'tests/**/*',
+    '**/*.test.*',
+    '**/*.spec.*'
   ]
 };

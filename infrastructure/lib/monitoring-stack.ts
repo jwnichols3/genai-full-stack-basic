@@ -1,7 +1,6 @@
 import { Stack, StackProps, Duration } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
-import * as logs from 'aws-cdk-lib/aws-logs';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';

@@ -4,7 +4,7 @@ describe('API Unit Tests', () => {
   });
 
   it('should validate environment', () => {
-    const nodeEnv = process.env.NODE_ENV || 'test';
+    const nodeEnv = process.env.NODE_ENV ?? 'test';
     expect(['test', 'development', 'production']).toContain(nodeEnv);
   });
 });

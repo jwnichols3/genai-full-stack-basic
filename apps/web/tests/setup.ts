@@ -16,7 +16,14 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock IntersectionObserver
-(globalThis as any).IntersectionObserver = class IntersectionObserver {
+interface MockIntersectionObserver {
+  disconnect: () => void;
+  observe: () => void;
+  unobserve: () => void;
+  takeRecords: () => IntersectionObserverEntry[];
+}
+
+(globalThis as typeof globalThis & { IntersectionObserver: unknown }).IntersectionObserver = class IntersectionObserver implements MockIntersectionObserver {
   constructor() {}
   disconnect() {}
   observe() {}
