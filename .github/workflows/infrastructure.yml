@@ -38,9 +38,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Temporarily skip tests to focus on deployment validation
-      # - name: Run infrastructure tests
-      #   run: npm run test:infra
+      - name: Run infrastructure tests
+        run: npm run test --workspace=infrastructure
 
       - name: CDK security check
         run: |
@@ -48,11 +47,41 @@ jobs:
           # Check for hardcoded secrets
           grep -r "AKIA\|password\|secret" lib/ bin/ || echo "No hardcoded secrets found"
 
+      - name: Security controls validation
+        run: |
+          cd infrastructure
+          echo "Validating security controls in CDK synthesis..."
+
+          # Generate CDK output for validation
+          npm run synth -- --context environment=dev > cdk-output.json
+
+          # Check for security groups
+          if grep -q "AWS::EC2::SecurityGroup" cdk-output.json; then
+            echo "✅ Security Groups found"
+          else
+            echo "❌ CRITICAL: No Security Groups found - infrastructure exposed"
+            exit 1
+          fi
+
+          # Check for CloudTrail
+          if grep -q "AWS::CloudTrail::Trail" cdk-output.json; then
+            echo "✅ CloudTrail found"
+          else
+            echo "❌ CRITICAL: No CloudTrail found - no audit logging"
+            exit 1
+          fi
+
+          # Check for restrictive security group rules
+          if grep -q "0.0.0.0/0" cdk-output.json && grep -q "22\|3389" cdk-output.json; then
+            echo "❌ WARNING: Found potentially open SSH/RDP ports"
+          fi
+
+          echo "Security validation completed"
+
       - name: CDK diff for dev environment
         run: |
           cd infrastructure
           npm run diff -- --context environment=dev
-        continue-on-error: true
 
       - name: CDK synth validation
         run: |
