@@ -15,8 +15,5 @@
   },
   "include": ["src/**/*", "tests/**/*"],
   "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "../../packages/shared" },
-    { "path": "../../packages/config" }
-  ]
+  "references": [{ "path": "../../packages/shared" }, { "path": "../../packages/config" }]
 }

@@ -128,11 +128,15 @@ export class AppStack extends Stack {
     );
 
     // VPC Flow Logs Security Group (for monitoring)
-    const vpcFlowLogsSecurityGroup = new ec2.SecurityGroup(this, `VpcFlowLogsSecurityGroup-${env}`, {
-      vpc: this.vpc,
-      description: `Security group for VPC Flow Logs - ${env}`,
-      allowAllOutbound: false,
-    });
+    const vpcFlowLogsSecurityGroup = new ec2.SecurityGroup(
+      this,
+      `VpcFlowLogsSecurityGroup-${env}`,
+      {
+        vpc: this.vpc,
+        description: `Security group for VPC Flow Logs - ${env}`,
+        allowAllOutbound: false,
+      }
+    );
 
     // Allow VPC Flow Logs to send to CloudWatch
     vpcFlowLogsSecurityGroup.addEgressRule(
@@ -297,11 +301,7 @@ export class AppStack extends Stack {
           statements: [
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
-              actions: [
-                'dynamodb:PutItem',
-                'dynamodb:Query',
-                'dynamodb:GetItem',
-              ],
+              actions: ['dynamodb:PutItem', 'dynamodb:Query', 'dynamodb:GetItem'],
               resources: [this.auditTable.tableArn],
             }),
           ],
@@ -336,11 +336,7 @@ export class AppStack extends Stack {
           statements: [
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
-              actions: [
-                'dynamodb:PutItem',
-                'dynamodb:Query',
-                'dynamodb:GetItem',
-              ],
+              actions: ['dynamodb:PutItem', 'dynamodb:Query', 'dynamodb:GetItem'],
               resources: [this.auditTable.tableArn],
             }),
           ],

@@ -3,6 +3,7 @@
 Architecture document is now complete. All sections have been populated based on the PRD requirements and existing technical documentation. The architecture provides a comprehensive blueprint for building the AWS EC2 Instance Management Platform using modern serverless patterns and fullstack best practices.
 
 Key architectural decisions made:
+
 - Serverless backend using Lambda and API Gateway for operational simplicity
 - React SPA with Material-UI for responsive, professional UI
 - AWS Cognito for managed authentication with role-based access

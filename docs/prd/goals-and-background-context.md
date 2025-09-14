@@ -17,6 +17,6 @@ The AWS EC2 Instance Management Platform addresses the need for a streamlined in
 
 ## Change Log
 
-| Date | Version | Description | Author |
-|------|---------|-------------|--------|
-| 2025-01-13 | 1.0 | Initial PRD creation from existing documentation | BMad Master |
+| Date       | Version | Description                                      | Author      |
+| ---------- | ------- | ------------------------------------------------ | ----------- |
+| 2025-01-13 | 1.0     | Initial PRD creation from existing documentation | BMad Master |

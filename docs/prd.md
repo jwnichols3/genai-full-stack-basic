@@ -19,9 +19,9 @@ The AWS EC2 Instance Management Platform addresses the need for a streamlined in
 
 ### Change Log
 
-| Date | Version | Description | Author |
-|------|---------|-------------|--------|
-| 2025-01-13 | 1.0 | Initial PRD creation from existing documentation | BMad Master |
+| Date       | Version | Description                                      | Author      |
+| ---------- | ------- | ------------------------------------------------ | ----------- |
+| 2025-01-13 | 1.0     | Initial PRD creation from existing documentation | BMad Master |
 
 ## Requirements
 
@@ -91,6 +91,7 @@ Clean, professional aesthetic aligned with AWS design language. Material-UI comp
 ### Target Device and Platforms: Web Responsive
 
 Responsive web application optimized for:
+
 - Desktop (1920x1080 primary target)
 - Tablet (landscape and portrait)
 - Mobile (basic support for monitoring on-the-go)
@@ -108,6 +109,7 @@ Serverless architecture using AWS Lambda functions within a monorepo structure. 
 ### Testing Requirements
 
 Full testing pyramid implementation:
+
 - **Unit Tests**: Jest for both frontend (React components) and backend (Lambda functions) with minimum 80% coverage
 - **Integration Tests**: React Testing Library for component integration, API endpoint testing with mocked AWS services
 - **E2E Tests**: Playwright for critical user journeys including login, instance viewing, and admin actions
@@ -161,6 +163,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** the team can efficiently develop and maintain all application components.
 
 **Acceptance Criteria:**
+
 1. Monorepo initialized with npm workspaces containing web/, backend/, and infrastructure/ directories
 2. Git repository created with proper .gitignore for Node.js, React, and CDK artifacts
 3. Root package.json configured with workspace scripts for building and testing all components
@@ -177,6 +180,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** we can manage all AWS resources as code.
 
 **Acceptance Criteria:**
+
 1. CDK application initialized with TypeScript and proper stack structure
 2. Base stack created with environment-specific configuration loading from config files
 3. CDK can successfully synthesize CloudFormation templates without errors
@@ -192,6 +196,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** only authorized users can access the platform.
 
 **Acceptance Criteria:**
+
 1. Cognito User Pool created with email-based sign-in enabled
 2. Password policy enforced (min 12 chars, upper/lower/digit/symbol required)
 3. All 4 pre-registered users created with correct roles (admin/readonly) as custom attributes
@@ -207,6 +212,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** we can build the user interface on a solid foundation.
 
 **Acceptance Criteria:**
+
 1. React application created with TypeScript using Vite as build tool
 2. Material-UI installed and theme configured with AWS color scheme
 3. React Router configured with routes for /login, /dashboard, and /404
@@ -222,6 +228,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** I can access the EC2 management features.
 
 **Acceptance Criteria:**
+
 1. Login page created with Material-UI form components for email/password
 2. Integration with Cognito using AWS Amplify or AWS SDK for authentication
 3. JWT tokens properly stored and managed (memory/sessionStorage, not localStorage)
@@ -238,6 +245,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** we have a reliable deployment process.
 
 **Acceptance Criteria:**
+
 1. S3 bucket created with proper configuration for static website hosting
 2. CloudFront distribution configured pointing to S3 origin
 3. Frontend build artifacts successfully deployed to S3
@@ -258,6 +266,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** the frontend can communicate with backend services.
 
 **Acceptance Criteria:**
+
 1. API Gateway REST API created with proper stage configuration (dev/prod)
 2. CORS configured correctly for CloudFront distribution origin
 3. Lambda execution role created with necessary IAM permissions for CloudWatch logs
@@ -274,6 +283,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** only authenticated users can access the API.
 
 **Acceptance Criteria:**
+
 1. Lambda authorizer function created to validate Cognito JWT tokens
 2. Authorizer extracts and validates user role from custom:role attribute
 3. API Gateway configured to use the Lambda authorizer for all endpoints
@@ -290,6 +300,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** I can see all instances at a glance.
 
 **Acceptance Criteria:**
+
 1. Lambda function created with AWS SDK v3 for EC2 client
 2. Function queries EC2 DescribeInstances API with proper error handling
 3. IAM role includes ec2:DescribeInstances permission with appropriate resource scope
@@ -306,6 +317,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** I can quickly assess the status of my infrastructure.
 
 **Acceptance Criteria:**
+
 1. Dashboard page created with Material-UI DataGrid or card layout
 2. Loading state displayed while fetching instance data
 3. Each instance shows: ID, Name tag, Type, State (with color coding), Public IP, Private IP
@@ -323,6 +335,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** I can understand its configuration and status.
 
 **Acceptance Criteria:**
+
 1. Clicking an instance navigates to detail view (/instances/{instanceId})
 2. Detail API endpoint created (GET /instances/{instanceId})
 3. Lambda function retrieves comprehensive instance details
@@ -340,6 +353,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** I understand what's happening with my requests.
 
 **Acceptance Criteria:**
+
 1. Global error boundary implemented to catch React errors
 2. API error interceptor displays user-friendly messages
 3. Toast notifications configured for success/error feedback
@@ -356,6 +370,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** the interface isn't cluttered with unavailable actions.
 
 **Acceptance Criteria:**
+
 1. User role retrieved from JWT token and stored in React context
 2. Admin-only UI elements hidden for read-only users
 3. Navigation menu adapts based on user role
@@ -376,6 +391,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** I can resolve issues without AWS Console access.
 
 **Acceptance Criteria:**
+
 1. Lambda function created for POST /instances/{instanceId}/reboot endpoint
 2. Function validates user role is 'admin' before proceeding
 3. IAM role includes ec2:RebootInstances permission with resource constraints
@@ -392,6 +408,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** I don't accidentally disrupt services.
 
 **Acceptance Criteria:**
+
 1. Reboot button added to instance detail view (admin only)
 2. Button styled with warning color (orange/red) to indicate impact
 3. Clicking button opens Material-UI confirmation dialog
@@ -409,6 +426,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** we maintain accountability and can investigate issues.
 
 **Acceptance Criteria:**
+
 1. CloudWatch log group created specifically for audit logs
 2. All admin actions log: timestamp, user email, action, target resource, result
 3. Structured JSON logging format for easy querying
@@ -425,6 +443,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** I can track what actions have been taken.
 
 **Acceptance Criteria:**
+
 1. New route /audit-logs accessible only to admin users
 2. Lambda function created to query CloudWatch Logs Insights
 3. UI displays logs in paginated table with sorting
@@ -441,6 +460,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** I can make informed decisions about instance management.
 
 **Acceptance Criteria:**
+
 1. Lambda function queries CloudWatch for instance metrics
 2. Metrics include: CPU utilization, network in/out, disk I/O
 3. Detail view shows metrics graphs for last 1hr, 6hr, 24hr
@@ -457,6 +477,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** I understand what changes have been made.
 
 **Acceptance Criteria:**
+
 1. Instance detail view includes "Recent Actions" section
 2. Shows last 10 actions taken on this specific instance
 3. Actions pulled from audit logs filtered by instance ID
@@ -473,6 +494,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** we prevent accidental automation or abuse.
 
 **Acceptance Criteria:**
+
 1. DynamoDB table created for tracking user action counts
 2. Rate limit of 10 admin actions per user per minute
 3. Lambda functions check rate limit before executing actions
@@ -493,6 +515,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** we achieve 80% code coverage and catch bugs early.
 
 **Acceptance Criteria:**
+
 1. Jest configured for all workspaces with coverage reporting
 2. React component tests using React Testing Library
 3. Lambda function tests with mocked AWS SDK calls
@@ -509,6 +532,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** we ensure the system works correctly as a whole.
 
 **Acceptance Criteria:**
+
 1. API integration tests using supertest or similar
 2. Tests cover all API endpoints with various user roles
 3. Authentication flow tested end-to-end
@@ -525,6 +549,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** we validate the complete user experience.
 
 **Acceptance Criteria:**
+
 1. Playwright configured with test infrastructure
 2. E2E tests cover: login, view instances, admin reboot, logout
 3. Tests run against deployed development environment
@@ -541,6 +566,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** I can track platform health and performance.
 
 **Acceptance Criteria:**
+
 1. CloudWatch dashboard created with key metrics widgets
 2. API Gateway metrics: requests, latency, 4xx/5xx errors
 3. Lambda metrics: invocations, duration, errors, throttles
@@ -557,6 +583,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** we can respond quickly to problems.
 
 **Acceptance Criteria:**
+
 1. SNS topic created for alarm notifications
 2. Alarms configured for: high error rate (>1%), high latency (>3s)
 3. Lambda throttling alarm when concurrent executions approach limit
@@ -573,6 +600,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** I can efficiently manage instances.
 
 **Acceptance Criteria:**
+
 1. Lambda functions optimized with connection pooling for AWS SDK
 2. API Gateway caching enabled for GET endpoints (5-minute TTL)
 3. CloudFront caching headers optimized for static assets
@@ -589,6 +617,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** we can safely release updates.
 
 **Acceptance Criteria:**
+
 1. Production CDK stacks configured with appropriate limits
 2. Blue-green deployment strategy for zero-downtime updates
 3. Automated smoke tests run after deployment
@@ -605,6 +634,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** the platform is protected from threats.
 
 **Acceptance Criteria:**
+
 1. Security headers configured in CloudFront (CSP, HSTS, etc.)
 2. API input validation on all endpoints using Joi or Zod
 3. SQL injection prevention (if database implemented)
@@ -621,6 +651,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 **So that** the team can maintain and troubleshoot the platform.
 
 **Acceptance Criteria:**
+
 1. Runbook created for common operational tasks
 2. Troubleshooting guide for known issues
 3. Architecture diagrams updated and finalized
@@ -632,7 +663,7 @@ Complete production deployment setup, implement comprehensive monitoring with Cl
 
 ## Checklist Results Report
 
-*(This section will be populated after running the PM checklist)*
+_(This section will be populated after running the PM checklist)_
 
 ## Next Steps
 

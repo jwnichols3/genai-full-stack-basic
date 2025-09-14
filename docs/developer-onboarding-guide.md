@@ -204,13 +204,13 @@ ec2-manager/
 
 ### Key Files and Their Purposes
 
-| File/Directory | Purpose | When to Modify |
-|----------------|---------|----------------|
-| `.github/workflows/` | CI/CD pipeline definitions | Rarely, with DevOps approval |
-| `infrastructure/lib/` | Infrastructure as Code | Infrastructure changes only |
-| `infrastructure/config/` | Environment settings | Environment-specific config |
-| `scripts/` | Operational scripts | Deployment/maintenance tasks |
-| `package.json` | Dependencies and scripts | Adding new dependencies |
+| File/Directory           | Purpose                    | When to Modify               |
+| ------------------------ | -------------------------- | ---------------------------- |
+| `.github/workflows/`     | CI/CD pipeline definitions | Rarely, with DevOps approval |
+| `infrastructure/lib/`    | Infrastructure as Code     | Infrastructure changes only  |
+| `infrastructure/config/` | Environment settings       | Environment-specific config  |
+| `scripts/`               | Operational scripts        | Deployment/maintenance tasks |
+| `package.json`           | Dependencies and scripts   | Adding new dependencies      |
 
 ## Infrastructure Overview
 
@@ -248,23 +248,23 @@ graph TB
 
 ### Environment Mapping
 
-| Environment | AWS Account | Purpose | Access Level |
-|-------------|-------------|---------|--------------|
-| **Development** | Dev Account | Feature development | Full access |
-| **Staging** | Staging Account | Pre-production testing | Read access |
-| **Production** | Prod Account | Live system | No direct access |
+| Environment     | AWS Account     | Purpose                | Access Level     |
+| --------------- | --------------- | ---------------------- | ---------------- |
+| **Development** | Dev Account     | Feature development    | Full access      |
+| **Staging**     | Staging Account | Pre-production testing | Read access      |
+| **Production**  | Prod Account    | Live system            | No direct access |
 
 ### AWS Services Used
 
-| Service | Purpose | Developer Access |
-|---------|---------|------------------|
-| **Lambda** | Serverless functions | View logs, test locally |
-| **API Gateway** | REST API management | View configuration |
-| **DynamoDB** | Audit trail storage | Query data (dev only) |
-| **S3** | Static web hosting | Upload test files |
-| **CloudFront** | CDN and caching | View configurations |
-| **Cognito** | User authentication | Test authentication flows |
-| **CloudWatch** | Monitoring and logging | View metrics and logs |
+| Service         | Purpose                | Developer Access          |
+| --------------- | ---------------------- | ------------------------- |
+| **Lambda**      | Serverless functions   | View logs, test locally   |
+| **API Gateway** | REST API management    | View configuration        |
+| **DynamoDB**    | Audit trail storage    | Query data (dev only)     |
+| **S3**          | Static web hosting     | Upload test files         |
+| **CloudFront**  | CDN and caching        | View configurations       |
+| **Cognito**     | User authentication    | Test authentication flows |
+| **CloudWatch**  | Monitoring and logging | View metrics and logs     |
 
 ## Development Workflow
 
@@ -345,6 +345,7 @@ git push origin feature/JIRA-123-new-feature
 ### Code Review Process
 
 **Review Checklist:**
+
 - [ ] Code follows project conventions
 - [ ] Tests are included and passing
 - [ ] Documentation is updated
@@ -353,6 +354,7 @@ git push origin feature/JIRA-123-new-feature
 - [ ] Infrastructure changes reviewed by DevOps
 
 **Automated PR Validation:**
+
 - Quick validation (linting, type checking)
 - Security scanning (secrets, vulnerabilities)
 - Test execution (unit, integration)
@@ -454,6 +456,7 @@ npm run test:integration
 ### Testing Best Practices
 
 **1. Test Naming Convention:**
+
 ```typescript
 describe('ComponentName', () => {
   describe('when condition', () => {
@@ -465,6 +468,7 @@ describe('ComponentName', () => {
 ```
 
 **2. Infrastructure Test Patterns:**
+
 ```typescript
 // Test for resource existence
 template.resourceCountIs('AWS::Lambda::Function', 2);
@@ -472,23 +476,26 @@ template.resourceCountIs('AWS::Lambda::Function', 2);
 // Test for specific properties
 template.hasResourceProperties('AWS::S3::Bucket', {
   BucketEncryption: {
-    ServerSideEncryptionConfiguration: [{
-      ServerSideEncryptionByDefault: {
-        SSEAlgorithm: 'AES256'
-      }
-    }]
-  }
+    ServerSideEncryptionConfiguration: [
+      {
+        ServerSideEncryptionByDefault: {
+          SSEAlgorithm: 'AES256',
+        },
+      },
+    ],
+  },
 });
 
 // Test for resource relationships
 template.hasResource('AWS::IAM::Role', {
   Properties: Match.objectLike({
-    AssumeRolePolicyDocument: Match.anyValue()
-  })
+    AssumeRolePolicyDocument: Match.anyValue(),
+  }),
 });
 ```
 
 **3. Mock External Dependencies:**
+
 ```typescript
 // Mock AWS SDK calls
 jest.mock('@aws-sdk/client-dynamodb');
@@ -513,10 +520,12 @@ npm run deploy -- --context environment=dev --profile ec2-manager-dev
 ### CI/CD Pipeline Deployment
 
 **Automatic Deployments:**
+
 - **Push to `develop`** → Deploys to staging
 - **Push to `main`** → Deploys to production (with approval)
 
 **Manual Deployment Triggers:**
+
 ```bash
 # Trigger deployment via GitHub Actions
 # (Push to appropriate branch or use GitHub CLI)
@@ -540,6 +549,7 @@ gh workflow run "CI/CD Pipeline" --ref develop
 ```
 
 **Health Check Endpoints:**
+
 ```bash
 # API health check (when implemented)
 curl -f https://api-dev.ec2manager.local/health
@@ -567,6 +577,7 @@ aws logs tail API-Gateway-Execution-Logs_<api-id>/dev \
 ```
 
 **CloudWatch Dashboard:**
+
 - Navigate to AWS Console → CloudWatch → Dashboards
 - Look for `EC2Manager-Enhanced-dev` dashboard
 
@@ -584,6 +595,7 @@ npm run deploy -- --context environment=dev --debug --verbose
 ```
 
 **Application Debugging:**
+
 ```bash
 # Debug mode with detailed logging
 NODE_ENV=development LOG_LEVEL=debug npm run dev
@@ -595,6 +607,7 @@ AWS_SDK_DEBUG=1 npm run dev
 ### Common Debugging Scenarios
 
 **1. Stack Deployment Failures:**
+
 ```bash
 # Check CloudFormation events
 aws cloudformation describe-stack-events \
@@ -607,6 +620,7 @@ npm run diff -- --context environment=dev
 ```
 
 **2. Lambda Function Issues:**
+
 ```bash
 # Test Lambda function locally (when implemented)
 sam local invoke FunctionName \
@@ -619,6 +633,7 @@ aws lambda get-function \
 ```
 
 **3. API Gateway Issues:**
+
 ```bash
 # Test API endpoints
 curl -v https://<api-id>.execute-api.us-west-2.amazonaws.com/dev/health
@@ -635,9 +650,11 @@ curl -v https://<api-id>.execute-api.us-west-2.amazonaws.com/dev/health
 ```typescript
 // infrastructure/lib/app-stack.ts
 // Add new resource
-const newResource = new aws-service.ResourceType(this, `NewResource-${env}`, {
-  // Resource configuration
-});
+const newResource =
+  new aws() -
+  service.ResourceType(this, `NewResource-${env}`, {
+    // Resource configuration
+  });
 
 // Export resource if needed
 this.newResource = newResource;
@@ -702,6 +719,7 @@ environment: {
 ### Running Infrastructure Tests
 
 **Unit Tests:**
+
 ```bash
 cd infrastructure
 npm run test:unit
@@ -711,6 +729,7 @@ npm run test -- app-stack.test.ts
 ```
 
 **Integration Tests:**
+
 ```bash
 npm run test:integration
 
@@ -721,6 +740,7 @@ npm run test:integration -- --testTimeout=300000
 ### Viewing Metrics and Logs
 
 **CloudWatch Metrics:**
+
 ```bash
 # Get API Gateway metrics
 aws cloudwatch get-metric-statistics \
@@ -735,6 +755,7 @@ aws cloudwatch get-metric-statistics \
 ```
 
 **Custom Metrics:**
+
 ```bash
 # View custom business metrics
 aws cloudwatch get-metric-statistics \
@@ -814,6 +835,7 @@ aws ec2 describe-security-groups \
 ### Getting Help
 
 **Escalation Path:**
+
 1. **First:** Check this documentation and project README
 2. **Second:** Search team Slack channels for similar issues
 3. **Third:** Ask in #engineering-support Slack channel
@@ -821,6 +843,7 @@ aws ec2 describe-security-groups \
 5. **Last Resort:** Create GitHub issue with detailed error logs
 
 **When Asking for Help, Include:**
+
 - Exact error message or output
 - Steps to reproduce the issue
 - Your environment (OS, Node version, AWS profile)
@@ -831,22 +854,24 @@ aws ec2 describe-security-groups \
 
 ### Internal Documentation
 
-| Document | Purpose | Location |
-|----------|---------|----------|
-| **Infrastructure Architecture** | System design and AWS resources | `/docs/infrastructure-architecture.md` |
+| Document                         | Purpose                          | Location                                |
+| -------------------------------- | -------------------------------- | --------------------------------------- |
+| **Infrastructure Architecture**  | System design and AWS resources  | `/docs/infrastructure-architecture.md`  |
 | **DevOps Process Documentation** | CI/CD and operational procedures | `/docs/devops-process-documentation.md` |
-| **Operations Runbook** | Troubleshooting and maintenance | `/docs/operations-runbook.md` |
-| **API Documentation** | API endpoints and usage | `/docs/api-documentation.md` (future) |
+| **Operations Runbook**           | Troubleshooting and maintenance  | `/docs/operations-runbook.md`           |
+| **API Documentation**            | API endpoints and usage          | `/docs/api-documentation.md` (future)   |
 
 ### External Resources
 
 **AWS Documentation:**
+
 - [AWS CDK Developer Guide](https://docs.aws.amazon.com/cdk/v2/guide/)
 - [AWS Lambda Developer Guide](https://docs.aws.amazon.com/lambda/latest/dg/)
 - [Amazon API Gateway Developer Guide](https://docs.aws.amazon.com/apigateway/latest/developerguide/)
 - [Amazon DynamoDB Developer Guide](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/)
 
 **Development Tools:**
+
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [Jest Testing Framework](https://jestjs.io/docs/getting-started)
 - [ESLint Configuration](https://eslint.org/docs/user-guide/getting-started)
@@ -854,10 +879,10 @@ aws ec2 describe-security-groups \
 
 ### Team Contacts
 
-| Role | Contact | Slack | Availability |
-|------|---------|-------|--------------|
-| **Tech Lead** | tech-lead@company.com | @tech.lead | 9 AM - 6 PM PST |
-| **DevOps Lead** | devops-lead@company.com | @devops.lead | 8 AM - 5 PM PST |
+| Role                    | Contact                 | Slack        | Availability    |
+| ----------------------- | ----------------------- | ------------ | --------------- |
+| **Tech Lead**           | tech-lead@company.com   | @tech.lead   | 9 AM - 6 PM PST |
+| **DevOps Lead**         | devops-lead@company.com | @devops.lead | 8 AM - 5 PM PST |
 | **Engineering Manager** | eng-manager@company.com | @eng.manager | 9 AM - 7 PM PST |
 
 ### Slack Channels
@@ -870,6 +895,7 @@ aws ec2 describe-security-groups \
 ### Quick Reference Commands
 
 **Development Setup:**
+
 ```bash
 # Full development environment setup
 git clone https://github.com/company/ec2-manager.git
@@ -879,6 +905,7 @@ npm install
 ```
 
 **Daily Development:**
+
 ```bash
 # Start development
 npm run dev
@@ -891,6 +918,7 @@ npm run lint && npm run format && npm run type-check
 ```
 
 **Infrastructure Management:**
+
 ```bash
 # Deploy changes
 cd infrastructure && npm run deploy -- --context environment=dev
@@ -903,6 +931,7 @@ cd infrastructure && npm run diff -- --context environment=dev
 ```
 
 **Debugging:**
+
 ```bash
 # View logs
 aws logs tail /aws/lambda/function-name --follow --profile ec2-manager-dev
@@ -918,6 +947,7 @@ aws cloudformation describe-stacks --stack-name EC2Manager-dev --profile ec2-man
 This guide should get you started with EC2 Manager development. Remember that infrastructure and DevOps practices evolve, so always refer to the latest documentation and don't hesitate to ask questions.
 
 For your first week, we recommend:
+
 1. Complete the development environment setup
 2. Deploy to your development environment
 3. Run through the test suite

@@ -4,17 +4,17 @@ module.exports = {
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
-    'prettier'
+    'prettier',
   ],
   plugins: ['@typescript-eslint'],
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: 'module',
-    project: true
+    project: true,
   },
   env: {
     es2022: true,
-    node: true
+    node: true,
   },
   rules: {
     '@typescript-eslint/explicit-function-return-type': 'off',
@@ -31,7 +31,7 @@ module.exports = {
     '@typescript-eslint/prefer-optional-chain': 'error',
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'prefer-const': 'error',
-    'no-var': 'error'
+    'no-var': 'error',
   },
   ignorePatterns: [
     'node_modules',
@@ -44,6 +44,6 @@ module.exports = {
     'cdk.out',
     'tests/**/*',
     '**/*.test.*',
-    '**/*.spec.*'
-  ]
+    '**/*.spec.*',
+  ],
 };

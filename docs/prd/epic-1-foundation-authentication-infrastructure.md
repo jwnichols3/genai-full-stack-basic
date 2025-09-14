@@ -9,6 +9,7 @@
 **So that** the team can efficiently develop and maintain all application components.
 
 **Acceptance Criteria:**
+
 1. Monorepo initialized with npm workspaces containing web/, backend/, and infrastructure/ directories
 2. Git repository created with proper .gitignore for Node.js, React, and CDK artifacts
 3. Root package.json configured with workspace scripts for building and testing all components
@@ -25,6 +26,7 @@
 **So that** we can manage all AWS resources as code.
 
 **Acceptance Criteria:**
+
 1. CDK application initialized with TypeScript and proper stack structure
 2. Base stack created with environment-specific configuration loading from config files
 3. CDK can successfully synthesize CloudFormation templates without errors
@@ -40,6 +42,7 @@
 **So that** only authorized users can access the platform.
 
 **Acceptance Criteria:**
+
 1. Cognito User Pool created with email-based sign-in enabled
 2. Password policy enforced (min 12 chars, upper/lower/digit/symbol required)
 3. All 4 pre-registered users created with correct roles (admin/readonly) as custom attributes
@@ -55,6 +58,7 @@
 **So that** we can build the user interface on a solid foundation.
 
 **Acceptance Criteria:**
+
 1. React application created with TypeScript using Vite as build tool
 2. Material-UI installed and theme configured with AWS color scheme
 3. React Router configured with routes for /login, /dashboard, and /404
@@ -70,6 +74,7 @@
 **So that** I can access the EC2 management features.
 
 **Acceptance Criteria:**
+
 1. Login page created with Material-UI form components for email/password
 2. Integration with Cognito using AWS Amplify or AWS SDK for authentication
 3. JWT tokens properly stored and managed (memory/sessionStorage, not localStorage)
@@ -86,6 +91,7 @@
 **So that** we have a reliable deployment process.
 
 **Acceptance Criteria:**
+
 1. S3 bucket created with proper configuration for static website hosting
 2. CloudFront distribution configured pointing to S3 origin
 3. Frontend build artifacts successfully deployed to S3

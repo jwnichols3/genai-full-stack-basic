@@ -3,6 +3,6 @@ module.exports = {
   extends: ['../../packages/config/eslint/index.js'],
   parserOptions: {
     tsconfigRootDir: __dirname,
-    project: './tsconfig.json'
-  }
+    project: './tsconfig.json',
+  },
 };

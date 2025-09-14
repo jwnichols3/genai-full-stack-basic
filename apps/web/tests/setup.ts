@@ -23,12 +23,13 @@ interface MockIntersectionObserver {
   takeRecords: () => IntersectionObserverEntry[];
 }
 
-(globalThis as typeof globalThis & { IntersectionObserver: unknown }).IntersectionObserver = class IntersectionObserver implements MockIntersectionObserver {
-  constructor() {}
-  disconnect() {}
-  observe() {}
-  unobserve() {}
-  takeRecords() {
-    return [];
-  }
-};
+(globalThis as typeof globalThis & { IntersectionObserver: unknown }).IntersectionObserver =
+  class IntersectionObserver implements MockIntersectionObserver {
+    constructor() {}
+    disconnect() {}
+    observe() {}
+    unobserve() {}
+    takeRecords() {
+      return [];
+    }
+  };

@@ -178,6 +178,7 @@ npm run <script> --workspace=<workspace-name>
 ## Pre-commit Hooks
 
 This project uses Husky for pre-commit hooks to ensure code quality:
+
 - Linting check
 - Formatting check
 - Type checking

@@ -11,6 +11,7 @@ Serverless architecture using AWS Lambda functions within a monorepo structure. 
 ## Testing Requirements
 
 Full testing pyramid implementation:
+
 - **Unit Tests**: Jest for both frontend (React components) and backend (Lambda functions) with minimum 80% coverage
 - **Integration Tests**: React Testing Library for component integration, API endpoint testing with mocked AWS services
 - **E2E Tests**: Playwright for critical user journeys including login, instance viewing, and admin actions

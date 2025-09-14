@@ -1,4 +1,5 @@
 # Technical Architecture Document
+
 ## AWS EC2 Instance Management Platform
 
 **Version:** 1.0
@@ -150,9 +151,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': process.env.CORS_ORIGIN
+        'Access-Control-Allow-Origin': process.env.CORS_ORIGIN,
       },
-      body: JSON.stringify(instances)
+      body: JSON.stringify(instances),
     };
   } catch (error) {
     return errorHandler(error);
@@ -185,21 +186,21 @@ const userPool = new cognito.UserPool(this, 'UserPool', {
     requireLowercase: true,
     requireUppercase: true,
     requireDigits: true,
-    requireSymbols: true
+    requireSymbols: true,
   },
   accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
   customAttributes: {
-    role: new cognito.StringAttribute({ mutable: false })
-  }
+    role: new cognito.StringAttribute({ mutable: false }),
+  },
 });
 ```
 
 ### 4.2 User Roles & Permissions
 
 | Role     | List Instances | View Details | Reboot | Start/Stop |
-|----------|---------------|--------------|--------|------------|
-| admin    | ✓             | ✓            | ✓      | Future     |
-| readonly | ✓             | ✓            | ✗      | ✗          |
+| -------- | -------------- | ------------ | ------ | ---------- |
+| admin    | ✓              | ✓            | ✓      | Future     |
+| readonly | ✓              | ✓            | ✗      | ✗          |
 
 ### 4.3 JWT Token Structure
 
@@ -228,9 +229,11 @@ const websiteBucket = new s3.Bucket(this, 'WebsiteBucket', {
   blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
   encryption: s3.BucketEncryption.S3_MANAGED,
   versioned: true,
-  lifecycleRules: [{
-    noncurrentVersionExpiration: cdk.Duration.days(30)
-  }]
+  lifecycleRules: [
+    {
+      noncurrentVersionExpiration: cdk.Duration.days(30),
+    },
+  ],
 });
 ```
 
@@ -243,17 +246,19 @@ const distribution = new cloudfront.Distribution(this, 'Distribution', {
     viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
     cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
     allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
-    compress: true
+    compress: true,
   },
   defaultRootObject: 'index.html',
-  errorResponses: [{
-    httpStatus: 404,
-    responseHttpStatus: 200,
-    responsePagePath: '/index.html',
-    ttl: cdk.Duration.seconds(0)
-  }],
+  errorResponses: [
+    {
+      httpStatus: 404,
+      responseHttpStatus: 200,
+      responsePagePath: '/index.html',
+      ttl: cdk.Duration.seconds(0),
+    },
+  ],
   minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
-  priceClass: cloudfront.PriceClass.PRICE_CLASS_100
+  priceClass: cloudfront.PriceClass.PRICE_CLASS_100,
 });
 ```
 
@@ -268,13 +273,13 @@ const api = new apigateway.RestApi(this, 'Api', {
     throttlingBurstLimit: 200,
     loggingLevel: apigateway.MethodLoggingLevel.INFO,
     dataTraceEnabled: true,
-    metricsEnabled: true
+    metricsEnabled: true,
   },
   defaultCorsPreflightOptions: {
     allowOrigins: [distribution.distributionDomainName],
     allowMethods: ['GET', 'POST', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization']
-  }
+    allowHeaders: ['Content-Type', 'Authorization'],
+  },
 });
 ```
 
@@ -284,13 +289,13 @@ const api = new apigateway.RestApi(this, 'Api', {
 
 ### 6.1 API Endpoints
 
-| Method | Endpoint                    | Description          | Auth Required | Admin Only |
-|--------|----------------------------|---------------------|--------------|------------|
-| POST   | /auth/login                | User login          | No           | No         |
-| POST   | /auth/refresh              | Refresh token       | Yes          | No         |
-| GET    | /instances                 | List EC2 instances  | Yes          | No         |
-| GET    | /instances/{id}            | Get instance details| Yes          | No         |
-| POST   | /instances/{id}/reboot     | Reboot instance     | Yes          | Yes        |
+| Method | Endpoint               | Description          | Auth Required | Admin Only |
+| ------ | ---------------------- | -------------------- | ------------- | ---------- |
+| POST   | /auth/login            | User login           | No            | No         |
+| POST   | /auth/refresh          | Refresh token        | Yes           | No         |
+| GET    | /instances             | List EC2 instances   | Yes           | No         |
+| GET    | /instances/{id}        | Get instance details | Yes           | No         |
+| POST   | /instances/{id}/reboot | Reboot instance      | Yes           | Yes        |
 
 ### 6.2 Request/Response Flow
 
@@ -350,27 +355,27 @@ interface ApiResponse<T> {
 const lambdaRole = new iam.Role(this, 'LambdaRole', {
   assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
   managedPolicies: [
-    iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole')
+    iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
   ],
   inlinePolicies: {
     EC2Access: new iam.PolicyDocument({
       statements: [
         new iam.PolicyStatement({
           actions: ['ec2:DescribeInstances', 'ec2:DescribeInstanceStatus'],
-          resources: ['*']
+          resources: ['*'],
         }),
         new iam.PolicyStatement({
           actions: ['ec2:RebootInstances'],
           resources: [`arn:aws:ec2:${region}:${account}:instance/*`],
           conditions: {
             StringEquals: {
-              'aws:RequestedRegion': region
-            }
-          }
-        })
-      ]
-    })
-  }
+              'aws:RequestedRegion': region,
+            },
+          },
+        }),
+      ],
+    }),
+  },
 });
 ```
 
@@ -390,14 +395,14 @@ const lambdaRole = new iam.Role(this, 'LambdaRole', {
 // VPC Configuration (if needed for future RDS/ElastiCache)
 const vpc = new ec2.Vpc(this, 'VPC', {
   maxAzs: 2,
-  natGateways: 0,  // Serverless, no NAT needed initially
+  natGateways: 0, // Serverless, no NAT needed initially
   subnetConfiguration: [
     {
       name: 'Public',
       subnetType: ec2.SubnetType.PUBLIC,
-      cidrMask: 24
-    }
-  ]
+      cidrMask: 24,
+    },
+  ],
 });
 ```
 
@@ -485,7 +490,7 @@ def deploy(env: str):
 const instanceListMetric = new cloudwatch.Metric({
   namespace: 'EC2Manager',
   metricName: 'InstanceListRequests',
-  dimensions: { Environment: props.env }
+  dimensions: { Environment: props.env },
 });
 
 // Alarms
@@ -493,7 +498,7 @@ new cloudwatch.Alarm(this, 'HighErrorRate', {
   metric: apiGateway.metricServerError(),
   threshold: 10,
   evaluationPeriods: 2,
-  treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING
+  treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
 });
 ```
 
@@ -512,8 +517,8 @@ const dashboard = new cloudwatch.Dashboard(this, 'Dashboard', {
   widgets: [
     [apiRequestsWidget, apiLatencyWidget],
     [lambdaErrorsWidget, lambdaDurationWidget],
-    [cognitoLoginsWidget, activeUsersWidget]
-  ]
+    [cognitoLoginsWidget, activeUsersWidget],
+  ],
 });
 ```
 
@@ -737,11 +742,7 @@ genai-full-stack-basic/
 // Root package.json (npm workspaces)
 {
   "name": "genai-full-stack-basic",
-  "workspaces": [
-    "web",
-    "backend",
-    "infrastructure"
-  ],
+  "workspaces": ["web", "backend", "infrastructure"],
   "scripts": {
     "install:all": "npm install",
     "build:web": "npm run build --workspace=web",
@@ -839,6 +840,7 @@ aws cloudwatch get-metric-statistics --namespace EC2Manager
 ---
 
 **Document Version Control:**
+
 - v1.0 - Initial architecture document
 - Last Updated: January 2025
 - Next Review: After Phase 1 completion

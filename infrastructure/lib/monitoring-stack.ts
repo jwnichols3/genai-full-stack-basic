@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
+import * as cloudwatchActions from 'aws-cdk-lib/aws-cloudwatch-actions';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -92,9 +93,7 @@ export class MonitoringStack extends Stack {
           api.metricClientError({ period: Duration.minutes(5), statistic: 'Sum' }),
           api.metricServerError({ period: Duration.minutes(5), statistic: 'Sum' }),
         ],
-        leftAnnotations: [
-          { value: 10, label: 'Error Threshold', color: cloudwatch.Color.RED },
-        ],
+        leftAnnotations: [{ value: 10, label: 'Error Threshold', color: cloudwatch.Color.RED }],
       })
     );
 
@@ -108,24 +107,15 @@ export class MonitoringStack extends Stack {
           auditTable.metricConsumedReadCapacityUnits(),
           auditTable.metricConsumedWriteCapacityUnits(),
         ],
-        right: [
-          auditTable.metricSuccessfulRequestLatency({ operation: 'PutItem' }),
-          auditTable.metricSuccessfulRequestLatency({ operation: 'Query' }),
-        ],
+        right: [auditTable.metricSuccessfulRequestLatency()],
       }),
 
       new cloudwatch.GraphWidget({
         title: 'DynamoDB Throttling & Errors',
         width: 8,
         height: 6,
-        left: [
-          auditTable.metricThrottledRequests({ operation: 'PutItem' }),
-          auditTable.metricThrottledRequests({ operation: 'Query' }),
-        ],
-        right: [
-          auditTable.metricUserErrors(),
-          auditTable.metricSystemErrors(),
-        ],
+        left: [auditTable.metricThrottledRequests()],
+        right: [auditTable.metricUserErrors(), auditTable.metricSystemErrors()],
       }),
 
       new cloudwatch.SingleValueWidget({
@@ -272,7 +262,7 @@ export class MonitoringStack extends Stack {
       evaluationPeriods: 2,
       alarmDescription: 'Critical API errors detected',
       actionsEnabled: true,
-    }).addAlarmAction(new cloudwatch.actions.SnsAction(this.alertTopic));
+    }).addAlarmAction(new cloudwatchActions.SnsAction(this.alertTopic));
 
     // High Latency
     new cloudwatch.Alarm(this, `HighLatency-${env}`, {
@@ -284,7 +274,7 @@ export class MonitoringStack extends Stack {
       threshold: 2000, // 2 seconds
       evaluationPeriods: 3,
       alarmDescription: 'High API latency detected',
-    }).addAlarmAction(new cloudwatch.actions.SnsAction(this.alertTopic));
+    }).addAlarmAction(new cloudwatchActions.SnsAction(this.alertTopic));
 
     // DynamoDB Throttling
     new cloudwatch.Alarm(this, `DynamoDBThrottling-${env}`, {
@@ -293,7 +283,7 @@ export class MonitoringStack extends Stack {
       threshold: 1,
       evaluationPeriods: 2,
       alarmDescription: 'DynamoDB throttling detected',
-    }).addAlarmAction(new cloudwatch.actions.SnsAction(this.alertTopic));
+    }).addAlarmAction(new cloudwatchActions.SnsAction(this.alertTopic));
 
     // Security Alert - Authentication Failures
     new cloudwatch.Alarm(this, `SecurityAlert-${env}`, {
@@ -308,7 +298,7 @@ export class MonitoringStack extends Stack {
       evaluationPeriods: 1,
       alarmDescription: 'High number of authentication failures',
       treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
-    }).addAlarmAction(new cloudwatch.actions.SnsAction(this.alertTopic));
+    }).addAlarmAction(new cloudwatchActions.SnsAction(this.alertTopic));
 
     // Low Activity Alert (might indicate system issues)
     new cloudwatch.Alarm(this, `LowActivityAlert-${env}`, {
@@ -322,7 +312,7 @@ export class MonitoringStack extends Stack {
       comparisonOperator: cloudwatch.ComparisonOperator.LESS_THAN_THRESHOLD,
       alarmDescription: 'Unusually low API activity',
       treatMissingData: cloudwatch.TreatMissingData.BREACHING,
-    }).addAlarmAction(new cloudwatch.actions.SnsAction(this.alertTopic));
+    }).addAlarmAction(new cloudwatchActions.SnsAction(this.alertTopic));
   }
 
   private createCloudTrail(env: string): void {
@@ -334,29 +324,21 @@ export class MonitoringStack extends Stack {
     });
 
     // CloudTrail for API calls and security auditing
-    new cloudtrail.Trail(this, `CloudTrail-${env}`, {
+    const trail = new cloudtrail.Trail(this, `CloudTrail-${env}`, {
       trailName: `ec2-manager-trail-${env}`,
       bucket: trailBucket,
       includeGlobalServiceEvents: true,
       isMultiRegionTrail: true,
       enableFileValidation: true,
-      eventSelectors: [
-        {
-          readWriteType: cloudtrail.ReadWriteType.ALL,
-          includeManagementEvents: true,
-          dataResources: [
-            {
-              type: 'AWS::S3::Object',
-              values: [`${trailBucket.bucketArn}/*`],
-            },
-            {
-              type: 'AWS::DynamoDB::Table',
-              values: ['*'],
-            },
-          ],
-        },
-      ],
     });
+
+    // Add S3 data events for the audit trail bucket
+    trail.addS3EventSelector([
+      {
+        bucket: trailBucket,
+        objectPrefix: '',
+      },
+    ]);
   }
 
   private createCustomMetricsCollector(env: string, auditTable: dynamodb.Table): void {

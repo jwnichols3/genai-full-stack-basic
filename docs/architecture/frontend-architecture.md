@@ -3,6 +3,7 @@
 ## Component Architecture
 
 ### Component Organization
+
 ```text
 src/components/
 ├── common/
@@ -43,6 +44,7 @@ src/components/
 ```
 
 ### Component Template
+
 ```typescript
 // Example: InstanceListItem.tsx
 import React, { memo } from 'react';
@@ -113,6 +115,7 @@ InstanceListItem.displayName = 'InstanceListItem';
 ## State Management Architecture
 
 ### State Structure
+
 ```typescript
 // src/store/types.ts
 export interface AppState {
@@ -184,6 +187,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 ```
 
 ### State Management Patterns
+
 - Use Context API for global auth state
 - Use local component state for UI-only state
 - Implement optimistic updates for better UX
@@ -194,6 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 ## Routing Architecture
 
 ### Route Organization
+
 ```text
 /                           # Redirects to /dashboard or /login
 /login                      # Public: Login page
@@ -207,6 +212,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 ```
 
 ### Protected Route Pattern
+
 ```typescript
 // src/components/auth/ProtectedRoute.tsx
 import React from 'react';
@@ -260,6 +266,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 ## Frontend Services Layer
 
 ### API Client Setup
+
 ```typescript
 // src/services/api.ts
 import axios, { AxiosInstance, AxiosError } from 'axios';
@@ -275,8 +282,8 @@ class ApiClient {
       baseURL: API_BASE_URL,
       timeout: 30000,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     // Request interceptor for auth
@@ -311,7 +318,7 @@ class ApiClient {
         const formattedError = {
           code: error.response?.data?.error?.code || 'UNKNOWN_ERROR',
           message: error.response?.data?.error?.message || 'An unexpected error occurred',
-          status: error.response?.status
+          status: error.response?.status,
         };
 
         return Promise.reject(formattedError);
@@ -340,34 +347,25 @@ export const apiClient = new ApiClient();
 ```
 
 ### Service Example
+
 ```typescript
 // src/services/ec2.ts
 import { apiClient } from './api';
 import { EC2Instance, CloudWatchMetrics, RebootResponse } from '@/types';
 
 export class EC2Service {
-  async listInstances(filters?: {
-    state?: string;
-    tag?: string;
-  }): Promise<EC2Instance[]> {
-    const response = await apiClient.get<{ instances: EC2Instance[] }>(
-      '/instances',
-      filters
-    );
+  async listInstances(filters?: { state?: string; tag?: string }): Promise<EC2Instance[]> {
+    const response = await apiClient.get<{ instances: EC2Instance[] }>('/instances', filters);
     return response.data.instances;
   }
 
   async getInstanceDetails(instanceId: string): Promise<EC2Instance> {
-    const response = await apiClient.get<EC2Instance>(
-      `/instances/${instanceId}`
-    );
+    const response = await apiClient.get<EC2Instance>(`/instances/${instanceId}`);
     return response.data;
   }
 
   async rebootInstance(instanceId: string): Promise<RebootResponse> {
-    const response = await apiClient.post<RebootResponse>(
-      `/instances/${instanceId}/reboot`
-    );
+    const response = await apiClient.post<RebootResponse>(`/instances/${instanceId}/reboot`);
     return response.data;
   }
 
@@ -380,10 +378,10 @@ export class EC2Service {
       endTime?: string;
     }
   ): Promise<CloudWatchMetrics> {
-    const response = await apiClient.get<CloudWatchMetrics>(
-      `/instances/${instanceId}/metrics`,
-      { metricName, ...options }
-    );
+    const response = await apiClient.get<CloudWatchMetrics>(`/instances/${instanceId}/metrics`, {
+      metricName,
+      ...options,
+    });
     return response.data;
   }
 }

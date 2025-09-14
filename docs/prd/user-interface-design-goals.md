@@ -34,6 +34,7 @@ Clean, professional aesthetic aligned with AWS design language. Material-UI comp
 ## Target Device and Platforms: Web Responsive
 
 Responsive web application optimized for:
+
 - Desktop (1920x1080 primary target)
 - Tablet (landscape and portrait)
 - Mobile (basic support for monitoring on-the-go)

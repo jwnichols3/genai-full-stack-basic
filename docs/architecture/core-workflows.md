@@ -1,6 +1,7 @@
 # Core Workflows
 
 ## User Authentication Flow
+
 ```mermaid
 sequenceDiagram
     participant U as User
@@ -25,6 +26,7 @@ sequenceDiagram
 ```
 
 ## Instance Reboot Flow (Admin)
+
 ```mermaid
 sequenceDiagram
     participant U as Admin User
@@ -53,6 +55,7 @@ sequenceDiagram
 ```
 
 ## Real-time Metrics Retrieval
+
 ```mermaid
 sequenceDiagram
     participant U as User
@@ -82,6 +85,7 @@ sequenceDiagram
 ```
 
 ## Error Handling Flow
+
 ```mermaid
 sequenceDiagram
     participant U as User

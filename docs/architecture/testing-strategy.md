@@ -1,6 +1,7 @@
 # Testing Strategy
 
 ## Testing Pyramid
+
 ```text
         E2E Tests (5%)
        /              \
@@ -12,6 +13,7 @@ Frontend Unit (35%)  Backend Unit (35%)
 ## Test Organization
 
 ### Frontend Tests
+
 ```text
 apps/web/tests/
 ├── unit/
@@ -25,6 +27,7 @@ apps/web/tests/
 ```
 
 ### Backend Tests
+
 ```text
 apps/api/tests/
 ├── unit/
@@ -38,6 +41,7 @@ apps/api/tests/
 ```
 
 ### E2E Tests
+
 ```text
 tests/e2e/
 ├── specs/
@@ -51,6 +55,7 @@ tests/e2e/
 ## Test Examples
 
 ### Frontend Component Test
+
 ```typescript
 // apps/web/tests/unit/components/InstanceListItem.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -101,6 +106,7 @@ describe('InstanceListItem', () => {
 ```
 
 ### Backend API Test
+
 ```typescript
 // apps/api/tests/integration/api/reboot.test.ts
 import { handler } from '@/functions/instances/reboot';
@@ -124,10 +130,10 @@ describe('Reboot Instance Handler', () => {
           claims: {
             sub: 'user-123',
             email: 'admin@example.com',
-            'custom:role': 'admin'
-          }
-        }
-      }
+            'custom:role': 'admin',
+          },
+        },
+      },
     };
 
     const response = await handler(event);
@@ -135,7 +141,7 @@ describe('Reboot Instance Handler', () => {
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toEqual({
       message: 'Instance reboot initiated successfully',
-      instanceId: 'i-123'
+      instanceId: 'i-123',
     });
   });
 
@@ -145,10 +151,10 @@ describe('Reboot Instance Handler', () => {
       requestContext: {
         authorizer: {
           claims: {
-            'custom:role': 'readonly'
-          }
-        }
-      }
+            'custom:role': 'readonly',
+          },
+        },
+      },
     };
 
     const response = await handler(event);
@@ -159,6 +165,7 @@ describe('Reboot Instance Handler', () => {
 ```
 
 ### E2E Test
+
 ```typescript
 // tests/e2e/specs/dashboard.spec.ts
 import { test, expect } from '@playwright/test';
@@ -188,7 +195,7 @@ test.describe('Dashboard', () => {
 
     // Verify filtered results
     const states = await page.locator('[data-testid="instance-state"]').allTextContents();
-    states.forEach(state => {
+    states.forEach((state) => {
       expect(state).toBe('running');
     });
   });

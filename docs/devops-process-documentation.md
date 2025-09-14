@@ -52,12 +52,12 @@ graph TB
 
 ### Workflow Triggers
 
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| **PR Validation** | Pull request to `main`/`develop` | Fast feedback on code quality |
-| **CI/CD Pipeline** | Push to `main`/`develop` | Full deployment pipeline |
-| **Infrastructure** | Changes to `infrastructure/` | Infrastructure-focused validation |
-| **Notifications** | Workflow completion | Status notifications and reporting |
+| Workflow           | Trigger                          | Purpose                            |
+| ------------------ | -------------------------------- | ---------------------------------- |
+| **PR Validation**  | Pull request to `main`/`develop` | Fast feedback on code quality      |
+| **CI/CD Pipeline** | Push to `main`/`develop`         | Full deployment pipeline           |
+| **Infrastructure** | Changes to `infrastructure/`     | Infrastructure-focused validation  |
+| **Notifications**  | Workflow completion              | Status notifications and reporting |
 
 ### Quality Gates
 
@@ -90,6 +90,7 @@ All code must pass through sequential quality gates:
 **Primary deployment workflow handling the complete application lifecycle.**
 
 **Key Features:**
+
 - Parallel quality gates for fast feedback
 - Environment-specific deployments
 - Automated rollback on failure
@@ -99,29 +100,31 @@ All code must pass through sequential quality gates:
 
 ```yaml
 stages:
-  quality_gates:      # Parallel execution
+  quality_gates: # Parallel execution
     - lint-and-format
     - test-api
     - test-web
     - test-infrastructure
     - security-scan
 
-  build_validation:   # Depends on quality gates
+  build_validation: # Depends on quality gates
     - build-all-workspaces
     - cdk-synth-validation
 
-  deployment:         # Sequential by environment
-    - deploy-staging  # develop branch only
+  deployment: # Sequential by environment
+    - deploy-staging # develop branch only
     - deploy-production # main branch with manual approval
 ```
 
 **Environment Variables:**
+
 ```bash
 NODE_VERSION: '20.x'
 AWS_REGION: us-west-2
 ```
 
 **Secrets Required:**
+
 - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (staging)
 - `PROD_AWS_ACCESS_KEY_ID` / `PROD_AWS_SECRET_ACCESS_KEY` (production)
 - `SNYK_TOKEN` for security scanning
@@ -132,11 +135,13 @@ AWS_REGION: us-west-2
 **Specialized workflow for infrastructure changes with enhanced validation.**
 
 **Trigger Conditions:**
+
 - Changes to `infrastructure/` directory
 - Changes to the infrastructure workflow file
 - Pull requests affecting infrastructure
 
 **Specialized Validation:**
+
 ```bash
 # Security checks for infrastructure
 grep -r "AKIA\|password\|secret" lib/ bin/
@@ -147,6 +152,7 @@ npm run synth | grep -q "SSEEnabled.*true"
 ```
 
 **Environment Progression:**
+
 - Development → Staging → Production
 - Each with appropriate AWS credentials
 - Enhanced validation for production deployments
@@ -158,26 +164,31 @@ npm run synth | grep -q "SSEEnabled.*true"
 **Validation Categories:**
 
 **Quick Validation (< 2 minutes):**
+
 - Lint checks
 - Type checking
 - Basic build validation
 
 **Security Validation:**
+
 - Hardcoded secrets detection
 - Sensitive file type checking
 - Environment file validation
 
 **Infrastructure PR Validation:**
+
 - CDK diff analysis with impact assessment
 - Resource change detection
 - Destructive operation warnings
 
 **Code Quality Analysis:**
+
 - Comprehensive test execution
 - SonarCloud static analysis
 - Codecov coverage reporting
 
 **Bundle Analysis:**
+
 - Build size impact assessment
 - Large file detection (> 1MB)
 - Performance impact evaluation
@@ -187,12 +198,14 @@ npm run synth | grep -q "SSEEnabled.*true"
 **Comprehensive notification system for deployment events.**
 
 **Notification Channels:**
+
 - **Slack Integration:** Rich formatted messages with deployment status
 - **Microsoft Teams:** Alternative notification channel
 - **GitHub Deployments:** Native GitHub deployment tracking
 - **Email Notifications:** Production deployments only
 
 **Notification Content:**
+
 ```json
 {
   "environment": "production",
@@ -205,6 +218,7 @@ npm run synth | grep -q "SSEEnabled.*true"
 ```
 
 **Special Handling:**
+
 - **Rollback Notifications:** Critical production failures
 - **Health Check Results:** Post-deployment validation
 - **Deployment Status Tracking:** GitHub deployment API integration
@@ -233,6 +247,7 @@ aws cloudfront create-invalidation --distribution-id ${DEV_CLOUDFRONT_ID} --path
 ```
 
 **Health Checks:**
+
 - Basic API connectivity test
 - CloudFormation stack status verification
 
@@ -251,6 +266,7 @@ npm run test:integration:staging
 ```
 
 **Smoke Tests:**
+
 - API endpoint availability
 - Authentication flow validation
 - Database connectivity verification
@@ -267,6 +283,7 @@ npm run synth -- --context environment=production | grep -q "RemovalPolicy.*RETA
 ```
 
 **Deployment Process:**
+
 1. Manual approval gate (DevOps Lead/Engineering Manager)
 2. Infrastructure deployment with extra validation
 3. Application deployment with blue-green simulation
@@ -274,6 +291,7 @@ npm run synth -- --context environment=production | grep -q "RemovalPolicy.*RETA
 5. Success notification to team channels
 
 **Post-deployment:**
+
 - 30-second service stabilization period
 - Health check validation
 - Performance baseline comparison
@@ -286,11 +304,13 @@ npm run synth -- --context environment=production | grep -q "RemovalPolicy.*RETA
 **Comprehensive environment setup and deployment script.**
 
 **Usage:**
+
 ```bash
 ./scripts/provision-env.sh <environment> [aws-profile]
 ```
 
 **Features:**
+
 - AWS credential validation
 - Pre-deployment change preview with `cdk diff`
 - Interactive confirmation for existing stacks
@@ -300,6 +320,7 @@ npm run synth -- --context environment=production | grep -q "RemovalPolicy.*RETA
 - Resource output documentation
 
 **Safety Features:**
+
 ```bash
 # Production safety checks
 if [[ "$ENVIRONMENT" == "prod" ]]; then
@@ -315,16 +336,19 @@ fi
 **Enterprise-grade rollback capability with safety mechanisms.**
 
 **Usage:**
+
 ```bash
 ./scripts/rollback.sh <environment> [rollback-target] [aws-profile]
 ```
 
 **Rollback Strategies:**
+
 - **Previous Version:** Roll back to last known good state
 - **Specific Change Set:** Target specific CloudFormation change set
 - **Timestamp-based:** Roll back to specific point in time
 
 **Safety Mechanisms:**
+
 ```bash
 # Production rollback confirmation
 if [[ "$ENVIRONMENT" == "prod" ]]; then
@@ -336,6 +360,7 @@ fi
 ```
 
 **Rollback Process:**
+
 1. Current state backup creation
 2. Dependency and data resource validation
 3. Rollback execution with progress monitoring
@@ -347,17 +372,20 @@ fi
 **Comprehensive health and status monitoring tool.**
 
 **Usage:**
+
 ```bash
 ./scripts/deployment-status.sh <environment> [check-type] [aws-profile]
 ```
 
 **Check Categories:**
+
 - **Infrastructure:** CloudFormation stacks, resource status
 - **Application:** Service health, API availability
 - **Monitoring:** CloudWatch alarms, dashboard status
 - **Security:** IAM roles, encryption validation
 
 **Status Reporting:**
+
 ```bash
 # Exit codes for automation
 case "$OVERALL_STATUS" in
@@ -372,6 +400,7 @@ esac
 ### Testing Strategy Overview
 
 **Test Pyramid Implementation:**
+
 - **Unit Tests (70%):** Fast, isolated component testing
 - **Integration Tests (20%):** Service interaction validation
 - **End-to-End Tests (10%):** Complete user journey validation
@@ -379,6 +408,7 @@ esac
 ### Infrastructure Testing
 
 **Unit Tests (`/infrastructure/tests/unit/`):**
+
 ```typescript
 // Example: app-stack.test.ts
 import { App } from 'aws-cdk-lib';
@@ -390,12 +420,13 @@ test('VPC created with correct CIDR', () => {
 
   const template = Template.fromStack(stack);
   template.hasResourceProperties('AWS::EC2::VPC', {
-    CidrBlock: '10.0.0.0/16'
+    CidrBlock: '10.0.0.0/16',
   });
 });
 ```
 
 **Integration Tests (`/infrastructure/tests/integration/`):**
+
 ```typescript
 // Example: infrastructure.test.ts
 describe('Infrastructure Integration', () => {
@@ -411,11 +442,13 @@ describe('Infrastructure Integration', () => {
 ### Application Testing
 
 **API Tests:**
+
 - Unit tests for Lambda functions
 - Integration tests for API Gateway endpoints
 - Contract testing for API specifications
 
 **Web Application Tests:**
+
 - Component unit tests with Jest and React Testing Library
 - Integration tests for user workflows
 - Bundle size and performance testing
@@ -423,6 +456,7 @@ describe('Infrastructure Integration', () => {
 ### Testing in CI/CD Pipeline
 
 **Parallel Test Execution:**
+
 ```yaml
 jobs:
   test-api:
@@ -445,6 +479,7 @@ jobs:
 ```
 
 **Coverage Requirements:**
+
 - **Minimum Coverage:** 80% for all workspaces
 - **Coverage Reporting:** Codecov integration
 - **Coverage Gates:** Deployment blocked on coverage failures
@@ -454,6 +489,7 @@ jobs:
 ### Environment Configuration
 
 **Configuration Structure:**
+
 ```
 infrastructure/config/
 ├── dev.json      # Development environment
@@ -462,6 +498,7 @@ infrastructure/config/
 ```
 
 **Configuration Example (`dev.json`):**
+
 ```json
 {
   "environment": "dev",
@@ -484,10 +521,12 @@ infrastructure/config/
 ### Environment Isolation
 
 **Resource Naming Convention:**
+
 - **Pattern:** `{service}-{resource}-{environment}-{account-id}`
 - **Example:** `ec2-manager-web-prod-123456789012`
 
 **Network Isolation:**
+
 - Separate VPCs per environment (planned for Phase 3)
 - Environment-specific security groups
 - IAM role segregation by environment
@@ -495,6 +534,7 @@ infrastructure/config/
 ### Environment Promotion
 
 **Promotion Pipeline:**
+
 ```
 Feature Branch → Development → Staging → Production
       ↓              ↓           ↓          ↓
@@ -503,6 +543,7 @@ Feature Branch → Development → Staging → Production
 ```
 
 **Promotion Gates:**
+
 - **Dev → Staging:** Automated on successful tests
 - **Staging → Production:** Manual approval + additional validation
 
@@ -530,6 +571,7 @@ Feature Branch → Development → Staging → Production
 ### CloudWatch Implementation
 
 **Enhanced Monitoring Stack:**
+
 ```typescript
 // Custom metrics collection Lambda
 const metricsCollector = new lambda.Function(this, `MetricsCollector-${env}`, {
@@ -549,6 +591,7 @@ new events.Rule(this, `MetricsSchedule-${env}`, {
 ```
 
 **Dashboard Configuration:**
+
 - **Executive Dashboard:** High-level KPIs and system health
 - **Operations Dashboard:** Technical metrics and alerts
 - **Business Dashboard:** User activity and feature usage
@@ -557,24 +600,23 @@ new events.Rule(this, `MetricsSchedule-${env}`, {
 
 **Alert Categories and Thresholds:**
 
-| Alert Type | Threshold | Evaluation Period | Action |
-|------------|-----------|------------------|--------|
-| **Critical API Errors** | 3+ server errors | 10 minutes | SNS → Slack |
-| **High Latency** | >2s average | 15 minutes | SNS → Slack |
-| **DynamoDB Throttling** | Any throttling | 5 minutes | SNS → Slack |
-| **Security Alert** | 10+ auth failures | 5 minutes | SNS → Slack + Email |
-| **Low Activity** | <1 request/hour | 2 hours | SNS → Slack |
+| Alert Type              | Threshold         | Evaluation Period | Action              |
+| ----------------------- | ----------------- | ----------------- | ------------------- |
+| **Critical API Errors** | 3+ server errors  | 10 minutes        | SNS → Slack         |
+| **High Latency**        | >2s average       | 15 minutes        | SNS → Slack         |
+| **DynamoDB Throttling** | Any throttling    | 5 minutes         | SNS → Slack         |
+| **Security Alert**      | 10+ auth failures | 5 minutes         | SNS → Slack + Email |
+| **Low Activity**        | <1 request/hour   | 2 hours           | SNS → Slack         |
 
 **Notification Channels:**
+
 ```typescript
 const alertTopic = new sns.Topic(this, `AlertTopic-${env}`, {
   topicName: `ec2-manager-alerts-${env}`,
 });
 
 // Slack integration
-alertTopic.addSubscription(
-  new snsSubscriptions.EmailSubscription(alertEmail)
-);
+alertTopic.addSubscription(new snsSubscriptions.EmailSubscription(alertEmail));
 ```
 
 ### Health Check Framework
@@ -602,22 +644,24 @@ alertTopic.addSubscription(
 
 **Severity Levels:**
 
-| Severity | Description | Response Time | Escalation |
-|----------|-------------|---------------|------------|
-| **P1 - Critical** | System down, data loss | 15 minutes | Immediate page |
-| **P2 - High** | Major feature broken | 1 hour | Manager notification |
-| **P3 - Medium** | Minor feature issue | 4 hours | Next business day |
-| **P4 - Low** | Cosmetic or documentation | 1 week | Sprint planning |
+| Severity          | Description               | Response Time | Escalation           |
+| ----------------- | ------------------------- | ------------- | -------------------- |
+| **P1 - Critical** | System down, data loss    | 15 minutes    | Immediate page       |
+| **P2 - High**     | Major feature broken      | 1 hour        | Manager notification |
+| **P3 - Medium**   | Minor feature issue       | 4 hours       | Next business day    |
+| **P4 - Low**      | Cosmetic or documentation | 1 week        | Sprint planning      |
 
 ### Incident Response Process
 
 **Automated Detection:**
+
 1. CloudWatch alarm triggers
 2. SNS notification dispatch
 3. Slack/Teams message with context
 4. GitHub deployment status update
 
 **Manual Response Flow:**
+
 ```mermaid
 graph TD
     A[Alert Triggered] --> B[Initial Assessment]
@@ -636,6 +680,7 @@ graph TD
 **Communication Templates:**
 
 **Initial Incident Report:**
+
 ```
 🚨 INCIDENT ALERT 🚨
 Severity: P1
@@ -648,6 +693,7 @@ Incident Commander: @oncall-engineer
 ```
 
 **Resolution Notification:**
+
 ```
 ✅ INCIDENT RESOLVED
 Incident: #2025-0914-001
@@ -660,11 +706,13 @@ Post-mortem: [Link to document]
 ### Runbook Integration
 
 **Automated Runbooks:**
+
 - Rollback procedures with one-click execution
 - Health check validation scripts
 - Communication template automation
 
 **Manual Runbooks:**
+
 - Step-by-step troubleshooting guides
 - Escalation contact information
 - External service status check procedures
@@ -676,6 +724,7 @@ Post-mortem: [Link to document]
 **Automated Security Scanning:**
 
 1. **Dependency Vulnerability Scanning:**
+
    ```bash
    # npm audit for Node.js vulnerabilities
    npm audit --audit-level=high
@@ -697,6 +746,7 @@ Post-mortem: [Link to document]
 ### Compliance Automation
 
 **Compliance Checks in CI/CD:**
+
 ```bash
 # Check for required tags
 npm run synth | grep -q "ManagedBy.*CDK" || exit 1
@@ -709,6 +759,7 @@ npm run synth | grep -q "RemovalPolicy.*RETAIN"
 ```
 
 **Audit Trail:**
+
 - All deployments logged to CloudTrail
 - Infrastructure changes tracked in Git
 - Access patterns monitored via CloudWatch
@@ -716,6 +767,7 @@ npm run synth | grep -q "RemovalPolicy.*RETAIN"
 ### Secret Management
 
 **Secret Handling Strategy:**
+
 - AWS Systems Manager Parameter Store for configuration
 - Environment variables for non-sensitive settings
 - No hardcoded secrets in code (enforced by CI/CD)
@@ -726,6 +778,7 @@ npm run synth | grep -q "RemovalPolicy.*RETAIN"
 ### Daily Operations
 
 **Morning Checklist:**
+
 1. Review overnight deployment status
 2. Check CloudWatch dashboard for anomalies
 3. Validate backup completion status
@@ -733,6 +786,7 @@ npm run synth | grep -q "RemovalPolicy.*RETAIN"
 5. Assess resource utilization and costs
 
 **Monitoring Routine:**
+
 - Real-time Slack notifications for critical alerts
 - Daily cost analysis and optimization
 - Weekly performance trend analysis
@@ -741,11 +795,13 @@ npm run synth | grep -q "RemovalPolicy.*RETAIN"
 ### Maintenance Windows
 
 **Scheduled Maintenance:**
+
 - **Development:** Anytime (no user impact)
 - **Staging:** Outside business hours (6 PM - 8 AM PST)
 - **Production:** Planned maintenance windows (Sunday 2 AM - 6 AM PST)
 
 **Emergency Maintenance:**
+
 - Security patches: Immediate deployment authorized
 - Critical bug fixes: DevOps Lead approval required
 - Data integrity issues: CTO approval required
@@ -772,11 +828,13 @@ npm run synth | grep -q "RemovalPolicy.*RETAIN"
 ### Capacity Management
 
 **Capacity Planning Process:**
+
 - Monthly usage trend analysis
 - Quarterly capacity forecasting
 - Annual budget and resource planning
 
 **Auto-scaling Configuration:**
+
 - Lambda: Automatic concurrent execution scaling
 - DynamoDB: On-demand capacity with cost monitoring
 - CloudFront: Automatic global scaling
@@ -787,16 +845,17 @@ npm run synth | grep -q "RemovalPolicy.*RETAIN"
 
 **Rollback Decision Matrix:**
 
-| Scenario | Rollback Type | Time to Execute | Risk Level |
-|----------|---------------|-----------------|------------|
-| **Application Bug** | Lambda version rollback | 2 minutes | Low |
-| **Configuration Error** | CloudFormation rollback | 10 minutes | Medium |
-| **Data Corruption** | Point-in-time recovery | 2 hours | High |
-| **Security Breach** | Full system isolation | 30 minutes | Critical |
+| Scenario                | Rollback Type           | Time to Execute | Risk Level |
+| ----------------------- | ----------------------- | --------------- | ---------- |
+| **Application Bug**     | Lambda version rollback | 2 minutes       | Low        |
+| **Configuration Error** | CloudFormation rollback | 10 minutes      | Medium     |
+| **Data Corruption**     | Point-in-time recovery  | 2 hours         | High       |
+| **Security Breach**     | Full system isolation   | 30 minutes      | Critical   |
 
 ### Automated Rollback Triggers
 
 **Health Check Failures:**
+
 ```typescript
 // Automatic rollback on health check failure
 const healthCheckAlarm = new cloudwatch.Alarm(this, 'HealthCheck', {
@@ -806,12 +865,11 @@ const healthCheckAlarm = new cloudwatch.Alarm(this, 'HealthCheck', {
 });
 
 // Trigger automatic rollback
-healthCheckAlarm.addAlarmAction(
-  new cloudwatch.actions.SnsAction(rollbackTopic)
-);
+healthCheckAlarm.addAlarmAction(new cloudwatch.actions.SnsAction(rollbackTopic));
 ```
 
 **Performance Degradation:**
+
 - Response time > 2x baseline
 - Error rate > 10% for 5 minutes
 - Throughput drop > 50% for 10 minutes
@@ -819,11 +877,13 @@ healthCheckAlarm.addAlarmAction(
 ### Recovery Procedures
 
 **Disaster Recovery Testing:**
+
 - Monthly backup restoration tests in development
 - Quarterly full disaster recovery simulations
 - Annual business continuity exercises
 
 **Recovery Time Objectives:**
+
 - **Application Recovery:** 15 minutes
 - **Infrastructure Recovery:** 1 hour
 - **Data Recovery:** 4 hours
@@ -832,6 +892,7 @@ healthCheckAlarm.addAlarmAction(
 ### Backup and Restoration
 
 **Automated Backup Strategy:**
+
 ```bash
 # Daily backup verification script
 ./scripts/verify-backups.sh production
@@ -841,6 +902,7 @@ healthCheckAlarm.addAlarmAction(
 ```
 
 **Backup Components:**
+
 - DynamoDB point-in-time recovery (35 days)
 - S3 versioning for web assets
 - CloudFormation template exports
@@ -853,6 +915,7 @@ healthCheckAlarm.addAlarmAction(
 ### A. Required Secrets and Environment Variables
 
 **GitHub Secrets:**
+
 ```
 # AWS Credentials
 AWS_ACCESS_KEY_ID
@@ -878,33 +941,34 @@ PROD_CLOUDFRONT_ID
 
 ### B. Workflow File Locations
 
-| Workflow | File Path |
-|----------|-----------|
-| **CI/CD Pipeline** | `/.github/workflows/ci.yml` |
+| Workflow           | File Path                               |
+| ------------------ | --------------------------------------- |
+| **CI/CD Pipeline** | `/.github/workflows/ci.yml`             |
 | **Infrastructure** | `/.github/workflows/infrastructure.yml` |
-| **PR Validation** | `/.github/workflows/pr-validation.yml` |
-| **Notifications** | `/.github/workflows/notifications.yml` |
+| **PR Validation**  | `/.github/workflows/pr-validation.yml`  |
+| **Notifications**  | `/.github/workflows/notifications.yml`  |
 
 ### C. Script Locations
 
-| Script | File Path |
-|--------|-----------|
-| **Environment Provisioning** | `/scripts/provision-env.sh` |
-| **Rollback** | `/scripts/rollback.sh` |
-| **Deployment Status** | `/scripts/deployment-status.sh` |
+| Script                       | File Path                       |
+| ---------------------------- | ------------------------------- |
+| **Environment Provisioning** | `/scripts/provision-env.sh`     |
+| **Rollback**                 | `/scripts/rollback.sh`          |
+| **Deployment Status**        | `/scripts/deployment-status.sh` |
 
 ### D. Contact Information
 
-| Role | Contact | Escalation |
-|------|---------|------------|
-| **DevOps Lead** | devops-lead@company.com | CTO |
+| Role                    | Contact                 | Escalation     |
+| ----------------------- | ----------------------- | -------------- |
+| **DevOps Lead**         | devops-lead@company.com | CTO            |
 | **Engineering Manager** | eng-manager@company.com | VP Engineering |
-| **Security Team** | security@company.com | CISO |
-| **On-call Engineer** | oncall@company.com | DevOps Lead |
+| **Security Team**       | security@company.com    | CISO           |
+| **On-call Engineer**    | oncall@company.com      | DevOps Lead    |
 
 ---
 
 **Document Maintenance:**
+
 - **Review Schedule:** Quarterly
 - **Update Triggers:** Process changes, tool updates, incident learnings
 - **Approval Required:** DevOps Lead for major changes

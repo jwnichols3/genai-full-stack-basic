@@ -3,6 +3,7 @@
 ## Service Architecture
 
 ### Function Organization
+
 ```text
 api/src/functions/
 ├── auth/
@@ -31,6 +32,7 @@ api/src/functions/
 ```
 
 ### Function Template
+
 ```typescript
 // api/src/functions/instances/reboot.ts
 import { APIGatewayProxyHandler } from 'aws-lambda';
@@ -61,7 +63,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         action: 'ACCESS_DENIED',
         resourceType: 'EC2_INSTANCE',
         resourceId: instanceId,
-        details: { reason: 'Insufficient permissions' }
+        details: { reason: 'Insufficient permissions' },
       });
 
       return createErrorResponse(403, 'FORBIDDEN', 'Admin role required');
@@ -69,7 +71,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     // Reboot instance
     const command = new RebootInstancesCommand({
-      InstanceIds: [instanceId]
+      InstanceIds: [instanceId],
     });
 
     await ec2Client.send(command);
@@ -81,16 +83,15 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       action: 'REBOOT_INSTANCE',
       resourceType: 'EC2_INSTANCE',
       resourceId: instanceId,
-      ipAddress: event.requestContext.identity.sourceIp
+      ipAddress: event.requestContext.identity.sourceIp,
     });
 
     logger.info('Instance reboot successful', { instanceId });
 
     return createResponse(200, {
       message: 'Instance reboot initiated successfully',
-      instanceId
+      instanceId,
     });
-
   } catch (error) {
     logger.error('Reboot failed', { error, instanceId });
 
@@ -106,6 +107,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 ## Database Architecture
 
 ### Schema Design
+
 ```sql
 -- Note: Using DynamoDB, showing conceptual schema
 -- Primary Table: audit-logs
@@ -138,6 +140,7 @@ CREATE INDEX resource_index ON audit_logs (
 ```
 
 ### Data Access Layer
+
 ```typescript
 // api/src/shared/services/auditService.ts
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
@@ -161,36 +164,32 @@ export class AuditService {
 
   async logAction(entry: AuditEntry): Promise<void> {
     const timestamp = new Date().toISOString();
-    const ttl = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60); // 30 days
+    const ttl = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60; // 30 days
 
     const item = {
       ...entry,
       auditId: uuidv4(),
       timestamp,
-      ttl
+      ttl,
     };
 
     await this.dynamoClient.put({
       TableName: this.tableName,
-      Item: item
+      Item: item,
     });
   }
 
-  async getAuditLogs(
-    userId?: string,
-    limit = 50,
-    startDate?: string
-  ): Promise<AuditEntry[]> {
+  async getAuditLogs(userId?: string, limit = 50, startDate?: string): Promise<AuditEntry[]> {
     if (userId) {
       // Query by userId (primary key)
       const response = await this.dynamoClient.query({
         TableName: this.tableName,
         KeyConditionExpression: 'userId = :userId',
         ExpressionAttributeValues: {
-          ':userId': userId
+          ':userId': userId,
         },
         Limit: limit,
-        ScanIndexForward: false // Most recent first
+        ScanIndexForward: false, // Most recent first
       });
 
       return response.Items as AuditEntry[];
@@ -198,13 +197,13 @@ export class AuditService {
       // Scan with filter (less efficient, use sparingly)
       const params: any = {
         TableName: this.tableName,
-        Limit: limit
+        Limit: limit,
       };
 
       if (startDate) {
         params.FilterExpression = 'timestamp >= :startDate';
         params.ExpressionAttributeValues = {
-          ':startDate': startDate
+          ':startDate': startDate,
         };
       }
 
@@ -213,19 +212,16 @@ export class AuditService {
     }
   }
 
-  async getAuditLogsByAction(
-    action: string,
-    limit = 50
-  ): Promise<AuditEntry[]> {
+  async getAuditLogsByAction(action: string, limit = 50): Promise<AuditEntry[]> {
     const response = await this.dynamoClient.query({
       TableName: this.tableName,
       IndexName: 'action-index',
       KeyConditionExpression: 'action = :action',
       ExpressionAttributeValues: {
-        ':action': action
+        ':action': action,
       },
       Limit: limit,
-      ScanIndexForward: false
+      ScanIndexForward: false,
     });
 
     return response.Items as AuditEntry[];
@@ -236,6 +232,7 @@ export class AuditService {
 ## Authentication and Authorization
 
 ### Auth Flow
+
 ```mermaid
 sequenceDiagram
     participant C as Client
@@ -257,6 +254,7 @@ sequenceDiagram
 ```
 
 ### Middleware/Guards
+
 ```typescript
 // api/src/shared/middleware/authorizer.ts
 import { APIGatewayTokenAuthorizerHandler } from 'aws-lambda';
@@ -265,7 +263,7 @@ import { CognitoJwtVerifier } from 'aws-jwt-verify';
 const verifier = CognitoJwtVerifier.create({
   userPoolId: process.env.COGNITO_USER_POOL_ID!,
   tokenUse: 'access',
-  clientId: process.env.COGNITO_CLIENT_ID!
+  clientId: process.env.COGNITO_CLIENT_ID!,
 });
 
 export const handler: APIGatewayTokenAuthorizerHandler = async (event) => {
@@ -282,15 +280,15 @@ export const handler: APIGatewayTokenAuthorizerHandler = async (event) => {
           {
             Action: 'execute-api:Invoke',
             Effect: 'Allow',
-            Resource: event.methodArn
-          }
-        ]
+            Resource: event.methodArn,
+          },
+        ],
       },
       context: {
         userId: payload.sub,
         email: payload.email,
-        role: payload['custom:role']
-      }
+        role: payload['custom:role'],
+      },
     };
   } catch (error) {
     throw new Error('Unauthorized');

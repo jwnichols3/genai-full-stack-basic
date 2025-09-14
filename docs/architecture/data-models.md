@@ -5,6 +5,7 @@
 **Purpose:** Represents authenticated users in the system with their roles and preferences
 
 **Key Attributes:**
+
 - userId: string - Cognito user ID (UUID)
 - email: string - User's email address (unique)
 - role: 'admin' | 'readonly' - User's permission level
@@ -14,6 +15,7 @@
 - createdAt: ISO8601 timestamp - Account creation time
 
 ### TypeScript Interface
+
 ```typescript
 interface User {
   userId: string;
@@ -27,6 +29,7 @@ interface User {
 ```
 
 ### Relationships
+
 - One-to-many with AuditLog entries
 
 ## EC2Instance
@@ -34,6 +37,7 @@ interface User {
 **Purpose:** Represents EC2 instance data retrieved from AWS with enriched metadata
 
 **Key Attributes:**
+
 - instanceId: string - AWS EC2 instance ID
 - instanceType: string - EC2 instance type (e.g., t2.micro)
 - state: InstanceState - Current instance state
@@ -44,8 +48,15 @@ interface User {
 - tags: Record<string, string> - Instance tags
 
 ### TypeScript Interface
+
 ```typescript
-type InstanceState = 'pending' | 'running' | 'stopping' | 'stopped' | 'shutting-down' | 'terminated';
+type InstanceState =
+  | 'pending'
+  | 'running'
+  | 'stopping'
+  | 'stopped'
+  | 'shutting-down'
+  | 'terminated';
 
 interface EC2Instance {
   instanceId: string;
@@ -63,6 +74,7 @@ interface EC2Instance {
 ```
 
 ### Relationships
+
 - Referenced in AuditLog entries for instance actions
 
 ## AuditLog
@@ -70,6 +82,7 @@ interface EC2Instance {
 **Purpose:** Immutable audit trail of all administrative actions performed in the system
 
 **Key Attributes:**
+
 - auditId: string - Unique audit entry ID (UUID)
 - userId: string - ID of user who performed action
 - userEmail: string - Email of user (denormalized for quick access)
@@ -81,6 +94,7 @@ interface EC2Instance {
 - ipAddress: string - Client IP address
 
 ### TypeScript Interface
+
 ```typescript
 type AuditAction = 'LOGIN' | 'LOGOUT' | 'REBOOT_INSTANCE' | 'VIEW_INSTANCE' | 'ACCESS_DENIED';
 
@@ -98,6 +112,7 @@ interface AuditLog {
 ```
 
 ### Relationships
+
 - Many-to-one with User
 - References EC2Instance for instance-related actions
 
@@ -106,6 +121,7 @@ interface AuditLog {
 **Purpose:** Container for CloudWatch metrics data for EC2 instances
 
 **Key Attributes:**
+
 - instanceId: string - EC2 instance ID
 - metricName: string - CloudWatch metric name
 - dataPoints: MetricDataPoint[] - Time series data
@@ -113,6 +129,7 @@ interface AuditLog {
 - period: number - Data point interval in seconds
 
 ### TypeScript Interface
+
 ```typescript
 interface MetricDataPoint {
   timestamp: string;
@@ -131,4 +148,5 @@ interface CloudWatchMetrics {
 ```
 
 ### Relationships
+
 - Many-to-one with EC2Instance

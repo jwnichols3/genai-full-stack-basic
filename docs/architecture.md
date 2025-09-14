@@ -7,12 +7,14 @@ This document outlines the complete fullstack architecture for AWS EC2 Instance 
 This unified approach combines what would traditionally be separate backend and frontend architecture documents, streamlining the development process for modern fullstack applications where these concerns are increasingly intertwined.
 
 ### Starter Template or Existing Project
+
 N/A - Greenfield project
 
 ### Change Log
-| Date | Version | Description | Author |
-|------|---------|-------------|--------|
-| 2025-01-13 | 1.0 | Initial fullstack architecture document | Winston (Architect) |
+
+| Date       | Version | Description                             | Author              |
+| ---------- | ------- | --------------------------------------- | ------------------- |
+| 2025-01-13 | 1.0     | Initial fullstack architecture document | Winston (Architect) |
 
 ## High Level Architecture
 
@@ -98,29 +100,29 @@ graph TB
 
 ### Technology Stack Table
 
-| Category | Technology | Version | Purpose | Rationale |
-|----------|------------|---------|---------|-----------|
-| Frontend Language | TypeScript | 5.3+ | Type-safe frontend development | Type safety reduces runtime errors and improves IDE support |
-| Frontend Framework | React | 18.2+ | UI component framework | Industry standard with vast ecosystem and AWS Amplify support |
-| UI Component Library | Material-UI (MUI) | 5.15+ | Pre-built React components | Provides professional UI components aligned with Material Design |
-| State Management | Context API + useReducer | Built-in | Application state management | Sufficient for app complexity without Redux overhead |
-| Backend Language | TypeScript | 5.3+ | Type-safe backend development | Consistency with frontend and strong typing |
-| Backend Framework | AWS Lambda + Node.js | 20.x | Serverless compute runtime | Native AWS integration with minimal cold start times |
-| API Style | REST | N/A | API architecture pattern | Simple, well-understood pattern suitable for CRUD operations |
-| Database | DynamoDB | N/A | NoSQL database for audit logs | Serverless, auto-scaling, perfect for append-only audit data |
-| Cache | CloudFront | N/A | CDN and API caching | Built-in with AWS, reduces latency globally |
-| File Storage | S3 | N/A | Static asset and website hosting | Industry standard for static site hosting |
-| Authentication | AWS Cognito | N/A | User authentication and authorization | Managed service with built-in security features |
-| Frontend Testing | Jest + React Testing Library | 29.x / 14.x | Unit and integration testing | Standard React testing stack |
-| Backend Testing | Jest | 29.x | Lambda function testing | Consistent with frontend tooling |
-| E2E Testing | Playwright | 1.40+ | End-to-end browser testing | Modern, fast, reliable cross-browser testing |
-| Build Tool | Vite | 5.0+ | Frontend build and dev server | Fast builds with hot module replacement |
-| Bundler | Vite (Rollup) | 5.0+ | JavaScript bundling | Integrated with Vite, optimized production builds |
-| IaC Tool | AWS CDK | 2.100+ | Infrastructure as Code | Type-safe infrastructure with TypeScript |
-| CI/CD | GitHub Actions | N/A | Continuous Integration/Deployment | Free for public repos, good AWS integration |
-| Monitoring | CloudWatch | N/A | Logs, metrics, and dashboards | Native AWS service with Lambda integration |
-| Logging | CloudWatch Logs | N/A | Centralized logging | Automatic Lambda log aggregation |
-| CSS Framework | Emotion (via MUI) | 11.x | CSS-in-JS styling | Integrated with Material-UI, dynamic styling |
+| Category             | Technology                   | Version     | Purpose                               | Rationale                                                        |
+| -------------------- | ---------------------------- | ----------- | ------------------------------------- | ---------------------------------------------------------------- |
+| Frontend Language    | TypeScript                   | 5.3+        | Type-safe frontend development        | Type safety reduces runtime errors and improves IDE support      |
+| Frontend Framework   | React                        | 18.2+       | UI component framework                | Industry standard with vast ecosystem and AWS Amplify support    |
+| UI Component Library | Material-UI (MUI)            | 5.15+       | Pre-built React components            | Provides professional UI components aligned with Material Design |
+| State Management     | Context API + useReducer     | Built-in    | Application state management          | Sufficient for app complexity without Redux overhead             |
+| Backend Language     | TypeScript                   | 5.3+        | Type-safe backend development         | Consistency with frontend and strong typing                      |
+| Backend Framework    | AWS Lambda + Node.js         | 20.x        | Serverless compute runtime            | Native AWS integration with minimal cold start times             |
+| API Style            | REST                         | N/A         | API architecture pattern              | Simple, well-understood pattern suitable for CRUD operations     |
+| Database             | DynamoDB                     | N/A         | NoSQL database for audit logs         | Serverless, auto-scaling, perfect for append-only audit data     |
+| Cache                | CloudFront                   | N/A         | CDN and API caching                   | Built-in with AWS, reduces latency globally                      |
+| File Storage         | S3                           | N/A         | Static asset and website hosting      | Industry standard for static site hosting                        |
+| Authentication       | AWS Cognito                  | N/A         | User authentication and authorization | Managed service with built-in security features                  |
+| Frontend Testing     | Jest + React Testing Library | 29.x / 14.x | Unit and integration testing          | Standard React testing stack                                     |
+| Backend Testing      | Jest                         | 29.x        | Lambda function testing               | Consistent with frontend tooling                                 |
+| E2E Testing          | Playwright                   | 1.40+       | End-to-end browser testing            | Modern, fast, reliable cross-browser testing                     |
+| Build Tool           | Vite                         | 5.0+        | Frontend build and dev server         | Fast builds with hot module replacement                          |
+| Bundler              | Vite (Rollup)                | 5.0+        | JavaScript bundling                   | Integrated with Vite, optimized production builds                |
+| IaC Tool             | AWS CDK                      | 2.100+      | Infrastructure as Code                | Type-safe infrastructure with TypeScript                         |
+| CI/CD                | GitHub Actions               | N/A         | Continuous Integration/Deployment     | Free for public repos, good AWS integration                      |
+| Monitoring           | CloudWatch                   | N/A         | Logs, metrics, and dashboards         | Native AWS service with Lambda integration                       |
+| Logging              | CloudWatch Logs              | N/A         | Centralized logging                   | Automatic Lambda log aggregation                                 |
+| CSS Framework        | Emotion (via MUI)            | 11.x        | CSS-in-JS styling                     | Integrated with Material-UI, dynamic styling                     |
 
 ## Data Models
 
@@ -129,6 +131,7 @@ graph TB
 **Purpose:** Represents authenticated users in the system with their roles and preferences
 
 **Key Attributes:**
+
 - userId: string - Cognito user ID (UUID)
 - email: string - User's email address (unique)
 - role: 'admin' | 'readonly' - User's permission level
@@ -138,6 +141,7 @@ graph TB
 - createdAt: ISO8601 timestamp - Account creation time
 
 #### TypeScript Interface
+
 ```typescript
 interface User {
   userId: string;
@@ -151,6 +155,7 @@ interface User {
 ```
 
 #### Relationships
+
 - One-to-many with AuditLog entries
 
 ### EC2Instance
@@ -158,6 +163,7 @@ interface User {
 **Purpose:** Represents EC2 instance data retrieved from AWS with enriched metadata
 
 **Key Attributes:**
+
 - instanceId: string - AWS EC2 instance ID
 - instanceType: string - EC2 instance type (e.g., t2.micro)
 - state: InstanceState - Current instance state
@@ -168,8 +174,15 @@ interface User {
 - tags: Record<string, string> - Instance tags
 
 #### TypeScript Interface
+
 ```typescript
-type InstanceState = 'pending' | 'running' | 'stopping' | 'stopped' | 'shutting-down' | 'terminated';
+type InstanceState =
+  | 'pending'
+  | 'running'
+  | 'stopping'
+  | 'stopped'
+  | 'shutting-down'
+  | 'terminated';
 
 interface EC2Instance {
   instanceId: string;
@@ -187,6 +200,7 @@ interface EC2Instance {
 ```
 
 #### Relationships
+
 - Referenced in AuditLog entries for instance actions
 
 ### AuditLog
@@ -194,6 +208,7 @@ interface EC2Instance {
 **Purpose:** Immutable audit trail of all administrative actions performed in the system
 
 **Key Attributes:**
+
 - auditId: string - Unique audit entry ID (UUID)
 - userId: string - ID of user who performed action
 - userEmail: string - Email of user (denormalized for quick access)
@@ -205,6 +220,7 @@ interface EC2Instance {
 - ipAddress: string - Client IP address
 
 #### TypeScript Interface
+
 ```typescript
 type AuditAction = 'LOGIN' | 'LOGOUT' | 'REBOOT_INSTANCE' | 'VIEW_INSTANCE' | 'ACCESS_DENIED';
 
@@ -222,6 +238,7 @@ interface AuditLog {
 ```
 
 #### Relationships
+
 - Many-to-one with User
 - References EC2Instance for instance-related actions
 
@@ -230,6 +247,7 @@ interface AuditLog {
 **Purpose:** Container for CloudWatch metrics data for EC2 instances
 
 **Key Attributes:**
+
 - instanceId: string - EC2 instance ID
 - metricName: string - CloudWatch metric name
 - dataPoints: MetricDataPoint[] - Time series data
@@ -237,6 +255,7 @@ interface AuditLog {
 - period: number - Data point interval in seconds
 
 #### TypeScript Interface
+
 ```typescript
 interface MetricDataPoint {
   timestamp: string;
@@ -255,6 +274,7 @@ interface CloudWatchMetrics {
 ```
 
 #### Relationships
+
 - Many-to-one with EC2Instance
 
 ## API Specification
@@ -484,9 +504,11 @@ paths:
 ## Components
 
 ### Frontend Application
+
 **Responsibility:** React SPA providing user interface for EC2 instance management with real-time updates and responsive design
 
 **Key Interfaces:**
+
 - HTTP REST API calls to API Gateway endpoints
 - WebSocket connection for real-time instance state updates (future enhancement)
 - Cognito SDK integration for authentication flows
@@ -496,9 +518,11 @@ paths:
 **Technology Stack:** React 18.2+, TypeScript 5.3+, Material-UI 5.15+, Vite 5.0+
 
 ### API Gateway
+
 **Responsibility:** Single entry point for all API requests with request validation, rate limiting, and Cognito authorization
 
 **Key Interfaces:**
+
 - REST endpoints for instance operations
 - JWT token validation via Cognito authorizer
 - Request/response transformation and validation
@@ -508,9 +532,11 @@ paths:
 **Technology Stack:** AWS API Gateway REST API, Cognito Authorizer, Request Validators
 
 ### Lambda Functions
+
 **Responsibility:** Serverless compute layer executing business logic for instance management, metrics retrieval, and audit logging
 
 **Key Interfaces:**
+
 - Event handlers for API Gateway requests
 - AWS SDK calls to EC2, CloudWatch, and DynamoDB
 - Structured JSON responses with error handling
@@ -520,9 +546,11 @@ paths:
 **Technology Stack:** Node.js 20.x runtime, TypeScript, AWS SDK v3
 
 ### Authentication Service (Cognito)
+
 **Responsibility:** User authentication, authorization, and session management with role-based access control
 
 **Key Interfaces:**
+
 - User pool for authentication
 - JWT token generation and validation
 - Password policies and MFA support (future)
@@ -532,9 +560,11 @@ paths:
 **Technology Stack:** AWS Cognito User Pool with email-based authentication
 
 ### Audit Service (DynamoDB)
+
 **Responsibility:** Immutable audit trail storage for all administrative actions with high-performance queries
 
 **Key Interfaces:**
+
 - Put operations for new audit entries
 - Query operations by userId, timestamp, or action
 - GSI for efficient filtering
@@ -544,9 +574,11 @@ paths:
 **Technology Stack:** DynamoDB with on-demand capacity, single table design
 
 ### Static Hosting (S3 + CloudFront)
+
 **Responsibility:** Global distribution of frontend assets with caching, compression, and HTTPS termination
 
 **Key Interfaces:**
+
 - S3 bucket for static file storage
 - CloudFront distribution with custom domain
 - Cache invalidation API for deployments
@@ -556,9 +588,11 @@ paths:
 **Technology Stack:** S3 static website hosting, CloudFront CDN with OAI
 
 ### Monitoring Service (CloudWatch)
+
 **Responsibility:** Centralized logging, metrics collection, and operational dashboards for system observability
 
 **Key Interfaces:**
+
 - Log streams from Lambda functions
 - Custom metrics API
 - Dashboard API for visualization
@@ -571,6 +605,7 @@ paths:
 ## Core Workflows
 
 ### User Authentication Flow
+
 ```mermaid
 sequenceDiagram
     participant U as User
@@ -595,6 +630,7 @@ sequenceDiagram
 ```
 
 ### Instance Reboot Flow (Admin)
+
 ```mermaid
 sequenceDiagram
     participant U as Admin User
@@ -623,6 +659,7 @@ sequenceDiagram
 ```
 
 ### Real-time Metrics Retrieval
+
 ```mermaid
 sequenceDiagram
     participant U as User
@@ -652,6 +689,7 @@ sequenceDiagram
 ```
 
 ### Error Handling Flow
+
 ```mermaid
 sequenceDiagram
     participant U as User
@@ -797,6 +835,7 @@ sequenceDiagram
 ### Component Architecture
 
 #### Component Organization
+
 ```text
 src/components/
 ├── common/
@@ -837,6 +876,7 @@ src/components/
 ```
 
 #### Component Template
+
 ```typescript
 // Example: InstanceListItem.tsx
 import React, { memo } from 'react';
@@ -907,6 +947,7 @@ InstanceListItem.displayName = 'InstanceListItem';
 ### State Management Architecture
 
 #### State Structure
+
 ```typescript
 // src/store/types.ts
 export interface AppState {
@@ -978,6 +1019,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 ```
 
 #### State Management Patterns
+
 - Use Context API for global auth state
 - Use local component state for UI-only state
 - Implement optimistic updates for better UX
@@ -988,6 +1030,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 ### Routing Architecture
 
 #### Route Organization
+
 ```text
 /                           # Redirects to /dashboard or /login
 /login                      # Public: Login page
@@ -1001,6 +1044,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 ```
 
 #### Protected Route Pattern
+
 ```typescript
 // src/components/auth/ProtectedRoute.tsx
 import React from 'react';
@@ -1054,6 +1098,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 ### Frontend Services Layer
 
 #### API Client Setup
+
 ```typescript
 // src/services/api.ts
 import axios, { AxiosInstance, AxiosError } from 'axios';
@@ -1069,8 +1114,8 @@ class ApiClient {
       baseURL: API_BASE_URL,
       timeout: 30000,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     // Request interceptor for auth
@@ -1105,7 +1150,7 @@ class ApiClient {
         const formattedError = {
           code: error.response?.data?.error?.code || 'UNKNOWN_ERROR',
           message: error.response?.data?.error?.message || 'An unexpected error occurred',
-          status: error.response?.status
+          status: error.response?.status,
         };
 
         return Promise.reject(formattedError);
@@ -1134,34 +1179,25 @@ export const apiClient = new ApiClient();
 ```
 
 #### Service Example
+
 ```typescript
 // src/services/ec2.ts
 import { apiClient } from './api';
 import { EC2Instance, CloudWatchMetrics, RebootResponse } from '@/types';
 
 export class EC2Service {
-  async listInstances(filters?: {
-    state?: string;
-    tag?: string;
-  }): Promise<EC2Instance[]> {
-    const response = await apiClient.get<{ instances: EC2Instance[] }>(
-      '/instances',
-      filters
-    );
+  async listInstances(filters?: { state?: string; tag?: string }): Promise<EC2Instance[]> {
+    const response = await apiClient.get<{ instances: EC2Instance[] }>('/instances', filters);
     return response.data.instances;
   }
 
   async getInstanceDetails(instanceId: string): Promise<EC2Instance> {
-    const response = await apiClient.get<EC2Instance>(
-      `/instances/${instanceId}`
-    );
+    const response = await apiClient.get<EC2Instance>(`/instances/${instanceId}`);
     return response.data;
   }
 
   async rebootInstance(instanceId: string): Promise<RebootResponse> {
-    const response = await apiClient.post<RebootResponse>(
-      `/instances/${instanceId}/reboot`
-    );
+    const response = await apiClient.post<RebootResponse>(`/instances/${instanceId}/reboot`);
     return response.data;
   }
 
@@ -1174,10 +1210,10 @@ export class EC2Service {
       endTime?: string;
     }
   ): Promise<CloudWatchMetrics> {
-    const response = await apiClient.get<CloudWatchMetrics>(
-      `/instances/${instanceId}/metrics`,
-      { metricName, ...options }
-    );
+    const response = await apiClient.get<CloudWatchMetrics>(`/instances/${instanceId}/metrics`, {
+      metricName,
+      ...options,
+    });
     return response.data;
   }
 }
@@ -1190,6 +1226,7 @@ export const ec2Service = new EC2Service();
 ### Service Architecture
 
 #### Function Organization
+
 ```text
 api/src/functions/
 ├── auth/
@@ -1218,6 +1255,7 @@ api/src/functions/
 ```
 
 #### Function Template
+
 ```typescript
 // api/src/functions/instances/reboot.ts
 import { APIGatewayProxyHandler } from 'aws-lambda';
@@ -1248,7 +1286,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         action: 'ACCESS_DENIED',
         resourceType: 'EC2_INSTANCE',
         resourceId: instanceId,
-        details: { reason: 'Insufficient permissions' }
+        details: { reason: 'Insufficient permissions' },
       });
 
       return createErrorResponse(403, 'FORBIDDEN', 'Admin role required');
@@ -1256,7 +1294,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     // Reboot instance
     const command = new RebootInstancesCommand({
-      InstanceIds: [instanceId]
+      InstanceIds: [instanceId],
     });
 
     await ec2Client.send(command);
@@ -1268,16 +1306,15 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       action: 'REBOOT_INSTANCE',
       resourceType: 'EC2_INSTANCE',
       resourceId: instanceId,
-      ipAddress: event.requestContext.identity.sourceIp
+      ipAddress: event.requestContext.identity.sourceIp,
     });
 
     logger.info('Instance reboot successful', { instanceId });
 
     return createResponse(200, {
       message: 'Instance reboot initiated successfully',
-      instanceId
+      instanceId,
     });
-
   } catch (error) {
     logger.error('Reboot failed', { error, instanceId });
 
@@ -1293,6 +1330,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 ### Database Architecture
 
 #### Schema Design
+
 ```sql
 -- Note: Using DynamoDB, showing conceptual schema
 -- Primary Table: audit-logs
@@ -1325,6 +1363,7 @@ CREATE INDEX resource_index ON audit_logs (
 ```
 
 #### Data Access Layer
+
 ```typescript
 // api/src/shared/services/auditService.ts
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb';
@@ -1348,36 +1387,32 @@ export class AuditService {
 
   async logAction(entry: AuditEntry): Promise<void> {
     const timestamp = new Date().toISOString();
-    const ttl = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60); // 30 days
+    const ttl = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60; // 30 days
 
     const item = {
       ...entry,
       auditId: uuidv4(),
       timestamp,
-      ttl
+      ttl,
     };
 
     await this.dynamoClient.put({
       TableName: this.tableName,
-      Item: item
+      Item: item,
     });
   }
 
-  async getAuditLogs(
-    userId?: string,
-    limit = 50,
-    startDate?: string
-  ): Promise<AuditEntry[]> {
+  async getAuditLogs(userId?: string, limit = 50, startDate?: string): Promise<AuditEntry[]> {
     if (userId) {
       // Query by userId (primary key)
       const response = await this.dynamoClient.query({
         TableName: this.tableName,
         KeyConditionExpression: 'userId = :userId',
         ExpressionAttributeValues: {
-          ':userId': userId
+          ':userId': userId,
         },
         Limit: limit,
-        ScanIndexForward: false // Most recent first
+        ScanIndexForward: false, // Most recent first
       });
 
       return response.Items as AuditEntry[];
@@ -1385,13 +1420,13 @@ export class AuditService {
       // Scan with filter (less efficient, use sparingly)
       const params: any = {
         TableName: this.tableName,
-        Limit: limit
+        Limit: limit,
       };
 
       if (startDate) {
         params.FilterExpression = 'timestamp >= :startDate';
         params.ExpressionAttributeValues = {
-          ':startDate': startDate
+          ':startDate': startDate,
         };
       }
 
@@ -1400,19 +1435,16 @@ export class AuditService {
     }
   }
 
-  async getAuditLogsByAction(
-    action: string,
-    limit = 50
-  ): Promise<AuditEntry[]> {
+  async getAuditLogsByAction(action: string, limit = 50): Promise<AuditEntry[]> {
     const response = await this.dynamoClient.query({
       TableName: this.tableName,
       IndexName: 'action-index',
       KeyConditionExpression: 'action = :action',
       ExpressionAttributeValues: {
-        ':action': action
+        ':action': action,
       },
       Limit: limit,
-      ScanIndexForward: false
+      ScanIndexForward: false,
     });
 
     return response.Items as AuditEntry[];
@@ -1423,6 +1455,7 @@ export class AuditService {
 ### Authentication and Authorization
 
 #### Auth Flow
+
 ```mermaid
 sequenceDiagram
     participant C as Client
@@ -1444,6 +1477,7 @@ sequenceDiagram
 ```
 
 #### Middleware/Guards
+
 ```typescript
 // api/src/shared/middleware/authorizer.ts
 import { APIGatewayTokenAuthorizerHandler } from 'aws-lambda';
@@ -1452,7 +1486,7 @@ import { CognitoJwtVerifier } from 'aws-jwt-verify';
 const verifier = CognitoJwtVerifier.create({
   userPoolId: process.env.COGNITO_USER_POOL_ID!,
   tokenUse: 'access',
-  clientId: process.env.COGNITO_CLIENT_ID!
+  clientId: process.env.COGNITO_CLIENT_ID!,
 });
 
 export const handler: APIGatewayTokenAuthorizerHandler = async (event) => {
@@ -1469,15 +1503,15 @@ export const handler: APIGatewayTokenAuthorizerHandler = async (event) => {
           {
             Action: 'execute-api:Invoke',
             Effect: 'Allow',
-            Resource: event.methodArn
-          }
-        ]
+            Resource: event.methodArn,
+          },
+        ],
       },
       context: {
         userId: payload.sub,
         email: payload.email,
-        role: payload['custom:role']
-      }
+        role: payload['custom:role'],
+      },
     };
   } catch (error) {
     throw new Error('Unauthorized');
@@ -1586,6 +1620,7 @@ ec2-instance-manager/
 ### Local Development Setup
 
 #### Prerequisites
+
 ```bash
 # Required tools
 node --version  # v20.x or higher
@@ -1598,6 +1633,7 @@ aws configure list
 ```
 
 #### Initial Setup
+
 ```bash
 # Clone repository
 git clone <repository-url>
@@ -1619,6 +1655,7 @@ npx cdk bootstrap
 ```
 
 #### Development Commands
+
 ```bash
 # Start all services
 npm run dev
@@ -1652,6 +1689,7 @@ npm run build:api       # Build backend only
 ### Environment Configuration
 
 #### Required Environment Variables
+
 ```bash
 # Frontend (.env.local)
 VITE_API_BASE_URL=http://localhost:3001
@@ -1678,17 +1716,20 @@ LOG_LEVEL=debug
 ### Deployment Strategy
 
 **Frontend Deployment:**
+
 - **Platform:** S3 + CloudFront
 - **Build Command:** `npm run build:web`
 - **Output Directory:** `apps/web/dist`
 - **CDN/Edge:** CloudFront with 24-hour cache for assets
 
 **Backend Deployment:**
+
 - **Platform:** AWS Lambda via API Gateway
 - **Build Command:** `npm run build:api`
 - **Deployment Method:** AWS CDK with blue-green deployment
 
 ### CI/CD Pipeline
+
 ```yaml
 # .github/workflows/deploy.yaml
 name: Deploy to AWS
@@ -1777,27 +1818,31 @@ jobs:
 ```
 
 ### Environments
-| Environment | Frontend URL | Backend URL | Purpose |
-|-------------|-------------|-------------|---------|
-| Development | http://localhost:5173 | http://localhost:3001 | Local development |
-| Staging | https://staging.ec2-manager.example.com | https://api-staging.ec2-manager.example.com/v1 | Pre-production testing |
-| Production | https://ec2-manager.example.com | https://api.ec2-manager.example.com/v1 | Live environment |
+
+| Environment | Frontend URL                            | Backend URL                                    | Purpose                |
+| ----------- | --------------------------------------- | ---------------------------------------------- | ---------------------- |
+| Development | http://localhost:5173                   | http://localhost:3001                          | Local development      |
+| Staging     | https://staging.ec2-manager.example.com | https://api-staging.ec2-manager.example.com/v1 | Pre-production testing |
+| Production  | https://ec2-manager.example.com         | https://api.ec2-manager.example.com/v1         | Live environment       |
 
 ## Security and Performance
 
 ### Security Requirements
 
 **Frontend Security:**
+
 - CSP Headers: `default-src 'self'; script-src 'self' 'unsafe-inline' https://cognito-idp.us-east-1.amazonaws.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://*.amazonaws.com`
 - XSS Prevention: React's built-in escaping, input sanitization, DOMPurify for user content
 - Secure Storage: Tokens in memory only, no localStorage/sessionStorage for sensitive data
 
 **Backend Security:**
+
 - Input Validation: Joi schemas for all API inputs
 - Rate Limiting: 100 req/sec sustained, 200 req/sec burst per IP
 - CORS Policy: Strict origin validation, credentials included
 
 **Authentication Security:**
+
 - Token Storage: In-memory with secure HTTP-only refresh token cookie
 - Session Management: 8-hour access tokens, 30-day refresh tokens
 - Password Policy: Min 12 chars, uppercase, lowercase, number, symbol required
@@ -1805,11 +1850,13 @@ jobs:
 ### Performance Optimization
 
 **Frontend Performance:**
+
 - Bundle Size Target: < 300KB gzipped initial bundle
 - Loading Strategy: Code splitting by route, lazy loading for heavy components
 - Caching Strategy: Immutable assets with hash names, 1-year cache headers
 
 **Backend Performance:**
+
 - Response Time Target: p50 < 200ms, p99 < 500ms
 - Database Optimization: DynamoDB on-demand scaling, GSI for common queries
 - Caching Strategy: CloudFront edge caching for GET requests, 5-minute TTL
@@ -1817,6 +1864,7 @@ jobs:
 ## Testing Strategy
 
 ### Testing Pyramid
+
 ```text
         E2E Tests (5%)
        /              \
@@ -1828,6 +1876,7 @@ Frontend Unit (35%)  Backend Unit (35%)
 ### Test Organization
 
 #### Frontend Tests
+
 ```text
 apps/web/tests/
 ├── unit/
@@ -1841,6 +1890,7 @@ apps/web/tests/
 ```
 
 #### Backend Tests
+
 ```text
 apps/api/tests/
 ├── unit/
@@ -1854,6 +1904,7 @@ apps/api/tests/
 ```
 
 #### E2E Tests
+
 ```text
 tests/e2e/
 ├── specs/
@@ -1867,6 +1918,7 @@ tests/e2e/
 ### Test Examples
 
 #### Frontend Component Test
+
 ```typescript
 // apps/web/tests/unit/components/InstanceListItem.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -1917,6 +1969,7 @@ describe('InstanceListItem', () => {
 ```
 
 #### Backend API Test
+
 ```typescript
 // apps/api/tests/integration/api/reboot.test.ts
 import { handler } from '@/functions/instances/reboot';
@@ -1940,10 +1993,10 @@ describe('Reboot Instance Handler', () => {
           claims: {
             sub: 'user-123',
             email: 'admin@example.com',
-            'custom:role': 'admin'
-          }
-        }
-      }
+            'custom:role': 'admin',
+          },
+        },
+      },
     };
 
     const response = await handler(event);
@@ -1951,7 +2004,7 @@ describe('Reboot Instance Handler', () => {
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toEqual({
       message: 'Instance reboot initiated successfully',
-      instanceId: 'i-123'
+      instanceId: 'i-123',
     });
   });
 
@@ -1961,10 +2014,10 @@ describe('Reboot Instance Handler', () => {
       requestContext: {
         authorizer: {
           claims: {
-            'custom:role': 'readonly'
-          }
-        }
-      }
+            'custom:role': 'readonly',
+          },
+        },
+      },
     };
 
     const response = await handler(event);
@@ -1975,6 +2028,7 @@ describe('Reboot Instance Handler', () => {
 ```
 
 #### E2E Test
+
 ```typescript
 // tests/e2e/specs/dashboard.spec.ts
 import { test, expect } from '@playwright/test';
@@ -2004,7 +2058,7 @@ test.describe('Dashboard', () => {
 
     // Verify filtered results
     const states = await page.locator('[data-testid="instance-state"]').allTextContents();
-    states.forEach(state => {
+    states.forEach((state) => {
       expect(state).toBe('running');
     });
   });
@@ -2027,6 +2081,7 @@ test.describe('Dashboard', () => {
 ## Coding Standards
 
 ### Critical Fullstack Rules
+
 - **Type Sharing:** Always define types in packages/shared and import from there
 - **API Calls:** Never make direct HTTP calls - use the service layer
 - **Environment Variables:** Access only through config objects, never process.env directly
@@ -2039,20 +2094,22 @@ test.describe('Dashboard', () => {
 - **Test Coverage:** Minimum 80% coverage for critical business logic
 
 ### Naming Conventions
-| Element | Frontend | Backend | Example |
-|---------|----------|---------|---------|
-| Components | PascalCase | - | `UserProfile.tsx` |
-| Hooks | camelCase with 'use' | - | `useAuth.ts` |
-| API Routes | - | kebab-case | `/api/user-profile` |
-| Database Tables | - | snake_case | `user_profiles` |
-| Functions | camelCase | camelCase | `getUserById()` |
-| Constants | UPPER_SNAKE_CASE | UPPER_SNAKE_CASE | `MAX_RETRIES` |
-| Interfaces | PascalCase with 'I' prefix optional | PascalCase | `User` or `IUser` |
-| File names | PascalCase for components, camelCase for others | camelCase | `Button.tsx`, `apiClient.ts` |
+
+| Element         | Frontend                                        | Backend          | Example                      |
+| --------------- | ----------------------------------------------- | ---------------- | ---------------------------- |
+| Components      | PascalCase                                      | -                | `UserProfile.tsx`            |
+| Hooks           | camelCase with 'use'                            | -                | `useAuth.ts`                 |
+| API Routes      | -                                               | kebab-case       | `/api/user-profile`          |
+| Database Tables | -                                               | snake_case       | `user_profiles`              |
+| Functions       | camelCase                                       | camelCase        | `getUserById()`              |
+| Constants       | UPPER_SNAKE_CASE                                | UPPER_SNAKE_CASE | `MAX_RETRIES`                |
+| Interfaces      | PascalCase with 'I' prefix optional             | PascalCase       | `User` or `IUser`            |
+| File names      | PascalCase for components, camelCase for others | camelCase        | `Button.tsx`, `apiClient.ts` |
 
 ## Error Handling Strategy
 
 ### Error Flow
+
 ```mermaid
 sequenceDiagram
     participant U as User Action
@@ -2079,6 +2136,7 @@ sequenceDiagram
 ```
 
 ### Error Response Format
+
 ```typescript
 interface ApiError {
   error: {
@@ -2092,55 +2150,60 @@ interface ApiError {
 ```
 
 ### Frontend Error Handling
+
 ```typescript
 // src/hooks/useErrorHandler.ts
 export const useErrorHandler = () => {
   const { showNotification } = useNotification();
 
-  const handleError = useCallback((error: any) => {
-    console.error('Error occurred:', error);
+  const handleError = useCallback(
+    (error: any) => {
+      console.error('Error occurred:', error);
 
-    let message = 'An unexpected error occurred';
-    let severity: 'error' | 'warning' = 'error';
+      let message = 'An unexpected error occurred';
+      let severity: 'error' | 'warning' = 'error';
 
-    if (error.code === 'NETWORK_ERROR') {
-      message = 'Network connection failed. Please check your connection.';
-    } else if (error.code === 'UNAUTHORIZED') {
-      message = 'Your session has expired. Please login again.';
-      // Redirect to login
-    } else if (error.code === 'FORBIDDEN') {
-      message = 'You do not have permission to perform this action.';
-      severity = 'warning';
-    } else if (error.message) {
-      message = error.message;
-    }
+      if (error.code === 'NETWORK_ERROR') {
+        message = 'Network connection failed. Please check your connection.';
+      } else if (error.code === 'UNAUTHORIZED') {
+        message = 'Your session has expired. Please login again.';
+        // Redirect to login
+      } else if (error.code === 'FORBIDDEN') {
+        message = 'You do not have permission to perform this action.';
+        severity = 'warning';
+      } else if (error.message) {
+        message = error.message;
+      }
 
-    showNotification({
-      message,
-      severity,
-      action: error.code === 'NETWORK_ERROR' ? {
-        label: 'Retry',
-        onClick: () => window.location.reload()
-      } : undefined
-    });
-  }, [showNotification]);
+      showNotification({
+        message,
+        severity,
+        action:
+          error.code === 'NETWORK_ERROR'
+            ? {
+                label: 'Retry',
+                onClick: () => window.location.reload(),
+              }
+            : undefined,
+      });
+    },
+    [showNotification]
+  );
 
   return { handleError };
 };
 ```
 
 ### Backend Error Handling
+
 ```typescript
 // api/src/shared/middleware/errorHandler.ts
-export const errorHandler = (
-  error: any,
-  requestId: string
-): APIGatewayProxyResult => {
+export const errorHandler = (error: any, requestId: string): APIGatewayProxyResult => {
   logger.error('Request failed', {
     requestId,
     error: error.message,
     stack: error.stack,
-    code: error.code
+    code: error.code,
   });
 
   const errorResponse: ApiError = {
@@ -2148,8 +2211,8 @@ export const errorHandler = (
       code: error.code || 'INTERNAL_ERROR',
       message: error.message || 'An unexpected error occurred',
       timestamp: new Date().toISOString(),
-      requestId
-    }
+      requestId,
+    },
   };
 
   let statusCode = 500;
@@ -2164,9 +2227,9 @@ export const errorHandler = (
     statusCode,
     headers: {
       'Content-Type': 'application/json',
-      'X-Request-Id': requestId
+      'X-Request-Id': requestId,
     },
-    body: JSON.stringify(errorResponse)
+    body: JSON.stringify(errorResponse),
   };
 };
 ```
@@ -2174,6 +2237,7 @@ export const errorHandler = (
 ## Monitoring and Observability
 
 ### Monitoring Stack
+
 - **Frontend Monitoring:** CloudWatch RUM (Real User Monitoring)
 - **Backend Monitoring:** CloudWatch Logs, Metrics, and X-Ray
 - **Error Tracking:** CloudWatch Logs Insights with alerts
@@ -2182,6 +2246,7 @@ export const errorHandler = (
 ### Key Metrics
 
 **Frontend Metrics:**
+
 - Core Web Vitals (LCP, FID, CLS)
 - JavaScript errors per session
 - API response times (p50, p95, p99)
@@ -2189,6 +2254,7 @@ export const errorHandler = (
 - Page load times by route
 
 **Backend Metrics:**
+
 - Request rate (requests per second)
 - Error rate (4xx and 5xx responses)
 - Response time (p50, p95, p99)
@@ -2202,6 +2268,7 @@ export const errorHandler = (
 Architecture document is now complete. All sections have been populated based on the PRD requirements and existing technical documentation. The architecture provides a comprehensive blueprint for building the AWS EC2 Instance Management Platform using modern serverless patterns and fullstack best practices.
 
 Key architectural decisions made:
+
 - Serverless backend using Lambda and API Gateway for operational simplicity
 - React SPA with Material-UI for responsive, professional UI
 - AWS Cognito for managed authentication with role-based access

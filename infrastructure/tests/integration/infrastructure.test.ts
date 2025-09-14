@@ -3,27 +3,14 @@ import {
   DescribeStacksCommand,
   DescribeStackResourcesCommand,
 } from '@aws-sdk/client-cloudformation';
-import {
-  DynamoDBClient,
-  DescribeTableCommand,
-} from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, DescribeTableCommand } from '@aws-sdk/client-dynamodb';
 import {
   CognitoIdentityProviderClient,
   DescribeUserPoolCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
-import {
-  APIGatewayClient,
-  GetRestApisCommand,
-} from '@aws-sdk/client-api-gateway';
-import {
-  S3Client,
-  HeadBucketCommand,
-  GetBucketEncryptionCommand,
-} from '@aws-sdk/client-s3';
-import {
-  CloudWatchClient,
-  DescribeAlarmsCommand,
-} from '@aws-sdk/client-cloudwatch';
+import { APIGatewayClient, GetRestApisCommand } from '@aws-sdk/client-api-gateway';
+import { S3Client, HeadBucketCommand, GetBucketEncryptionCommand } from '@aws-sdk/client-s3';
+import { CloudWatchClient, DescribeAlarmsCommand } from '@aws-sdk/client-cloudwatch';
 
 // Integration tests for deployed infrastructure
 // These tests run against actual AWS resources
@@ -34,9 +21,7 @@ const stackName = `EC2Manager-${environment}`;
 
 // Skip integration tests if no AWS credentials or if running in CI without AWS access
 const shouldSkipIntegrationTests =
-  !process.env.AWS_PROFILE &&
-  !process.env.AWS_ACCESS_KEY_ID &&
-  !process.env.RUN_INTEGRATION_TESTS;
+  !process.env.AWS_PROFILE && !process.env.AWS_ACCESS_KEY_ID && !process.env.RUN_INTEGRATION_TESTS;
 
 const testTimeout = 30000; // 30 seconds
 
@@ -79,9 +64,7 @@ describe('Infrastructure Integration Tests', () => {
     test('stack exists and is in CREATE_COMPLETE or UPDATE_COMPLETE state', async () => {
       if (shouldSkipIntegrationTests) return;
 
-      const response = await cfnClient.send(
-        new DescribeStacksCommand({ StackName: stackName })
-      );
+      const response = await cfnClient.send(new DescribeStacksCommand({ StackName: stackName }));
 
       expect(response.Stacks).toHaveLength(1);
       const stack = response.Stacks?.[0];
@@ -93,7 +76,7 @@ describe('Infrastructure Integration Tests', () => {
     test('stack has all required resources', async () => {
       if (shouldSkipIntegrationTests) return;
 
-      const resourceTypes = stackResources.map(r => r.ResourceType);
+      const resourceTypes = stackResources.map((r) => r.ResourceType);
 
       // Essential resources that must exist
       const requiredResources = [
@@ -107,7 +90,7 @@ describe('Infrastructure Integration Tests', () => {
         'AWS::IAM::Role',
       ];
 
-      requiredResources.forEach(resourceType => {
+      requiredResources.forEach((resourceType) => {
         expect(resourceTypes).toContain(resourceType);
       });
     });
@@ -117,7 +100,7 @@ describe('Infrastructure Integration Tests', () => {
     test('VPC is created with correct configuration', async () => {
       if (shouldSkipIntegrationTests) return;
 
-      const vpcResource = stackResources.find(r => r.ResourceType === 'AWS::EC2::VPC');
+      const vpcResource = stackResources.find((r) => r.ResourceType === 'AWS::EC2::VPC');
       expect(vpcResource).toBeDefined();
       expect(vpcResource?.ResourceStatus).toBe('CREATE_COMPLETE');
     });
@@ -125,14 +108,14 @@ describe('Infrastructure Integration Tests', () => {
     test('subnets are created across multiple AZs', async () => {
       if (shouldSkipIntegrationTests) return;
 
-      const subnets = stackResources.filter(r => r.ResourceType === 'AWS::EC2::Subnet');
+      const subnets = stackResources.filter((r) => r.ResourceType === 'AWS::EC2::Subnet');
       expect(subnets.length).toBeGreaterThanOrEqual(4); // At least 2 public + 2 private
     });
 
     test('NAT gateways are created for private subnets', async () => {
       if (shouldSkipIntegrationTests) return;
 
-      const natGateways = stackResources.filter(r => r.ResourceType === 'AWS::EC2::NatGateway');
+      const natGateways = stackResources.filter((r) => r.ResourceType === 'AWS::EC2::NatGateway');
       expect(natGateways.length).toBeGreaterThanOrEqual(2); // High availability
     });
   });
@@ -141,13 +124,11 @@ describe('Infrastructure Integration Tests', () => {
     test('audit table exists and is configured correctly', async () => {
       if (shouldSkipIntegrationTests) return;
 
-      const tableResource = stackResources.find(r => r.ResourceType === 'AWS::DynamoDB::Table');
+      const tableResource = stackResources.find((r) => r.ResourceType === 'AWS::DynamoDB::Table');
       expect(tableResource).toBeDefined();
 
       const tableName = `ec2-manager-audit-${environment}`;
-      const response = await dynamoClient.send(
-        new DescribeTableCommand({ TableName: tableName })
-      );
+      const response = await dynamoClient.send(new DescribeTableCommand({ TableName: tableName }));
 
       expect(response.Table?.TableName).toBe(tableName);
       expect(response.Table?.TableStatus).toBe('ACTIVE');
@@ -171,9 +152,7 @@ describe('Infrastructure Integration Tests', () => {
       if (shouldSkipIntegrationTests) return;
 
       const tableName = `ec2-manager-audit-${environment}`;
-      const response = await dynamoClient.send(
-        new DescribeTableCommand({ TableName: tableName })
-      );
+      const response = await dynamoClient.send(new DescribeTableCommand({ TableName: tableName }));
 
       expect(response.Table?.BillingModeSummary?.BillingMode).toBe('PAY_PER_REQUEST');
     });
@@ -183,7 +162,9 @@ describe('Infrastructure Integration Tests', () => {
     test('user pool exists and is configured correctly', async () => {
       if (shouldSkipIntegrationTests) return;
 
-      const userPoolResource = stackResources.find(r => r.ResourceType === 'AWS::Cognito::UserPool');
+      const userPoolResource = stackResources.find(
+        (r) => r.ResourceType === 'AWS::Cognito::UserPool'
+      );
       expect(userPoolResource).toBeDefined();
 
       const response = await cognitoClient.send(
@@ -238,11 +219,11 @@ describe('Infrastructure Integration Tests', () => {
     test('API Gateway exists and is configured correctly', async () => {
       if (shouldSkipIntegrationTests) return;
 
-      const apiResource = stackResources.find(r => r.ResourceType === 'AWS::ApiGateway::RestApi');
+      const apiResource = stackResources.find((r) => r.ResourceType === 'AWS::ApiGateway::RestApi');
       expect(apiResource).toBeDefined();
 
       const response = await apiGatewayClient.send(new GetRestApisCommand({}));
-      const api = response.items?.find(api => api.name === `ec2-manager-api-${environment}`);
+      const api = response.items?.find((api) => api.name === `ec2-manager-api-${environment}`);
 
       expect(api).toBeDefined();
       expect(api?.name).toBe(`ec2-manager-api-${environment}`);
@@ -252,10 +233,12 @@ describe('Infrastructure Integration Tests', () => {
     test('API Gateway has deployment stage', async () => {
       if (shouldSkipIntegrationTests) return;
 
-      const stageResources = stackResources.filter(r => r.ResourceType === 'AWS::ApiGateway::Stage');
+      const stageResources = stackResources.filter(
+        (r) => r.ResourceType === 'AWS::ApiGateway::Stage'
+      );
       expect(stageResources.length).toBeGreaterThanOrEqual(1);
 
-      const stage = stageResources.find(s => s.LogicalResourceId?.includes('DeploymentStage'));
+      const stage = stageResources.find((s) => s.LogicalResourceId?.includes('DeploymentStage'));
       expect(stage).toBeDefined();
       expect(stage?.ResourceStatus).toBe('CREATE_COMPLETE');
     });
@@ -265,7 +248,9 @@ describe('Infrastructure Integration Tests', () => {
     test('CloudWatch dashboard exists', async () => {
       if (shouldSkipIntegrationTests) return;
 
-      const dashboardResource = stackResources.find(r => r.ResourceType === 'AWS::CloudWatch::Dashboard');
+      const dashboardResource = stackResources.find(
+        (r) => r.ResourceType === 'AWS::CloudWatch::Dashboard'
+      );
       expect(dashboardResource).toBeDefined();
       expect(dashboardResource?.ResourceStatus).toBe('CREATE_COMPLETE');
     });
@@ -273,7 +258,9 @@ describe('Infrastructure Integration Tests', () => {
     test('CloudWatch alarms are configured', async () => {
       if (shouldSkipIntegrationTests) return;
 
-      const alarmResources = stackResources.filter(r => r.ResourceType === 'AWS::CloudWatch::Alarm');
+      const alarmResources = stackResources.filter(
+        (r) => r.ResourceType === 'AWS::CloudWatch::Alarm'
+      );
       expect(alarmResources.length).toBeGreaterThanOrEqual(2); // At least API Gateway errors and latency
 
       // Get actual alarms from CloudWatch
@@ -285,15 +272,15 @@ describe('Infrastructure Integration Tests', () => {
 
       expect(response.MetricAlarms?.length).toBeGreaterThanOrEqual(2);
 
-      const alarmNames = response.MetricAlarms?.map(a => a.AlarmName) || [];
-      expect(alarmNames.some(name => name?.includes('5xx-Errors'))).toBe(true);
-      expect(alarmNames.some(name => name?.includes('High-Latency'))).toBe(true);
+      const alarmNames = response.MetricAlarms?.map((a) => a.AlarmName) || [];
+      expect(alarmNames.some((name) => name?.includes('5xx-Errors'))).toBe(true);
+      expect(alarmNames.some((name) => name?.includes('High-Latency'))).toBe(true);
     });
 
     test('log group exists with correct retention', async () => {
       if (shouldSkipIntegrationTests) return;
 
-      const logGroupResource = stackResources.find(r => r.ResourceType === 'AWS::Logs::LogGroup');
+      const logGroupResource = stackResources.find((r) => r.ResourceType === 'AWS::Logs::LogGroup');
       expect(logGroupResource).toBeDefined();
       expect(logGroupResource?.ResourceStatus).toBe('CREATE_COMPLETE');
     });
@@ -303,21 +290,21 @@ describe('Infrastructure Integration Tests', () => {
     test('IAM roles are created with proper permissions', async () => {
       if (shouldSkipIntegrationTests) return;
 
-      const roleResources = stackResources.filter(r => r.ResourceType === 'AWS::IAM::Role');
+      const roleResources = stackResources.filter((r) => r.ResourceType === 'AWS::IAM::Role');
       expect(roleResources.length).toBeGreaterThanOrEqual(2); // EC2Read and EC2Operator roles
 
-      const roleNames = roleResources.map(r => r.LogicalResourceId);
-      expect(roleNames.some(name => name?.includes('EC2ReadRole'))).toBe(true);
-      expect(roleNames.some(name => name?.includes('EC2OperatorRole'))).toBe(true);
+      const roleNames = roleResources.map((r) => r.LogicalResourceId);
+      expect(roleNames.some((name) => name?.includes('EC2ReadRole'))).toBe(true);
+      expect(roleNames.some((name) => name?.includes('EC2OperatorRole'))).toBe(true);
     });
 
     test('all IAM roles have valid assume role policies', async () => {
       if (shouldSkipIntegrationTests) return;
 
-      const roleResources = stackResources.filter(r => r.ResourceType === 'AWS::IAM::Role');
+      const roleResources = stackResources.filter((r) => r.ResourceType === 'AWS::IAM::Role');
 
       // All roles should be created successfully (not in failed state)
-      roleResources.forEach(role => {
+      roleResources.forEach((role) => {
         expect(role.ResourceStatus).toBe('CREATE_COMPLETE');
       });
     });
@@ -333,6 +320,10 @@ describe('Infrastructure Integration Tests', () => {
         new DescribeTableCommand({ TableName: tableName })
       );
 
+      // Verify table exists and is active
+      expect(tableResponse.Table?.TableStatus).toBe('ACTIVE');
+      expect(tableResponse.Table?.TableName).toBe(tableName);
+
       // Production should have point-in-time recovery
       // Note: Point-in-time recovery info requires separate API call in AWS SDK v3
       // For now, skip this check as it's not critical for deployment validation
@@ -344,7 +335,7 @@ describe('Infrastructure Integration Tests', () => {
 
       // Development environments should be configured for easy cleanup
       // This is validated by the CloudFormation template having proper deletion policies
-      const tableResource = stackResources.find(r => r.ResourceType === 'AWS::DynamoDB::Table');
+      const tableResource = stackResources.find((r) => r.ResourceType === 'AWS::DynamoDB::Table');
       expect(tableResource).toBeDefined();
       // Resource exists and is healthy
       expect(tableResource?.ResourceStatus).toBe('CREATE_COMPLETE');
@@ -356,16 +347,20 @@ describe('Infrastructure Integration Tests', () => {
 describe('Infrastructure Health Checks', () => {
   const healthCheckTimeout = 10000;
 
-  test('basic connectivity test', async () => {
-    if (shouldSkipIntegrationTests) return;
+  test(
+    'basic connectivity test',
+    async () => {
+      if (shouldSkipIntegrationTests) return;
 
-    // Basic test to ensure we can connect to AWS APIs
-    const cfnClient = new CloudFormationClient({ region });
+      // Basic test to ensure we can connect to AWS APIs
+      const cfnClient = new CloudFormationClient({ region });
 
-    await expect(
-      cfnClient.send(new DescribeStacksCommand({ StackName: stackName }))
-    ).resolves.not.toThrow();
-  }, healthCheckTimeout);
+      await expect(
+        cfnClient.send(new DescribeStacksCommand({ StackName: stackName }))
+      ).resolves.not.toThrow();
+    },
+    healthCheckTimeout
+  );
 
   // Add more health checks as needed for specific services
 });
@@ -379,9 +374,7 @@ export const runCriticalTests = async () => {
 
   try {
     const cfnClient = new CloudFormationClient({ region });
-    const response = await cfnClient.send(
-      new DescribeStacksCommand({ StackName: stackName })
-    );
+    const response = await cfnClient.send(new DescribeStacksCommand({ StackName: stackName }));
 
     const stack = response.Stacks?.[0];
     const isHealthy = ['CREATE_COMPLETE', 'UPDATE_COMPLETE'].includes(stack?.StackStatus || '');

@@ -2,12 +2,12 @@ name: Infrastructure Deployment
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths:
       - 'infrastructure/**'
       - '.github/workflows/infrastructure.yml'
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'infrastructure/**'
 

@@ -2,30 +2,20 @@ module.exports = {
   env: {
     node: true,
     es2021: true,
-    jest: true
+    jest: true,
   },
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-  ],
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 12,
     sourceType: 'module',
     project: './tsconfig.json',
   },
-  plugins: [
-    '@typescript-eslint'
-  ],
+  plugins: ['@typescript-eslint'],
   rules: {
     '@typescript-eslint/no-unused-vars': 'error',
     '@typescript-eslint/no-explicit-any': 'warn',
     'no-console': 'warn',
   },
-  ignorePatterns: [
-    'dist/',
-    'node_modules/',
-    '*.js',
-    'tests/**/*'
-  ]
+  ignorePatterns: ['dist/', 'node_modules/', '*.js', 'tests/**/*'],
 };

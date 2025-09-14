@@ -1,4 +1,5 @@
 # Brainstorming Session Results
+
 ## User Stories for AWS EC2 Instance Management Platform
 
 **Session Topic:** Foundational "Hello World" Epics and User Stories
@@ -23,6 +24,7 @@
 ## Phase 1: Broad Story Generation - Question Storming
 
 **User Questions Generated:**
+
 1. "What is the status of my instances?"
 2. "How do I know this is the latest status?"
 3. "Am I seeing the instances from the account I expect?"
@@ -36,4 +38,4 @@
 
 ## Phase 2: Convert Questions to User Stories
 
-*Using "As a... I want... So that..." format to transform user questions into actionable stories...*
+_Using "As a... I want... So that..." format to transform user questions into actionable stories..._

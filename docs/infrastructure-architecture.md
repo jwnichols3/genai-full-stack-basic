@@ -30,11 +30,11 @@ The EC2 Manager application is built on AWS using a comprehensive cloud-native a
 
 Three identical environments with environment-specific configurations:
 
-| Environment | Purpose | Features | Retention Policies |
-|-------------|---------|----------|-------------------|
-| **Development** | Feature development and testing | Relaxed security, cost-optimized | 7 days log retention, DESTROY removal policy |
-| **Staging** | Pre-production validation | Production-like configuration | 14 days log retention, mixed removal policies |
-| **Production** | Live system | Full security, monitoring, and backup | 30 days log retention, RETAIN removal policy |
+| Environment     | Purpose                         | Features                              | Retention Policies                            |
+| --------------- | ------------------------------- | ------------------------------------- | --------------------------------------------- |
+| **Development** | Feature development and testing | Relaxed security, cost-optimized      | 7 days log retention, DESTROY removal policy  |
+| **Staging**     | Pre-production validation       | Production-like configuration         | 14 days log retention, mixed removal policies |
+| **Production**  | Live system                     | Full security, monitoring, and backup | 30 days log retention, RETAIN removal policy  |
 
 ## Infrastructure as Code (IaC)
 
@@ -107,18 +107,21 @@ graph LR
 Each environment uses JSON configuration files with environment-specific settings:
 
 **Development Environment**
+
 - **Purpose:** Feature development and rapid iteration
 - **Resources:** Minimal resource allocation, single AZ for cost optimization
 - **Access Control:** Open access for development team
 - **Data Classification:** Non-sensitive development data only
 
 **Staging Environment**
+
 - **Purpose:** Pre-production validation and testing
 - **Resources:** Production-like resources with reduced capacity
 - **Access Control:** Restricted to QA and senior development team
 - **Data Classification:** Anonymized production-like data
 
 **Production Environment**
+
 - **Purpose:** Live customer-facing system
 - **Resources:** Full production capacity with auto-scaling
 - **Access Control:** Strict access controls with MFA required
@@ -134,6 +137,7 @@ Each environment uses JSON configuration files with environment-specific setting
 ### Feature Flag Integration
 
 Feature flags are managed at the application level but infrastructure supports:
+
 - Environment-specific API Gateway configurations
 - Lambda environment variables for feature toggles
 - CloudWatch custom metrics for feature usage tracking
@@ -361,20 +365,20 @@ graph TB
 
 ## Shared Responsibility Model
 
-| Component | Cloud Provider | Platform Team | Dev Team | Security Team |
-|-----------|----------------|---------------|----------|---------------|
-| **Physical Security** | ✓ | - | - | Audit |
-| **Network Infrastructure** | ✓ | Configuration | - | Review |
-| **Compute Platform** | ✓ | Configuration | - | Audit |
-| **Storage Encryption** | Engine | Configuration | - | Standards |
-| **Network Security** | Foundation | ✓ | Configuration | Review |
-| **IAM Policies** | Engine | ✓ | Request | Standards |
-| **Application Security** | - | Tools | ✓ | Review |
-| **Data Security** | Encryption | Policies | Implementation | Audit |
-| **Patch Management** | Managed Services | OS Updates | Dependencies | Audit |
-| **Monitoring** | Platform | ✓ | Application Metrics | Compliance |
-| **Incident Response** | Platform Support | Infrastructure | Application Issues | Coordination |
-| **Compliance Reporting** | Certification | Implementation | Documentation | ✓ |
+| Component                  | Cloud Provider   | Platform Team  | Dev Team            | Security Team |
+| -------------------------- | ---------------- | -------------- | ------------------- | ------------- |
+| **Physical Security**      | ✓                | -              | -                   | Audit         |
+| **Network Infrastructure** | ✓                | Configuration  | -                   | Review        |
+| **Compute Platform**       | ✓                | Configuration  | -                   | Audit         |
+| **Storage Encryption**     | Engine           | Configuration  | -                   | Standards     |
+| **Network Security**       | Foundation       | ✓              | Configuration       | Review        |
+| **IAM Policies**           | Engine           | ✓              | Request             | Standards     |
+| **Application Security**   | -                | Tools          | ✓                   | Review        |
+| **Data Security**          | Encryption       | Policies       | Implementation      | Audit         |
+| **Patch Management**       | Managed Services | OS Updates     | Dependencies        | Audit         |
+| **Monitoring**             | Platform         | ✓              | Application Metrics | Compliance    |
+| **Incident Response**      | Platform Support | Infrastructure | Application Issues  | Coordination  |
+| **Compliance Reporting**   | Certification    | Implementation | Documentation       | ✓             |
 
 ### Operational Monitoring Ownership
 
@@ -388,12 +392,14 @@ graph TB
 ### Metrics Collection
 
 **Infrastructure Metrics:**
+
 - CloudFormation stack status and events
 - Lambda function duration, errors, and cold starts
 - API Gateway request count, latency, and error rates
 - DynamoDB read/write capacity utilization and throttling
 
 **Business Metrics:**
+
 - EC2 management operations (start, stop, reboot)
 - User authentication events and failures
 - API endpoint usage patterns
@@ -402,11 +408,13 @@ graph TB
 ### Logging Strategy
 
 **Structured Logging:**
+
 - JSON format for all application logs
 - Correlation IDs for request tracing
 - Log levels: ERROR, WARN, INFO, DEBUG
 
 **Log Destinations:**
+
 - CloudWatch Logs for centralized collection
 - Log Groups per service with appropriate retention
 - Structured queries using CloudWatch Insights
@@ -420,12 +428,14 @@ graph TB
 ### Alerting & Incident Response
 
 **Critical Alerts:**
+
 - API Gateway 5xx errors > 3 in 10 minutes
 - Lambda function errors > 5% error rate
 - DynamoDB throttling events
 - Authentication failure spike > 10 failures in 5 minutes
 
 **Alert Channels:**
+
 - Slack integration for team notifications
 - SNS topics for automated escalation
 - PagerDuty integration for production incidents (planned)
@@ -433,6 +443,7 @@ graph TB
 ### Dashboards & Visualization
 
 **CloudWatch Dashboard Widgets:**
+
 - API performance overview with request count and latency
 - Error analysis with 4xx/5xx error tracking
 - DynamoDB performance and capacity utilization
@@ -440,6 +451,7 @@ graph TB
 - System health score calculation
 
 **Dashboard Organization:**
+
 - Executive Summary: High-level health and KPIs
 - Operations Dashboard: Detailed technical metrics
 - Business Dashboard: User activity and feature usage
@@ -494,11 +506,13 @@ graph TD
 ### Deployment Strategy
 
 **Blue-Green Deployment Simulation:**
+
 - Lambda versions enable instant rollback
 - API Gateway stages for traffic switching
 - CloudFront cache invalidation for immediate updates
 
 **Deployment Stages:**
+
 1. Infrastructure deployment (CDK)
 2. Application code deployment (Lambda)
 3. Static assets deployment (S3 + CloudFront)
@@ -508,16 +522,19 @@ graph TD
 ### Rollback Procedures
 
 **Automatic Rollback Triggers:**
+
 - Health check failures
 - Error rate spike > 10%
 - Response time > 2 seconds average
 
 **Manual Rollback Process:**
+
 ```bash
 ./scripts/rollback.sh <environment> [target]
 ```
 
 **Rollback Capabilities:**
+
 - Lambda function version rollback
 - CloudFormation stack rollback
 - S3 object version restoration
@@ -526,10 +543,12 @@ graph TD
 ### Approval Gates
 
 **Automated Approvals:**
+
 - Development environment (all changes)
 - Staging environment (successful test validation)
 
 **Manual Approvals:**
+
 - Production deployments (DevOps Lead or Engineering Manager)
 - Infrastructure changes affecting data retention
 - Security configuration modifications
@@ -539,12 +558,14 @@ graph TD
 ### Backup Strategy
 
 **Automated Backups:**
+
 - DynamoDB: Point-in-time recovery for production (35 days)
 - S3: Versioning enabled for web assets
 - Lambda: Code stored in Git with deployment artifacts
 - CloudFormation: Stack templates exported nightly
 
 **Backup Validation:**
+
 - Monthly restore testing in development environment
 - Backup integrity checks via CloudWatch alarms
 - Recovery time objective (RTO): 4 hours
@@ -571,21 +592,23 @@ graph TD
 
 ### RTO & RPO Targets
 
-| Scenario | RTO Target | RPO Target | Recovery Method |
-|----------|------------|------------|----------------|
-| **Application Error** | 15 minutes | 0 minutes | Lambda rollback |
-| **Data Corruption** | 2 hours | 1 hour | Point-in-time recovery |
-| **Infrastructure Failure** | 4 hours | 1 hour | CloudFormation restore |
-| **Region Outage** | 8 hours | 4 hours | Cross-region failover |
+| Scenario                   | RTO Target | RPO Target | Recovery Method        |
+| -------------------------- | ---------- | ---------- | ---------------------- |
+| **Application Error**      | 15 minutes | 0 minutes  | Lambda rollback        |
+| **Data Corruption**        | 2 hours    | 1 hour     | Point-in-time recovery |
+| **Infrastructure Failure** | 4 hours    | 1 hour     | CloudFormation restore |
+| **Region Outage**          | 8 hours    | 4 hours    | Cross-region failover  |
 
 ### DR Testing Approach
 
 **Monthly Testing:**
+
 - Automated backup restoration in dev environment
 - Recovery procedure documentation review
 - RTO/RPO measurement and reporting
 
 **Quarterly Testing:**
+
 - Full disaster recovery simulation
 - Cross-team coordination exercise
 - Post-incident review and process improvement
@@ -597,6 +620,7 @@ graph TD
 ### Resource Sizing Strategy
 
 **Right-Sizing Approach:**
+
 - DynamoDB: On-demand billing for variable workloads
 - Lambda: Memory optimization based on performance profiling
 - S3: Intelligent tiering for automated cost optimization
@@ -610,11 +634,13 @@ graph TD
 ### Cost Monitoring & Reporting
 
 **AWS Cost Explorer Integration:**
+
 - Daily cost alerts for budget overruns
 - Monthly cost analysis by service and environment
 - Resource utilization tracking and optimization recommendations
 
 **Budget Thresholds:**
+
 - Development: $100/month
 - Staging: $200/month
 - Production: $500/month (with 20% variance alert)
@@ -631,13 +657,13 @@ graph TD
 
 ### Service-to-Infrastructure Mapping
 
-| Application Service | Infrastructure Component | Dependencies |
-|-------------------|------------------------|--------------|
-| **User Authentication** | Cognito User Pool | IAM roles, API Gateway |
-| **API Layer** | Lambda Functions | API Gateway, DynamoDB |
-| **Audit Logging** | DynamoDB Table | Lambda functions, CloudWatch |
-| **Web Frontend** | S3 + CloudFront | API Gateway endpoints |
-| **Monitoring** | CloudWatch + SNS | Lambda functions, custom metrics |
+| Application Service     | Infrastructure Component | Dependencies                     |
+| ----------------------- | ------------------------ | -------------------------------- |
+| **User Authentication** | Cognito User Pool        | IAM roles, API Gateway           |
+| **API Layer**           | Lambda Functions         | API Gateway, DynamoDB            |
+| **Audit Logging**       | DynamoDB Table           | Lambda functions, CloudWatch     |
+| **Web Frontend**        | S3 + CloudFront          | API Gateway endpoints            |
+| **Monitoring**          | CloudWatch + SNS         | Lambda functions, custom metrics |
 
 ### Application Dependency Matrix
 
@@ -672,11 +698,13 @@ graph TD
 ### Platform Engineer and Developer Touchpoints
 
 **Daily Interaction:**
+
 - Morning standup alignment on infrastructure needs
 - Slack channel for real-time issue resolution
 - Infrastructure change notifications
 
 **Weekly Interaction:**
+
 - Architecture review meetings
 - Performance analysis and optimization planning
 - Capacity planning discussions
@@ -714,11 +742,13 @@ graph TD
 ### Risk Assessment
 
 **Change Risk Categories:**
+
 - **Low Risk:** Configuration changes, monitoring updates
 - **Medium Risk:** New resource deployment, capacity changes
 - **High Risk:** Security modifications, data schema changes
 
 **Risk Mitigation:**
+
 - Staging environment validation for all changes
 - Rollback plan documentation required
 - Change windows for production modifications
@@ -726,11 +756,13 @@ graph TD
 ### Testing Strategy
 
 **Pre-deployment Testing:**
+
 - CDK diff analysis for impact assessment
 - Integration tests in staging environment
 - Performance impact evaluation
 
 **Post-deployment Testing:**
+
 - Automated smoke tests
 - Health check validation
 - Performance regression testing
@@ -749,12 +781,14 @@ graph TD
 ### Technical Debt Inventory
 
 **Current Technical Debt:**
+
 1. Single-region deployment limits disaster recovery
 2. Manual secret rotation process
 3. Limited automated testing coverage for infrastructure
 4. Basic monitoring without advanced analytics
 
 **Debt Prioritization:**
+
 - **High Priority:** Multi-region deployment capability
 - **Medium Priority:** Advanced monitoring and alerting
 - **Low Priority:** Infrastructure testing enhancement
@@ -762,6 +796,7 @@ graph TD
 ### Planned Upgrades and Migrations
 
 **Phase 3 Roadmap (Q1 2026):**
+
 - Multi-region deployment with active-passive failover
 - Container support with Amazon ECS for microservices
 - Advanced monitoring with AWS X-Ray and custom metrics
@@ -770,6 +805,7 @@ graph TD
 ### Deprecation Schedule
 
 **Planned Deprecations:**
+
 - Legacy CDK v1 constructs → CDK v2 (completed)
 - Basic CloudWatch dashboards → Enhanced monitoring stack (Q4 2025)
 - Manual deployment scripts → Full CI/CD automation (Q1 2026)
@@ -777,16 +813,19 @@ graph TD
 ### Technology Roadmap
 
 **Short-term (6 months):**
+
 - Enhanced monitoring and alerting implementation
 - Automated security scanning integration
 - Performance optimization and cost reduction
 
 **Medium-term (12 months):**
+
 - Multi-region deployment architecture
 - Container workload support
 - Advanced analytics and business intelligence
 
 **Long-term (18+ months):**
+
 - Machine learning for predictive scaling
 - Zero-downtime deployment strategies
 - Advanced security with AWS Security Hub integration
@@ -794,11 +833,13 @@ graph TD
 ### Capacity Planning
 
 **Current Capacity:**
+
 - Lambda: 1000 concurrent executions
 - DynamoDB: On-demand scaling
 - API Gateway: 10,000 requests per second
 
 **Growth Projections:**
+
 - 3x user growth expected in next 12 months
 - API request volume increase of 5x anticipated
 - Storage requirements growth of 2x per year
@@ -806,11 +847,13 @@ graph TD
 ### Scalability Considerations
 
 **Horizontal Scaling:**
+
 - Lambda automatic scaling with reserved concurrency
 - DynamoDB global secondary indexes for query optimization
 - CloudFront edge locations for global performance
 
 **Vertical Scaling:**
+
 - Lambda memory allocation optimization
 - DynamoDB capacity mode evaluation
 - S3 transfer acceleration for large uploads

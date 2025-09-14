@@ -9,5 +9,5 @@ module.exports = {
   endOfLine: 'lf',
   bracketSpacing: true,
   jsxSingleQuote: false,
-  bracketSameLine: false
+  bracketSameLine: false,
 };

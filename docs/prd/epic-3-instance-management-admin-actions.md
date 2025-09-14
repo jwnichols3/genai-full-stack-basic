@@ -9,6 +9,7 @@
 **So that** I can resolve issues without AWS Console access.
 
 **Acceptance Criteria:**
+
 1. Lambda function created for POST /instances/{instanceId}/reboot endpoint
 2. Function validates user role is 'admin' before proceeding
 3. IAM role includes ec2:RebootInstances permission with resource constraints
@@ -25,6 +26,7 @@
 **So that** I don't accidentally disrupt services.
 
 **Acceptance Criteria:**
+
 1. Reboot button added to instance detail view (admin only)
 2. Button styled with warning color (orange/red) to indicate impact
 3. Clicking button opens Material-UI confirmation dialog
@@ -42,6 +44,7 @@
 **So that** we maintain accountability and can investigate issues.
 
 **Acceptance Criteria:**
+
 1. CloudWatch log group created specifically for audit logs
 2. All admin actions log: timestamp, user email, action, target resource, result
 3. Structured JSON logging format for easy querying
@@ -58,6 +61,7 @@
 **So that** I can track what actions have been taken.
 
 **Acceptance Criteria:**
+
 1. New route /audit-logs accessible only to admin users
 2. Lambda function created to query CloudWatch Logs Insights
 3. UI displays logs in paginated table with sorting
@@ -74,6 +78,7 @@
 **So that** I can make informed decisions about instance management.
 
 **Acceptance Criteria:**
+
 1. Lambda function queries CloudWatch for instance metrics
 2. Metrics include: CPU utilization, network in/out, disk I/O
 3. Detail view shows metrics graphs for last 1hr, 6hr, 24hr
@@ -90,6 +95,7 @@
 **So that** I understand what changes have been made.
 
 **Acceptance Criteria:**
+
 1. Instance detail view includes "Recent Actions" section
 2. Shows last 10 actions taken on this specific instance
 3. Actions pulled from audit logs filtered by instance ID
@@ -106,6 +112,7 @@
 **So that** we prevent accidental automation or abuse.
 
 **Acceptance Criteria:**
+
 1. DynamoDB table created for tracking user action counts
 2. Rate limit of 10 admin actions per user per minute
 3. Lambda functions check rate limit before executing actions

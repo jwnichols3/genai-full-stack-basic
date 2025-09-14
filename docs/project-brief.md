@@ -9,9 +9,11 @@ The solution leverages modern cloud-native technologies including React with Mat
 ## 2. Project Overview
 
 ### Purpose
+
 To develop a secure, user-friendly web application that enables authorized personnel to monitor and manage EC2 instances through a centralized dashboard interface.
 
 ### Key Features
+
 - **Instance Visualization**: Comprehensive view of EC2 instances with real-time status information
 - **Role-Based Access Control**: Differentiated access levels for admin and read-only users
 - **Instance Management**: Administrative capabilities for rebooting instances
@@ -20,6 +22,7 @@ To develop a secure, user-friendly web application that enables authorized perso
 - **Real-time Monitoring**: Integration with CloudWatch for instance metrics
 
 ### Target Users
+
 - System administrators requiring full instance management capabilities
 - Operations team members needing read-only access for monitoring
 - DevOps engineers managing infrastructure across development and production environments
@@ -27,12 +30,14 @@ To develop a secure, user-friendly web application that enables authorized perso
 ## 3. Business Objectives
 
 ### Primary Objectives
+
 1. **Centralized Management**: Provide a single point of access for EC2 instance monitoring and management
 2. **Enhanced Security**: Implement robust authentication and authorization mechanisms
 3. **Operational Efficiency**: Reduce time spent navigating the AWS console for routine instance operations
 4. **User Experience**: Deliver an intuitive interface that simplifies complex AWS operations
 
 ### Secondary Objectives
+
 1. **Scalability**: Build a foundation that can be extended to support additional AWS services
 2. **Compliance**: Ensure audit trails and proper access controls for regulatory requirements
 3. **Cost Awareness**: Provide visibility into instance usage patterns
@@ -41,6 +46,7 @@ To develop a secure, user-friendly web application that enables authorized perso
 ## 4. Scope & Deliverables
 
 ### In Scope
+
 - **Frontend Application**: React-based web interface with Material-UI components
 - **Backend Services**: AWS Lambda functions for API operations
 - **Authentication System**: AWS Cognito integration with pre-registered users
@@ -52,6 +58,7 @@ To develop a secure, user-friendly web application that enables authorized perso
 - **Documentation**: Technical documentation and user guides
 
 ### Out of Scope
+
 - **Multi-Region Support**: Initial version limited to single region operations
 - **Cost Optimization**: Advanced cost optimization features not included in MVP
 - **Additional AWS Services**: Focus limited to EC2 instances only
@@ -59,6 +66,7 @@ To develop a secure, user-friendly web application that enables authorized perso
 - **Advanced Analytics**: Complex reporting and analytics features
 
 ### Deliverables
+
 1. Complete source code repository with version control
 2. Deployed application in development and production environments
 3. API documentation and integration guides
@@ -70,6 +78,7 @@ To develop a secure, user-friendly web application that enables authorized perso
 ## 5. Technical Requirements
 
 ### Frontend Stack
+
 - **Framework**: React with TypeScript
 - **UI Library**: Material-UI (MUI)
 - **State Management**: React hooks and context API
@@ -78,6 +87,7 @@ To develop a secure, user-friendly web application that enables authorized perso
 - **Hosting**: Amazon S3 with CloudFront distribution
 
 ### Backend Stack
+
 - **Runtime**: Node.js on AWS Lambda
 - **API Framework**: Express.js or serverless framework
 - **Authentication**: AWS Cognito
@@ -86,6 +96,7 @@ To develop a secure, user-friendly web application that enables authorized perso
 - **Monitoring**: AWS CloudWatch
 
 ### Infrastructure
+
 - **IaC Tool**: AWS CDK v2 with TypeScript
 - **Environments**: Development and Production
 - **Deployment**: Automated via Python scripts
@@ -93,6 +104,7 @@ To develop a secure, user-friendly web application that enables authorized perso
 - **Security**: IAM roles and policies, VPC configuration
 
 ### Testing & Quality Assurance
+
 - **Unit Testing**: Jest for backend and frontend components
 - **Integration Testing**: React Testing Library
 - **End-to-End Testing**: Playwright
@@ -100,6 +112,7 @@ To develop a secure, user-friendly web application that enables authorized perso
 - **Code Quality**: ESLint, Prettier, and TypeScript strict mode
 
 ### API & Documentation
+
 - **API Specification**: OpenAPI 3.0 (Swagger)
 - **Documentation**: Auto-generated API docs
 - **Versioning**: Semantic versioning for API endpoints
@@ -108,6 +121,7 @@ To develop a secure, user-friendly web application that enables authorized perso
 ## 6. User Roles & Permissions
 
 ### Pre-Registered Users
+
 The following users will be pre-configured in the AWS Cognito user pool:
 
 1. **jnicamzn@amazon.com**
@@ -132,17 +146,18 @@ The following users will be pre-configured in the AWS Cognito user pool:
 
 ### Permission Matrix
 
-| Feature | Read-Only User | Admin User |
-|---------|----------------|------------|
-| View EC2 Instances | ✓ | ✓ |
-| View Instance Details | ✓ | ✓ |
-| View Instance Status | ✓ | ✓ |
-| View Instance Metrics | ✓ | ✓ |
-| Reboot Instances | ✗ | ✓ |
-| Start/Stop Instances | ✗ | Future Enhancement |
-| Create/Terminate Instances | ✗ | Future Enhancement |
+| Feature                    | Read-Only User | Admin User         |
+| -------------------------- | -------------- | ------------------ |
+| View EC2 Instances         | ✓              | ✓                  |
+| View Instance Details      | ✓              | ✓                  |
+| View Instance Status       | ✓              | ✓                  |
+| View Instance Metrics      | ✓              | ✓                  |
+| Reboot Instances           | ✗              | ✓                  |
+| Start/Stop Instances       | ✗              | Future Enhancement |
+| Create/Terminate Instances | ✗              | Future Enhancement |
 
 ### Security Considerations
+
 - Multi-factor authentication (MFA) recommended for admin users
 - Session timeout after 8 hours of inactivity
 - Audit logging for all administrative actions
@@ -151,6 +166,7 @@ The following users will be pre-configured in the AWS Cognito user pool:
 ## 7. Success Criteria
 
 ### Technical Success Metrics
+
 1. **Performance**: Page load times under 3 seconds
 2. **Availability**: 99.9% uptime for production environment
 3. **Security**: Zero security vulnerabilities in production
@@ -158,12 +174,14 @@ The following users will be pre-configured in the AWS Cognito user pool:
 5. **API Response Time**: Average API response under 500ms
 
 ### Business Success Metrics
+
 1. **User Adoption**: 100% of pre-registered users successfully onboarded
 2. **User Satisfaction**: Positive feedback from all stakeholder groups
 3. **Operational Efficiency**: 50% reduction in time spent on routine EC2 monitoring tasks
 4. **Error Reduction**: Decreased incidents related to manual AWS console operations
 
 ### Quality Metrics
+
 1. **Bug Reports**: Less than 5 critical bugs in first month post-deployment
 2. **Documentation**: Complete API documentation with examples
 3. **Deployment Success**: 100% success rate for automated deployments
@@ -172,6 +190,7 @@ The following users will be pre-configured in the AWS Cognito user pool:
 ## 8. Timeline & Milestones
 
 ### Phase 1: Foundation (Weeks 1-2)
+
 - **Week 1**:
   - Project setup and repository initialization
   - AWS CDK infrastructure scaffolding
@@ -185,6 +204,7 @@ The following users will be pre-configured in the AWS Cognito user pool:
   - Initial CI/CD pipeline configuration
 
 ### Phase 2: Core Development (Weeks 3-4)
+
 - **Week 3**:
   - EC2 instance listing API development
   - Frontend dashboard implementation
@@ -198,6 +218,7 @@ The following users will be pre-configured in the AWS Cognito user pool:
   - Unit and integration testing implementation
 
 ### Phase 3: Testing & Documentation (Week 5)
+
 - Comprehensive testing suite completion
 - End-to-end testing with Playwright
 - API documentation generation
@@ -205,6 +226,7 @@ The following users will be pre-configured in the AWS Cognito user pool:
 - Security testing and vulnerability assessment
 
 ### Phase 4: Deployment & Launch (Week 6)
+
 - Production environment deployment
 - User acceptance testing
 - Performance optimization
@@ -212,6 +234,7 @@ The following users will be pre-configured in the AWS Cognito user pool:
 - Go-live preparation and user onboarding
 
 ### Key Milestones
+
 - **M1**: Development environment deployed (End of Week 2)
 - **M2**: Core functionality complete (End of Week 4)
 - **M3**: Testing and documentation complete (End of Week 5)
@@ -222,70 +245,79 @@ The following users will be pre-configured in the AWS Cognito user pool:
 ### Technical Risks
 
 #### High Risk
+
 1. **AWS Service Limits**
-   - *Risk*: API throttling or service quotas impacting functionality
-   - *Mitigation*: Implement proper error handling, retry logic, and request AWS limit increases if needed
+   - _Risk_: API throttling or service quotas impacting functionality
+   - _Mitigation_: Implement proper error handling, retry logic, and request AWS limit increases if needed
 
 2. **Authentication Integration Complexity**
-   - *Risk*: Cognito integration challenges causing delays
-   - *Mitigation*: Early prototype development, AWS documentation review, and fallback authentication options
+   - _Risk_: Cognito integration challenges causing delays
+   - _Mitigation_: Early prototype development, AWS documentation review, and fallback authentication options
 
 #### Medium Risk
+
 3. **Cross-Browser Compatibility**
-   - *Risk*: Material-UI components behaving differently across browsers
-   - *Mitigation*: Comprehensive browser testing and progressive enhancement approach
+   - _Risk_: Material-UI components behaving differently across browsers
+   - _Mitigation_: Comprehensive browser testing and progressive enhancement approach
 
 4. **API Performance**
-   - *Risk*: Lambda cold starts affecting user experience
-   - *Mitigation*: Implement connection pooling, consider provisioned concurrency for critical functions
+   - _Risk_: Lambda cold starts affecting user experience
+   - _Mitigation_: Implement connection pooling, consider provisioned concurrency for critical functions
 
 #### Low Risk
+
 5. **CDK Deployment Issues**
-   - *Risk*: Infrastructure deployment failures
-   - *Mitigation*: Incremental deployment approach, comprehensive testing in development environment
+   - _Risk_: Infrastructure deployment failures
+   - _Mitigation_: Incremental deployment approach, comprehensive testing in development environment
 
 ### Business Risks
 
 #### Medium Risk
+
 1. **User Adoption**
-   - *Risk*: Users preferring AWS console over new platform
-   - *Mitigation*: Focus on user experience, provide training, and highlight efficiency benefits
+   - _Risk_: Users preferring AWS console over new platform
+   - _Mitigation_: Focus on user experience, provide training, and highlight efficiency benefits
 
 2. **Scope Creep**
-   - *Risk*: Additional feature requests during development
-   - *Mitigation*: Clear scope documentation, change control process, and stakeholder alignment
+   - _Risk_: Additional feature requests during development
+   - _Mitigation_: Clear scope documentation, change control process, and stakeholder alignment
 
 #### Low Risk
+
 3. **Timeline Delays**
-   - *Risk*: Development taking longer than estimated
-   - *Mitigation*: Agile development approach, regular check-ins, and buffer time allocation
+   - _Risk_: Development taking longer than estimated
+   - _Mitigation_: Agile development approach, regular check-ins, and buffer time allocation
 
 ### Security Risks
 
 #### High Risk
+
 1. **Unauthorized Access**
-   - *Risk*: Security vulnerabilities allowing unauthorized instance access
-   - *Mitigation*: Regular security reviews, penetration testing, and principle of least privilege
+   - _Risk_: Security vulnerabilities allowing unauthorized instance access
+   - _Mitigation_: Regular security reviews, penetration testing, and principle of least privilege
 
 2. **Data Exposure**
-   - *Risk*: Sensitive AWS information exposure
-   - *Mitigation*: Proper data classification, encryption in transit and at rest, and access logging
+   - _Risk_: Sensitive AWS information exposure
+   - _Mitigation_: Proper data classification, encryption in transit and at rest, and access logging
 
 ## 10. Key Stakeholders
 
 ### Primary Stakeholders
 
 #### Project Sponsor
+
 - **Role**: Executive sponsor and primary decision maker
 - **Responsibilities**: Strategic direction, resource allocation, final approvals
 - **Involvement Level**: Weekly status updates, milestone reviews
 
 #### Technical Lead
+
 - **Role**: Architecture and technical decision authority
 - **Responsibilities**: Technical standards, code reviews, infrastructure design
 - **Involvement Level**: Daily development oversight
 
 #### Product Owner
+
 - **Role**: Requirements definition and user experience
 - **Responsibilities**: Feature prioritization, user acceptance criteria, stakeholder communication
 - **Involvement Level**: Sprint planning, user story definition
@@ -293,21 +325,25 @@ The following users will be pre-configured in the AWS Cognito user pool:
 ### Secondary Stakeholders
 
 #### Operations Team
+
 - **Role**: Platform operations and maintenance
 - **Responsibilities**: Production support, monitoring, incident response
 - **Involvement Level**: Weekly operational reviews, deployment coordination
 
 #### Security Team
+
 - **Role**: Security compliance and risk assessment
 - **Responsibilities**: Security reviews, vulnerability assessments, compliance validation
 - **Involvement Level**: Security checkpoints at each milestone
 
 #### End Users
+
 - **Role**: Platform users and feedback providers
 - **Responsibilities**: User acceptance testing, feedback provision, requirements validation
 - **Involvement Level**: UAT participation, regular feedback sessions
 
 ### Communication Plan
+
 - **Daily**: Development team standups
 - **Weekly**: Stakeholder status updates
 - **Bi-weekly**: Sprint reviews and planning

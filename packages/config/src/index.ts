@@ -24,18 +24,18 @@ export const getConfig = (): AppConfig => {
     environment: env as AppConfig['environment'],
     aws: {
       region: process.env.AWS_REGION || 'us-west-2',
-      profile: process.env.AWS_PROFILE
+      profile: process.env.AWS_PROFILE,
     },
     api: {
       endpoint: process.env.API_ENDPOINT || 'http://localhost:3000',
-      timeout: 30000
+      timeout: 30000,
     },
     dynamodb: {
-      auditTableName: process.env.AUDIT_TABLE_NAME || `ec2-manager-audit-${env}`
+      auditTableName: process.env.AUDIT_TABLE_NAME || `ec2-manager-audit-${env}`,
     },
     cognito: {
       userPoolId: process.env.COGNITO_USER_POOL_ID,
-      clientId: process.env.COGNITO_CLIENT_ID
-    }
+      clientId: process.env.COGNITO_CLIENT_ID,
+    },
   };
 };

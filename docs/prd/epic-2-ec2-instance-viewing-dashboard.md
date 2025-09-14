@@ -9,6 +9,7 @@
 **So that** the frontend can communicate with backend services.
 
 **Acceptance Criteria:**
+
 1. API Gateway REST API created with proper stage configuration (dev/prod)
 2. CORS configured correctly for CloudFront distribution origin
 3. Lambda execution role created with necessary IAM permissions for CloudWatch logs
@@ -25,6 +26,7 @@
 **So that** only authenticated users can access the API.
 
 **Acceptance Criteria:**
+
 1. Lambda authorizer function created to validate Cognito JWT tokens
 2. Authorizer extracts and validates user role from custom:role attribute
 3. API Gateway configured to use the Lambda authorizer for all endpoints
@@ -41,6 +43,7 @@
 **So that** I can see all instances at a glance.
 
 **Acceptance Criteria:**
+
 1. Lambda function created with AWS SDK v3 for EC2 client
 2. Function queries EC2 DescribeInstances API with proper error handling
 3. IAM role includes ec2:DescribeInstances permission with appropriate resource scope
@@ -57,6 +60,7 @@
 **So that** I can quickly assess the status of my infrastructure.
 
 **Acceptance Criteria:**
+
 1. Dashboard page created with Material-UI DataGrid or card layout
 2. Loading state displayed while fetching instance data
 3. Each instance shows: ID, Name tag, Type, State (with color coding), Public IP, Private IP
@@ -74,6 +78,7 @@
 **So that** I can understand its configuration and status.
 
 **Acceptance Criteria:**
+
 1. Clicking an instance navigates to detail view (/instances/{instanceId})
 2. Detail API endpoint created (GET /instances/{instanceId})
 3. Lambda function retrieves comprehensive instance details
@@ -91,6 +96,7 @@
 **So that** I understand what's happening with my requests.
 
 **Acceptance Criteria:**
+
 1. Global error boundary implemented to catch React errors
 2. API error interceptor displays user-friendly messages
 3. Toast notifications configured for success/error feedback
@@ -107,6 +113,7 @@
 **So that** the interface isn't cluttered with unavailable actions.
 
 **Acceptance Criteria:**
+
 1. User role retrieved from JWT token and stored in React context
 2. Admin-only UI elements hidden for read-only users
 3. Navigation menu adapts based on user role

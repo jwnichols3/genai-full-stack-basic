@@ -23,12 +23,12 @@
 
 ### Emergency Contacts
 
-| Role | Contact | Slack | Phone |
-|------|---------|-------|-------|
-| **On-Call Engineer** | oncall@company.com | @oncall | [On-Call Number] |
-| **DevOps Lead** | devops-lead@company.com | @devops.lead | [Emergency Number] |
-| **Engineering Manager** | eng-manager@company.com | @eng.manager | [Manager Number] |
-| **CTO** | cto@company.com | @cto | [Executive Escalation] |
+| Role                    | Contact                 | Slack        | Phone                  |
+| ----------------------- | ----------------------- | ------------ | ---------------------- |
+| **On-Call Engineer**    | oncall@company.com      | @oncall      | [On-Call Number]       |
+| **DevOps Lead**         | devops-lead@company.com | @devops.lead | [Emergency Number]     |
+| **Engineering Manager** | eng-manager@company.com | @eng.manager | [Manager Number]       |
+| **CTO**                 | cto@company.com         | @cto         | [Executive Escalation] |
 
 ### Critical Commands
 
@@ -48,11 +48,11 @@ aws cloudformation describe-stacks --stack-name EC2Manager-production --region u
 
 ### Service URLs
 
-| Environment | URL | Purpose |
-|-------------|-----|---------|
-| **Production** | https://ec2manager.com | Live application |
-| **Staging** | https://staging.ec2manager.com | Pre-production |
-| **Development** | https://dev.ec2manager.com | Development |
+| Environment     | URL                            | Purpose          |
+| --------------- | ------------------------------ | ---------------- |
+| **Production**  | https://ec2manager.com         | Live application |
+| **Staging**     | https://staging.ec2manager.com | Pre-production   |
+| **Development** | https://dev.ec2manager.com     | Development      |
 
 ### AWS Console Quick Links
 
@@ -81,21 +81,21 @@ graph TB
 
 ### Environment Overview
 
-| Environment | Stack Name | Region | Purpose |
-|-------------|------------|--------|---------|
-| **Production** | EC2Manager-production | us-west-2 | Live system |
-| **Staging** | EC2Manager-staging | us-west-2 | Pre-production validation |
-| **Development** | EC2Manager-dev | us-west-2 | Development and testing |
+| Environment     | Stack Name            | Region    | Purpose                   |
+| --------------- | --------------------- | --------- | ------------------------- |
+| **Production**  | EC2Manager-production | us-west-2 | Live system               |
+| **Staging**     | EC2Manager-staging    | us-west-2 | Pre-production validation |
+| **Development** | EC2Manager-dev        | us-west-2 | Development and testing   |
 
 ### Key Metrics to Monitor
 
-| Metric | Normal Range | Warning Threshold | Critical Threshold |
-|--------|--------------|-------------------|-------------------|
-| **API Latency** | < 200ms | > 1s | > 2s |
-| **Error Rate** | < 1% | > 5% | > 10% |
-| **DynamoDB Throttling** | 0 | > 0 | > 5 events |
-| **Lambda Duration** | < 5s | > 10s | > 15s |
-| **CloudFront 4xx Rate** | < 5% | > 10% | > 20% |
+| Metric                  | Normal Range | Warning Threshold | Critical Threshold |
+| ----------------------- | ------------ | ----------------- | ------------------ |
+| **API Latency**         | < 200ms      | > 1s              | > 2s               |
+| **Error Rate**          | < 1%         | > 5%              | > 10%              |
+| **DynamoDB Throttling** | 0            | > 0               | > 5 events         |
+| **Lambda Duration**     | < 5s         | > 10s             | > 15s              |
+| **CloudFront 4xx Rate** | < 5%         | > 10%             | > 20%              |
 
 ## Monitoring and Alerting
 
@@ -104,12 +104,14 @@ graph TB
 **Primary Dashboard:** `EC2Manager-Enhanced-production`
 
 **Dashboard Sections:**
+
 1. **API Performance Overview** - Request count, latency, errors
 2. **DynamoDB Performance** - Read/write capacity, throttling
 3. **Business Metrics** - EC2 operations, user activity
 4. **System Health** - Health score, response times
 
 **Accessing Dashboards:**
+
 ```bash
 # Open production dashboard
 aws cloudwatch get-dashboard \
@@ -124,25 +126,26 @@ echo "https://console.aws.amazon.com/cloudwatch/home?region=us-west-2#dashboards
 
 **Critical Alerts (Immediate Response Required):**
 
-| Alert | Condition | Response Time | Action |
-|-------|-----------|---------------|--------|
-| **API Server Errors** | 3+ 5xx errors in 10 min | 5 minutes | Check logs, consider rollback |
-| **High Latency** | >2s average for 15 min | 10 minutes | Performance investigation |
-| **DynamoDB Throttling** | Any throttling events | 5 minutes | Check capacity, scale if needed |
-| **Lambda Function Errors** | >5% error rate | 5 minutes | Check function logs and config |
-| **Security Alert** | 10+ auth failures in 5 min | 2 minutes | Security investigation |
+| Alert                      | Condition                  | Response Time | Action                          |
+| -------------------------- | -------------------------- | ------------- | ------------------------------- |
+| **API Server Errors**      | 3+ 5xx errors in 10 min    | 5 minutes     | Check logs, consider rollback   |
+| **High Latency**           | >2s average for 15 min     | 10 minutes    | Performance investigation       |
+| **DynamoDB Throttling**    | Any throttling events      | 5 minutes     | Check capacity, scale if needed |
+| **Lambda Function Errors** | >5% error rate             | 5 minutes     | Check function logs and config  |
+| **Security Alert**         | 10+ auth failures in 5 min | 2 minutes     | Security investigation          |
 
 **Warning Alerts (Monitor and Investigate):**
 
-| Alert | Condition | Response Time | Action |
-|-------|-----------|---------------|--------|
-| **Elevated Error Rate** | 5-10% error rate | 30 minutes | Monitor trends, investigate if sustained |
-| **Performance Degradation** | 1-2s average latency | 30 minutes | Performance analysis |
-| **Low Activity** | <1 request/hour for 2 hours | 1 hour | Check system availability |
+| Alert                       | Condition                   | Response Time | Action                                   |
+| --------------------------- | --------------------------- | ------------- | ---------------------------------------- |
+| **Elevated Error Rate**     | 5-10% error rate            | 30 minutes    | Monitor trends, investigate if sustained |
+| **Performance Degradation** | 1-2s average latency        | 30 minutes    | Performance analysis                     |
+| **Low Activity**            | <1 request/hour for 2 hours | 1 hour        | Check system availability                |
 
 ### Alert Response Procedures
 
 **1. Initial Alert Response (First 5 Minutes):**
+
 ```bash
 # Step 1: Acknowledge alert in Slack
 # Step 2: Check system status
@@ -159,6 +162,7 @@ aws cloudformation describe-stack-events \
 ```
 
 **2. Alert Escalation:**
+
 - **0-15 minutes:** On-call engineer investigates
 - **15-30 minutes:** Escalate to DevOps Lead if unresolved
 - **30-60 minutes:** Escalate to Engineering Manager
@@ -167,6 +171,7 @@ aws cloudformation describe-stack-events \
 ### Log Management
 
 **Log Locations:**
+
 ```bash
 # API Gateway logs
 aws logs tail API-Gateway-Execution-Logs_<api-id>/prod --follow
@@ -182,6 +187,7 @@ aws logs tail /aws/cloudtrail/<trail-name> --follow
 ```
 
 **Log Analysis Commands:**
+
 ```bash
 # Search for errors in the last hour
 aws logs filter-log-events \
@@ -208,6 +214,7 @@ aws logs create-export-task \
 ### Deployment Status Monitoring
 
 **Real-time Deployment Monitoring:**
+
 ```bash
 # Monitor active deployment
 aws cloudformation describe-stack-events \
@@ -223,6 +230,7 @@ watch -n 30 'aws cloudformation describe-stacks \
 ```
 
 **Post-Deployment Validation:**
+
 ```bash
 # Full system health check
 ./scripts/deployment-status.sh prod all
@@ -237,6 +245,7 @@ curl -w "@curl-format.txt" -o /dev/null -s https://api.ec2manager.com/health
 ### Blue-Green Deployment Simulation
 
 **Lambda Version Management:**
+
 ```bash
 # Check current Lambda version
 aws lambda get-function \
@@ -260,11 +269,13 @@ aws lambda get-alias \
 ### Deployment Rollback Triggers
 
 **Automatic Rollback Conditions:**
+
 - Health check failures for >5 minutes
 - Error rate >10% for >10 minutes
 - Response time >5s average for >15 minutes
 
 **Manual Rollback Decision Points:**
+
 - Data corruption detected
 - Security vulnerability exposed
 - Critical business function impaired
@@ -274,16 +285,17 @@ aws lambda get-alias \
 
 ### Incident Classification
 
-| Severity | Description | Response Time | Notification |
-|----------|-------------|---------------|--------------|
-| **P1 - Critical** | Complete system outage, data loss | 15 minutes | Page on-call, notify management |
-| **P2 - High** | Major functionality impaired | 1 hour | Slack alert, email notification |
-| **P3 - Medium** | Minor functionality affected | 4 hours | Slack notification |
-| **P4 - Low** | Cosmetic issues, documentation | Next business day | Ticket creation |
+| Severity          | Description                       | Response Time     | Notification                    |
+| ----------------- | --------------------------------- | ----------------- | ------------------------------- |
+| **P1 - Critical** | Complete system outage, data loss | 15 minutes        | Page on-call, notify management |
+| **P2 - High**     | Major functionality impaired      | 1 hour            | Slack alert, email notification |
+| **P3 - Medium**   | Minor functionality affected      | 4 hours           | Slack notification              |
+| **P4 - Low**      | Cosmetic issues, documentation    | Next business day | Ticket creation                 |
 
 ### Incident Response Workflow
 
 **1. Incident Detection and Initial Response:**
+
 ```mermaid
 graph TD
     A[Alert Triggered] --> B[Acknowledge Alert]
@@ -312,6 +324,7 @@ graph TD
 ```
 
 **2. Incident Commander Responsibilities:**
+
 - Coordinate response efforts
 - Communicate with stakeholders
 - Make rollback decisions
@@ -321,6 +334,7 @@ graph TD
 **3. Communication Templates:**
 
 **Initial Incident Notification:**
+
 ```
 🚨 INCIDENT DECLARED - P1
 Incident ID: INC-2025-0914-001
@@ -336,6 +350,7 @@ Current actions: Checking recent deployments, reviewing logs
 ```
 
 **Status Update Template:**
+
 ```
 📊 INCIDENT UPDATE - INC-2025-0914-001
 Time: 15:00 UTC (+30 minutes)
@@ -349,6 +364,7 @@ ETA: 15 minutes to full resolution
 ```
 
 **Resolution Notification:**
+
 ```
 ✅ INCIDENT RESOLVED - INC-2025-0914-001
 Duration: 45 minutes (14:30-15:15 UTC)
@@ -361,6 +377,7 @@ Post-mortem: Scheduled for 2025-09-15 10:00 AM
 ### War Room Procedures
 
 **Virtual War Room Setup:**
+
 1. Create dedicated Slack channel: `#incident-2025-0914-001`
 2. Start Zoom/Teams call with screen sharing
 3. Invite key stakeholders:
@@ -370,6 +387,7 @@ Post-mortem: Scheduled for 2025-09-15 10:00 AM
    - Engineering Manager (P1/P2 incidents)
 
 **War Room Communication Protocol:**
+
 - Status updates every 15 minutes for P1, 30 minutes for P2
 - Single source of truth: Incident Commander
 - Record all actions taken with timestamps
@@ -382,6 +400,7 @@ Post-mortem: Scheduled for 2025-09-15 10:00 AM
 **Symptom: API returning 5xx errors**
 
 **Diagnostic Steps:**
+
 ```bash
 # 1. Check API Gateway health
 aws apigateway get-rest-apis \
@@ -410,6 +429,7 @@ aws lambda invoke \
 ```
 
 **Common Solutions:**
+
 1. **Lambda function errors:** Check function logs for exceptions
 2. **Timeout issues:** Increase Lambda timeout or optimize code
 3. **Permission issues:** Verify IAM roles and policies
@@ -420,6 +440,7 @@ aws lambda invoke \
 **Symptom: DynamoDB throttling events**
 
 **Diagnostic Steps:**
+
 ```bash
 # 1. Check table status
 aws dynamodb describe-table \
@@ -450,6 +471,7 @@ aws cloudwatch get-metric-statistics \
 ```
 
 **Resolution Steps:**
+
 1. **On-demand billing:** Already configured, should auto-scale
 2. **Query optimization:** Review access patterns
 3. **Hot partition:** Analyze partition key distribution
@@ -460,6 +482,7 @@ aws cloudwatch get-metric-statistics \
 **Symptom: Lambda function timeouts or errors**
 
 **Diagnostic Steps:**
+
 ```bash
 # 1. Check function configuration
 aws lambda get-function-configuration \
@@ -485,6 +508,7 @@ aws cloudwatch get-metric-statistics \
 ```
 
 **Common Issues and Solutions:**
+
 1. **Memory issues:** Increase memory allocation
 2. **Timeout issues:** Increase timeout or optimize code
 3. **Cold starts:** Consider provisioned concurrency
@@ -495,6 +519,7 @@ aws cloudwatch get-metric-statistics \
 **Symptom: Static content not loading or slow performance**
 
 **Diagnostic Steps:**
+
 ```bash
 # 1. Check CloudFront distribution
 aws cloudfront get-distribution \
@@ -518,6 +543,7 @@ aws cloudwatch get-metric-statistics \
 ```
 
 **Resolution Steps:**
+
 1. **Cache invalidation:** Create invalidation for affected paths
 2. **Origin issues:** Check S3 bucket accessibility
 3. **Configuration issues:** Verify behaviors and caching policies
@@ -527,6 +553,7 @@ aws cloudwatch get-metric-statistics \
 **Symptom: Users unable to authenticate**
 
 **Diagnostic Steps:**
+
 ```bash
 # 1. Check Cognito User Pool status
 aws cognito-idp describe-user-pool \
@@ -556,6 +583,7 @@ aws cloudwatch get-metric-statistics \
 ### Regular Maintenance Tasks
 
 **Daily Tasks:**
+
 ```bash
 # 1. Check system health
 ./scripts/deployment-status.sh prod all
@@ -573,6 +601,7 @@ aws ce get-cost-and-usage \
 ```
 
 **Weekly Tasks:**
+
 ```bash
 # 1. Review performance trends
 # 2. Analyze cost optimization opportunities
@@ -582,6 +611,7 @@ aws ce get-cost-and-usage \
 ```
 
 **Monthly Tasks:**
+
 - Capacity planning review
 - Security audit
 - Documentation updates
@@ -591,6 +621,7 @@ aws ce get-cost-and-usage \
 ### Backup Verification
 
 **DynamoDB Backup Status:**
+
 ```bash
 # Check point-in-time recovery status
 aws dynamodb describe-continuous-backups \
@@ -610,6 +641,7 @@ aws dynamodb restore-table-from-backup \
 ```
 
 **S3 Backup Verification:**
+
 ```bash
 # Check versioning status
 aws s3api get-bucket-versioning \
@@ -624,6 +656,7 @@ aws s3api list-object-versions \
 ### Log Rotation and Cleanup
 
 **CloudWatch Log Management:**
+
 ```bash
 # Check log group retention
 aws logs describe-log-groups \
@@ -639,6 +672,7 @@ aws logs put-retention-policy \
 ```
 
 **Old Resource Cleanup:**
+
 ```bash
 # Clean up old Lambda versions
 aws lambda list-versions-by-function \
@@ -656,6 +690,7 @@ aws lambda list-versions-by-function \
 ### Automated Rollback Scenarios
 
 **Health Check Failures:**
+
 ```bash
 # Triggered automatically by CloudWatch alarms
 # Check rollback status
@@ -671,6 +706,7 @@ aws cloudformation describe-stack-events \
 ### Manual Rollback Procedures
 
 **Production Rollback (Emergency):**
+
 ```bash
 # Emergency rollback command
 ./scripts/rollback.sh prod
@@ -686,6 +722,7 @@ watch -n 30 'aws cloudformation describe-stacks \
 ```
 
 **Lambda Function Rollback:**
+
 ```bash
 # Rollback Lambda to previous version
 aws lambda update-alias \
@@ -702,6 +739,7 @@ aws lambda get-alias \
 ```
 
 **S3 Content Rollback:**
+
 ```bash
 # Restore previous object versions
 aws s3 sync s3://ec2-manager-web-prod-<account-id>/ ./backup-web/
@@ -716,6 +754,7 @@ aws cloudfront create-invalidation \
 ### Post-Rollback Validation
 
 **Validation Checklist:**
+
 ```bash
 # 1. System health check
 ./scripts/deployment-status.sh prod all
@@ -746,6 +785,7 @@ aws cloudwatch get-metric-statistics \
 ### Performance Monitoring
 
 **Key Performance Indicators:**
+
 ```bash
 # API response times
 aws cloudwatch get-metric-statistics \
@@ -784,6 +824,7 @@ aws cloudwatch get-metric-statistics \
 ### Performance Optimization Actions
 
 **Lambda Optimization:**
+
 ```bash
 # Check memory utilization
 aws logs filter-log-events \
@@ -799,6 +840,7 @@ aws lambda update-function-configuration \
 ```
 
 **DynamoDB Optimization:**
+
 ```bash
 # Analyze hot partitions
 aws dynamodb describe-table \
@@ -818,6 +860,7 @@ aws dynamodb update-table \
 ### Security Monitoring
 
 **Security Event Detection:**
+
 ```bash
 # Check CloudTrail for suspicious activity
 aws logs filter-log-events \
@@ -844,7 +887,9 @@ aws logs filter-log-events \
 **Suspected Security Breach:**
 
 **Immediate Actions:**
+
 1. **Isolate affected systems:**
+
 ```bash
 # Disable API Gateway temporarily
 aws apigateway update-rest-api \
@@ -858,6 +903,7 @@ aws cognito-idp admin-user-global-sign-out \
 ```
 
 2. **Preserve evidence:**
+
 ```bash
 # Export relevant logs
 aws logs create-export-task \
@@ -877,6 +923,7 @@ aws cloudformation get-template \
 ### Security Hardening
 
 **Regular Security Tasks:**
+
 ```bash
 # Check for overly permissive IAM policies
 aws iam list-policies \
@@ -908,6 +955,7 @@ aws s3api get-bucket-encryption \
 3. **Escalation** (if not resolved in 15 minutes)
 
 **Emergency Response Steps:**
+
 ```bash
 # 1. Check overall AWS service health
 curl -s https://status.aws.amazon.com/ | grep -i us-west-2
@@ -939,6 +987,7 @@ aws lambda invoke \
 **Data Integrity Response:**
 
 1. **Immediate Actions:**
+
 ```bash
 # Stop all write operations (if possible)
 # This would require application-level circuit breakers
@@ -957,6 +1006,7 @@ aws dynamodb list-backups \
 ```
 
 2. **Recovery Options:**
+
 ```bash
 # Point-in-time recovery
 aws dynamodb restore-table-to-point-in-time \
@@ -977,6 +1027,7 @@ aws dynamodb restore-table-from-backup \
 **External Dependency Failure Response:**
 
 1. **Assess Impact:**
+
 ```bash
 # Check AWS service health
 curl -s "https://status.aws.amazon.com/rss/dynamodb-us-west-2.rss"
@@ -985,12 +1036,14 @@ curl -s "https://status.aws.amazon.com/rss/apigateway-us-west-2.rss"
 ```
 
 2. **Communication Strategy:**
+
 - Update status page
 - Notify users via in-app messaging
 - Social media updates if appropriate
 - Regular status updates to stakeholders
 
 3. **Mitigation Options:**
+
 ```bash
 # Enable read replicas if available
 # Implement circuit breakers
@@ -1001,6 +1054,7 @@ curl -s "https://status.aws.amazon.com/rss/apigateway-us-west-2.rss"
 ### Network Connectivity Issues
 
 **Network Troubleshooting:**
+
 ```bash
 # Test basic connectivity
 ping api.ec2manager.com
@@ -1058,6 +1112,7 @@ aws cloudfront get-distribution \
 **On-Call Quick Reference Card:**
 
 **Emergency Commands:**
+
 ```bash
 # System status
 ./scripts/deployment-status.sh prod all
@@ -1073,6 +1128,7 @@ aws cloudformation describe-stacks --stack-name EC2Manager-production
 ```
 
 **Critical Phone Numbers:**
+
 - On-Call Escalation: [Phone Number]
 - AWS Support: [Enterprise Support Number]
 - Security Team: [Security Escalation]
