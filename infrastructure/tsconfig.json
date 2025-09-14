@@ -1,0 +1,21 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": "./",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../packages/shared/src/*"],
+      "@config/*": ["../packages/config/src/*"]
+    }
+  },
+  "include": ["lib/**/*", "bin/**/*"],
+  "exclude": ["node_modules", "cdk.out", "dist", "**/*.test.ts", "**/*.spec.ts"],
+  "references": [
+    { "path": "../packages/shared" },
+    { "path": "../packages/config" }
+  ]
+}

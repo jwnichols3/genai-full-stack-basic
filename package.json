@@ -1,0 +1,36 @@
+{
+  "name": "ec2-instance-manager",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AWS EC2 Instance Manager - Full Stack Application",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "infrastructure"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/web",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "build": "npm run build --workspaces --if-present",
+    "build:web": "npm run build --workspace=apps/web",
+    "build:api": "npm run build --workspace=apps/api",
+    "build:infra": "npm run build --workspace=infrastructure",
+    "test": "npm run test --workspaces --if-present",
+    "test:web": "npm run test --workspace=apps/web",
+    "test:api": "npm run test --workspace=apps/api",
+    "test:infra": "npm run test --workspace=infrastructure",
+    "lint": "npm run lint --workspaces --if-present",
+    "format": "npm run format --workspaces --if-present",
+    "type-check": "npm run type-check --workspaces --if-present",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "husky": "^8.0.3",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}
