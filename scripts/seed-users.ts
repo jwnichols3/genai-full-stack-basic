@@ -3,6 +3,7 @@ import {
   CognitoIdentityProviderClient,
   AdminCreateUserCommand,
   AdminUpdateUserAttributesCommand,
+  AdminSetUserPasswordCommand,
   MessageActionType,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
@@ -22,28 +23,28 @@ const USERS: User[] = [
     firstName: 'System',
     lastName: 'Administrator',
     role: 'admin',
-    temporaryPassword: 'TempAdmin123!',
+    temporaryPassword: 'AdminPass123!',
   },
   {
     email: 'readonly@ec2manager.com',
     firstName: 'Read',
     lastName: 'Only',
     role: 'readonly',
-    temporaryPassword: 'TempRead123!',
+    temporaryPassword: 'ReadPass123!',
   },
   {
     email: 'manager@ec2manager.com',
     firstName: 'EC2',
     lastName: 'Manager',
     role: 'admin',
-    temporaryPassword: 'TempMgr123!',
+    temporaryPassword: 'ManagerPass123!',
   },
   {
     email: 'viewer@ec2manager.com',
     firstName: 'System',
     lastName: 'Viewer',
     role: 'readonly',
-    temporaryPassword: 'TempView123!',
+    temporaryPassword: 'ViewerPass123!',
   },
 ];
 
@@ -95,7 +96,7 @@ async function createUser(
   try {
     console.log(`Creating user: ${user.email} with role: ${user.role}`);
 
-    // Create user with temporary password
+    // Create user with permanent password
     const createUserParams = {
       UserPoolId: userPoolId,
       Username: user.email,
@@ -127,7 +128,17 @@ async function createUser(
     };
 
     await cognitoClient.send(new AdminCreateUserCommand(createUserParams));
-    console.log(`✓ User ${user.email} created successfully`);
+
+    // Set permanent password to avoid NEW_PASSWORD_REQUIRED challenge
+    const setPasswordParams = {
+      UserPoolId: userPoolId,
+      Username: user.email,
+      Password: user.temporaryPassword,
+      Permanent: true,
+    };
+
+    await cognitoClient.send(new AdminSetUserPasswordCommand(setPasswordParams));
+    console.log(`✓ User ${user.email} created successfully with permanent password`);
   } catch (error: any) {
     if (error.name === 'UsernameExistsException') {
       console.log(`⚠ User ${user.email} already exists, updating attributes...`);
@@ -153,7 +164,17 @@ async function createUser(
       };
 
       await cognitoClient.send(new AdminUpdateUserAttributesCommand(updateParams));
-      console.log(`✓ User ${user.email} attributes updated`);
+
+      // Also set permanent password for existing users
+      const setPasswordParams = {
+        UserPoolId: userPoolId,
+        Username: user.email,
+        Password: user.temporaryPassword,
+        Permanent: true,
+      };
+
+      await cognitoClient.send(new AdminSetUserPasswordCommand(setPasswordParams));
+      console.log(`✓ User ${user.email} attributes updated and password set to permanent`);
     } else {
       console.error(`✗ Failed to create user ${user.email}:`, error.message);
       throw error;

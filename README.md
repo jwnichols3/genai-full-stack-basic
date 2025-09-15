@@ -6,6 +6,19 @@ A full-stack AWS application for managing EC2 instances with comprehensive audit
 
 EC2 Instance Manager provides a secure, user-friendly interface for managing AWS EC2 instances with complete audit trail functionality. The application uses AWS Cognito for authentication, DynamoDB for audit logging, and CloudFront for global content delivery.
 
+## 🚀 Live Demo
+
+**Frontend Application**: https://d2pbh2fudgytg0.cloudfront.net
+
+### Test Credentials
+
+| Email                     | Password          | Role     | Access Level                |
+| ------------------------- | ----------------- | -------- | --------------------------- |
+| `admin@ec2manager.com`    | `AdminPass123!`   | admin    | Full access to all features |
+| `readonly@ec2manager.com` | `ReadPass123!`    | readonly | Read-only access            |
+| `manager@ec2manager.com`  | `ManagerPass123!` | admin    | Full access to all features |
+| `viewer@ec2manager.com`   | `ViewerPass123!`  | readonly | Read-only access            |
+
 ## Tech Stack
 
 - **Frontend**: React 18.2+, TypeScript 5.3+, Material-UI 5.15+, Vite 5.0+
@@ -134,6 +147,55 @@ npm run deploy:prod
 ```
 
 **Note:** Always run `npm run build` before deploying to ensure TypeScript is compiled.
+
+### 5. Deploy Frontend Application
+
+After infrastructure deployment, deploy the frontend:
+
+```bash
+# Install Python dependencies for deployment script
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Deploy frontend to dev environment
+python scripts/deploy-web.py dev --profile jnicamzn-sso-ec2
+```
+
+### 6. Seed Test Users
+
+Create test users for authentication:
+
+```bash
+AWS_PROFILE=jnicamzn-sso-ec2 NODE_ENV=dev npx tsx scripts/seed-users.ts
+```
+
+## 📋 Environment Configuration
+
+### Required Environment Variables
+
+The following environment variables are automatically configured during deployment:
+
+```bash
+# Cognito Configuration (from deployed infrastructure)
+VITE_COGNITO_USER_POOL_ID=us-west-2_mDM8sap1x
+VITE_COGNITO_CLIENT_ID=238u9sk9ds3k8be0qu2hahsvqi
+VITE_COGNITO_DOMAIN=https://ec2-manager-dev-357044226454.auth.us-west-2.amazoncognito.com
+VITE_AWS_REGION=us-west-2
+
+# API Configuration (to be added in future epics)
+VITE_API_URL=https://api-dev.ec2manager.local/api
+```
+
+### Deployment Outputs
+
+After successful deployment, note these important values:
+
+- **Frontend URL**: https://d2pbh2fudgytg0.cloudfront.net
+- **S3 Bucket**: ec2-manager-web-dev-us-west-2
+- **CloudFront Distribution**: E1MR5C1ECGXXFG
+- **AWS Account**: 357044226454
+- **Region**: us-west-2
 
 ## Available Scripts
 

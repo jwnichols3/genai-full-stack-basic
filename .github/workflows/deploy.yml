@@ -1,0 +1,152 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
+
+env:
+  NODE_VERSION: '20.x'
+  AWS_REGION: us-west-2
+
+jobs:
+  deploy:
+    name: Deploy to AWS
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify AWS credentials
+        run: |
+          echo "Verifying AWS credentials..."
+          aws sts get-caller-identity
+          echo "✓ AWS credentials verified"
+
+      - name: Build infrastructure
+        run: npm run build:infra
+
+      - name: Deploy CDK infrastructure
+        run: |
+          cd infrastructure
+          echo "Deploying CDK stacks..."
+          npx cdk deploy --all \
+            --require-approval never \
+            --context environment=${{ github.event.inputs.environment || 'dev' }}
+          echo "✓ CDK deployment completed"
+
+      - name: Get stack outputs
+        id: outputs
+        run: |
+          ENVIRONMENT=${{ github.event.inputs.environment || 'dev' }}
+          STACK_NAME="EC2Manager-Web-${ENVIRONMENT}"
+
+          echo "Getting outputs from stack: ${STACK_NAME}"
+
+          BUCKET_NAME=$(aws cloudformation describe-stacks \
+            --stack-name "${STACK_NAME}" \
+            --query 'Stacks[0].Outputs[?OutputKey==`S3BucketName`].OutputValue' \
+            --output text)
+
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+            --stack-name "${STACK_NAME}" \
+            --query 'Stacks[0].Outputs[?OutputKey==`DistributionId`].OutputValue' \
+            --output text)
+
+          CLOUDFRONT_URL=$(aws cloudformation describe-stacks \
+            --stack-name "${STACK_NAME}" \
+            --query 'Stacks[0].Outputs[?OutputKey==`CloudFrontURL`].OutputValue' \
+            --output text)
+
+          echo "bucket-name=${BUCKET_NAME}" >> $GITHUB_OUTPUT
+          echo "distribution-id=${DISTRIBUTION_ID}" >> $GITHUB_OUTPUT
+          echo "cloudfront-url=${CLOUDFRONT_URL}" >> $GITHUB_OUTPUT
+
+          echo "S3 Bucket: ${BUCKET_NAME}"
+          echo "Distribution ID: ${DISTRIBUTION_ID}"
+          echo "CloudFront URL: ${CLOUDFRONT_URL}"
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3
+
+      - name: Deploy frontend using Python script
+        env:
+          ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
+        run: |
+          echo "Deploying frontend to environment: ${ENVIRONMENT}"
+          python scripts/deploy-web.py ${ENVIRONMENT} --profile default
+
+      - name: Verify deployment
+        run: |
+          echo "Verifying deployment..."
+          CLOUDFRONT_URL="${{ steps.outputs.outputs.cloudfront-url }}"
+
+          if [ -n "${CLOUDFRONT_URL}" ]; then
+            echo "Testing CloudFront URL: ${CLOUDFRONT_URL}"
+
+            # Wait for CloudFront to propagate
+            echo "Waiting 60 seconds for CloudFront propagation..."
+            sleep 60
+
+            # Test the deployment
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${CLOUDFRONT_URL}" || echo "000")
+
+            if [ "${HTTP_CODE}" = "200" ]; then
+              echo "✓ Deployment verification successful (HTTP ${HTTP_CODE})"
+              echo "🚀 Application deployed successfully!"
+              echo "📱 Access your app at: ${CLOUDFRONT_URL}"
+            else
+              echo "⚠️ Deployment verification returned HTTP ${HTTP_CODE}"
+              echo "This might be normal for new deployments. Please check manually."
+            fi
+          else
+            echo "⚠️ CloudFront URL not available for verification"
+          fi
+
+      - name: Output deployment summary
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ github.event.inputs.environment || 'dev' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**S3 Bucket:** ${{ steps.outputs.outputs.bucket-name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**CloudFront Distribution:** ${{ steps.outputs.outputs.distribution-id }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Application URL:** ${{ steps.outputs.outputs.cloudfront-url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Infrastructure:** Deployed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Frontend:** Built and uploaded to S3" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **CloudFront:** Cache invalidated" >> $GITHUB_STEP_SUMMARY

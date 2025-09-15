@@ -183,14 +183,77 @@ The deployment scripts automatically handle:
 
 No manual environment variable setup required.
 
+## Frontend Deployment
+
+### Web Application Deployment
+
+After infrastructure deployment, deploy the frontend application:
+
+```bash
+# Deploy frontend to dev environment
+python scripts/deploy-web.py dev --profile jnicamzn-sso-ec2
+
+# Deploy frontend to prod environment
+python scripts/deploy-web.py prod --profile jnicamzn-sso-ec2
+```
+
+### Frontend Deployment Features
+
+- **Environment Variable Injection**: Automatically loads and injects Cognito configuration from deployed infrastructure
+- **S3 Sync**: Efficiently syncs built files to S3 bucket with proper cache headers
+- **CloudFront Invalidation**: Automatically invalidates cache after deployment
+- **Deployment Verification**: Includes health checks and accessibility tests
+
+### GitHub Actions Deployment
+
+Automated deployment via GitHub Actions:
+
+- **CI Pipeline**: Runs tests, linting, and builds on pull requests
+- **CD Pipeline**: Deploys infrastructure and frontend on main branch pushes
+- **Manual Deployment**: Supports manual deployment via workflow dispatch
+
+## User Management
+
+### Seeded Test Users
+
+After deployment, seed test users for authentication testing:
+
+```bash
+# Seed users in dev environment
+AWS_PROFILE=jnicamzn-sso-ec2 NODE_ENV=dev npx tsx scripts/seed-users.ts
+
+# Seed users in prod environment
+AWS_PROFILE=jnicamzn-sso-ec2 NODE_ENV=prod npx tsx scripts/seed-users.ts
+```
+
+### Default User Credentials
+
+| Email                     | Password          | Role     | Access Level     |
+| ------------------------- | ----------------- | -------- | ---------------- |
+| `admin@ec2manager.com`    | `AdminPass123!`   | admin    | Full access      |
+| `readonly@ec2manager.com` | `ReadPass123!`    | readonly | Read-only access |
+| `manager@ec2manager.com`  | `ManagerPass123!` | admin    | Full access      |
+| `viewer@ec2manager.com`   | `ViewerPass123!`  | readonly | Read-only access |
+
+### Important Notes
+
+- **Permanent Passwords**: Users are created with permanent passwords (no password change required on first login)
+- **Verified Emails**: All user emails are pre-verified
+- **Custom Roles**: Users have custom `role` attributes for access control
+
 ## Post-Deployment
 
 After successful deployment:
 
-1. Note the stack outputs (User Pool ID, Client ID, etc.)
-2. Update any dependent configurations
-3. Test authentication flows
-4. Verify all resources in correct account
+1. **Note Stack Outputs**:
+   - User Pool ID: `us-west-2_mDM8sap1x`
+   - Client ID: `238u9sk9ds3k8be0qu2hahsvqi`
+   - CloudFront URL: `https://d2pbh2fudgytg0.cloudfront.net`
+   - S3 Bucket: `ec2-manager-web-dev-us-west-2`
+
+2. **Update Environment Variables**: `.env.dev` should be updated with actual values
+3. **Test Authentication**: Use provided test credentials to verify login flow
+4. **Verify Resources**: Ensure all resources deployed to correct AWS account (`357044226454`)
 
 ## Security Notes
 

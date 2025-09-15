@@ -56,6 +56,13 @@ class AuthService {
 
       const response = await this.cognitoClient.send(command);
 
+      // Handle NEW_PASSWORD_REQUIRED challenge
+      if (response.ChallengeName === 'NEW_PASSWORD_REQUIRED') {
+        throw new Error(
+          'Password change required. Please contact your administrator to reset your password.'
+        );
+      }
+
       if (!response.AuthenticationResult) {
         throw new Error('Authentication failed');
       }
