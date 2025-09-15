@@ -10,6 +10,8 @@ module.exports = {
         tsconfig: {
           esModuleInterop: true,
           allowSyntheticDefaultImports: true,
+          target: 'ES2020',
+          module: 'ES2020',
         },
       },
     ],

@@ -1,5 +1,22 @@
 import '@testing-library/jest-dom';
 
+// Mock import.meta for Jest environment
+(globalThis as any).import = {
+  meta: {
+    env: {
+      VITE_COGNITO_USER_POOL_ID: 'test-user-pool-id',
+      VITE_COGNITO_CLIENT_ID: 'test-client-id',
+      VITE_COGNITO_DOMAIN: 'test-domain',
+      VITE_AWS_REGION: 'us-west-2',
+      VITE_API_BASE_URL: 'http://localhost:3001/api',
+      VITE_APP_NAME: 'EC2 Instance Manager',
+      VITE_APP_VERSION: '1.0.0',
+      DEV: true,
+      PROD: false,
+    },
+  },
+};
+
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
