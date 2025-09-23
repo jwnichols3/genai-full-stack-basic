@@ -1,5 +1,5 @@
 // Login form component with Material-UI components and validation
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -37,6 +37,17 @@ export function LoginForm({ onSubmit, loading = false, error }: LoginFormProps) 
 
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  // Check for session expired flag on component mount
+  useEffect(() => {
+    const sessionExpiredFlag = sessionStorage.getItem('sessionExpired');
+    if (sessionExpiredFlag === 'true') {
+      setSessionExpired(true);
+      // Clear the flag after showing the message
+      sessionStorage.removeItem('sessionExpired');
+    }
+  }, []);
 
   const validateEmail = (email: string): string | undefined => {
     if (!email) {
@@ -162,6 +173,17 @@ export function LoginForm({ onSubmit, loading = false, error }: LoginFormProps) 
               Enter your credentials to access the EC2 Instance Manager
             </Typography>
           </Box>
+
+          {sessionExpired && (
+            <Alert
+              severity="warning"
+              sx={{ marginBottom: 2 }}
+              variant="outlined"
+              onClose={() => setSessionExpired(false)}
+            >
+              Your session has expired. Please sign in again to continue.
+            </Alert>
+          )}
 
           {error && (
             <Alert severity="error" sx={{ marginBottom: 2 }} variant="outlined">

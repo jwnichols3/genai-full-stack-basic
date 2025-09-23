@@ -1,5 +1,7 @@
 import { EC2Instance } from '@ec2-manager/shared';
 import { authService } from './auth';
+import { errorHandler } from './errorHandler';
+import { isNetworkError } from '../utils/errorUtils';
 
 // API Base URL from environment or default
 const API_BASE_URL =
@@ -37,48 +39,90 @@ interface FilterOptions {
 }
 
 class EC2Service {
-  private async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const token = authService.getIdToken(); // Use ID token instead of access token
+  private async makeRequest<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const token = authService.getIdToken();
     console.log('🔑 EC2 Service using ID token:', token ? 'Token present' : 'No token');
 
     if (!token) {
-      // No token available, redirect to login
-      console.log('❌ No authentication token available, redirecting to login');
-      window.location.href = '/login';
-      throw new Error('No authentication token available');
+      // Handle missing token with proper error
+      const error = await errorHandler.handleApiError(
+        new Error('No authentication token available'),
+        { showToast: true, redirect: true }
+      );
+      throw error;
     }
 
     const url = `${API_BASE_URL}${endpoint}`;
     console.log('🌐 Making API request to:', url);
-    console.log('🔒 ID Token details:', {
-      tokenType: 'ID_TOKEN',
-      tokenLength: token.length,
-      tokenParts: token.split('.').length,
-      tokenPrefix: token.substring(0, 50),
-      tokenSuffix: token.length > 50 ? token.substring(token.length - 20) : 'N/A',
-    });
 
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        ...options.headers,
-      },
-    });
+    // Add timeout and retry logic
+    const timeoutMs = 30000; // 30 second timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-    if (!response.ok) {
-      if (response.status === 401) {
-        // Token expired or invalid, redirect to login
-        await authService.logout();
-        window.location.href = '/login';
-        throw new Error('Authentication failed');
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          ...options.headers,
+        },
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        // Use centralized error handler for HTTP errors
+        const apiError = await errorHandler.handleApiError(response, {
+          showToast: true,
+          logToCloudWatch: true,
+          redirect: response.status === 401,
+        });
+        throw apiError;
       }
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
 
-    return response.json() as Promise<T>;
+      return response.json() as Promise<T>;
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      // Handle different error types
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          // Timeout error
+          const timeoutError = await errorHandler.handleApiError(
+            new Error('Request timed out'),
+            { showToast: true, logToCloudWatch: true }
+          );
+          throw timeoutError;
+        }
+
+        if (isNetworkError(error)) {
+          // Network error
+          const networkError = errorHandler.handleNetworkError(error);
+          throw networkError;
+        }
+      }
+
+      // Re-throw API errors from error handler
+      if (typeof error === 'object' && error !== null && 'code' in error) {
+        throw error;
+      }
+
+      // Handle unexpected errors - convert to Error first
+      const errorObj = error instanceof Error ? error : new Error('Unexpected error occurred');
+      const unexpectedError = await errorHandler.handleApiError(errorObj, {
+        showToast: true,
+        logToCloudWatch: true,
+      });
+      throw unexpectedError;
+    }
   }
+
 
   async listInstances(filters?: FilterOptions): Promise<EC2Instance[]> {
     const params = new URLSearchParams();

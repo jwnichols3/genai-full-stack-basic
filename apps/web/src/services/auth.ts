@@ -104,6 +104,9 @@ class AuthService {
       const user = await this.getCurrentUser();
       console.log('✅ User information retrieved:', { email: user.email, role: user.role });
 
+      // Handle post-login redirect
+      this.handlePostLoginRedirect();
+
       return { user, tokens };
     } catch (error) {
       console.log('❌ Login failed:', error);
@@ -284,6 +287,24 @@ class AuthService {
       sessionStorage.removeItem(REFRESH_TOKEN_KEY);
     } catch (error) {
       console.warn('Failed to clear tokens from storage:', error);
+    }
+  }
+
+  /**
+   * Handle post-login redirect to preserved URL
+   */
+  private handlePostLoginRedirect(): void {
+    try {
+      const redirectUrl = sessionStorage.getItem('redirectUrl');
+      if (redirectUrl && redirectUrl !== '/login') {
+        sessionStorage.removeItem('redirectUrl');
+        // Use setTimeout to allow the current auth flow to complete
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 100);
+      }
+    } catch (error) {
+      console.warn('Failed to handle post-login redirect:', error);
     }
   }
 

@@ -1,6 +1,7 @@
 // Authentication context provider using Context API and useReducer
 import { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { authService } from '../services/auth';
+import { errorHandler } from '../services/errorHandler';
 import { authReducer, initialAuthState } from './authReducer';
 import type { AuthState, LoginCredentials } from '../types/auth';
 
@@ -20,6 +21,18 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [state, dispatch] = useReducer(authReducer, initialAuthState);
+
+  // Update error handler with current user info when user state changes
+  useEffect(() => {
+    if (state.user) {
+      errorHandler.setCurrentUser({
+        role: state.user.role,
+        email: state.user.email,
+      });
+    } else {
+      errorHandler.setCurrentUser(null);
+    }
+  }, [state.user]);
 
   // Initialize authentication state on mount
   useEffect(() => {

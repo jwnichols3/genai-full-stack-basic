@@ -1,12 +1,14 @@
-// Notification provider for toast messages and alerts
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { Snackbar, Alert, AlertColor } from '@mui/material';
+// Enhanced notification provider for toast messages and alerts
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import { Snackbar, Alert, AlertColor, useTheme, useMediaQuery } from '@mui/material';
 
 interface Notification {
   id: string;
   message: string;
   severity: AlertColor;
   duration?: number;
+  timestamp: number;
+  persist?: boolean;
 }
 
 interface NotificationContextValue {
@@ -25,8 +27,13 @@ interface NotificationProviderProps {
 
 export function NotificationProvider({ children }: NotificationProviderProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const showNotification = (
+  // Maximum number of notifications to show simultaneously
+  const MAX_NOTIFICATIONS = 5;
+
+  const showNotification = useCallback((
     message: string,
     severity: AlertColor = 'info',
     duration: number = 6000
@@ -37,16 +44,32 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       message,
       severity,
       duration,
+      timestamp: Date.now(),
+      persist: duration === 0,
     };
 
-    setNotifications((prev) => [...prev, notification]);
+    setNotifications((prev) => {
+      // Remove oldest notification if we're at the limit
+      const current = prev.length >= MAX_NOTIFICATIONS ? prev.slice(1) : prev;
+      return [...current, notification];
+    });
 
     if (duration > 0) {
       setTimeout(() => {
         removeNotification(id);
       }, duration);
     }
-  };
+  }, []);
+
+  // Setup error handler integration
+  useEffect(() => {
+    // Import error handler and set notification provider
+    void import('../../services/errorHandler').then(({ errorHandler }) => {
+      errorHandler.setNotificationProvider((message, severity) => {
+        showNotification(message, severity);
+      });
+    });
+  }, [showNotification]);
 
   const showSuccess = (message: string, duration?: number) => {
     showNotification(message, 'success', duration);
@@ -83,19 +106,56 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
   return (
     <NotificationContext.Provider value={contextValue}>
       {children}
-      {notifications.map((notification) => (
+      {notifications.map((notification, index) => (
         <Snackbar
           key={notification.id}
           open
           onClose={handleClose(notification.id)}
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          sx={{ mt: 8 }} // Offset for AppBar
+          anchorOrigin={{
+            vertical: isMobile ? 'bottom' : 'top',
+            horizontal: isMobile ? 'center' : 'right',
+          }}
+          sx={{
+            mt: isMobile ? 0 : 8, // Offset for AppBar on desktop
+            mb: isMobile ? 2 : 0,
+            // Stack notifications vertically
+            ...(isMobile
+              ? {
+                  bottom: `${16 + index * 80}px !important`,
+                  top: 'auto !important',
+                }
+              : {
+                  top: `${64 + 16 + index * 80}px !important`,
+                  bottom: 'auto !important',
+                }),
+          }}
         >
           <Alert
             onClose={handleClose(notification.id)}
             severity={notification.severity}
             variant="filled"
-            sx={{ width: '100%' }}
+            sx={{
+              width: '100%',
+              minWidth: isMobile ? 280 : 400,
+              maxWidth: isMobile ? 320 : 500,
+              // Enhanced styling for different severities
+              ...(notification.severity === 'error' && {
+                backgroundColor: theme.palette.error.main,
+                color: theme.palette.error.contrastText,
+              }),
+              ...(notification.severity === 'success' && {
+                backgroundColor: theme.palette.success.main,
+                color: theme.palette.success.contrastText,
+              }),
+              ...(notification.severity === 'warning' && {
+                backgroundColor: theme.palette.warning.main,
+                color: theme.palette.warning.contrastText,
+              }),
+              ...(notification.severity === 'info' && {
+                backgroundColor: theme.palette.info.main,
+                color: theme.palette.info.contrastText,
+              }),
+            }}
           >
             {notification.message}
           </Alert>
