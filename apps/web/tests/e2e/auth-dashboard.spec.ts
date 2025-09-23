@@ -467,11 +467,6 @@ test.describe('EC2 Manager - Logout Functionality', () => {
   });
 
   test('should clear session data on logout', async ({ page }) => {
-    // Check that session storage has auth data before logout
-    const sessionDataBefore = await page.evaluate(() => {
-      return Object.keys(sessionStorage).length > 0;
-    });
-
     // Logout
     await page.locator('[aria-label="account menu"]').click();
     await page.getByRole('menuitem', { name: /logout/i }).click();

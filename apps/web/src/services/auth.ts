@@ -61,7 +61,7 @@ class AuthService {
       console.log('✅ Cognito auth response received');
 
       // Handle NEW_PASSWORD_REQUIRED challenge
-      if (response.ChallengeName === 'NEW_PASSWORD_REQUIRED') {
+      if (response?.ChallengeName === 'NEW_PASSWORD_REQUIRED') {
         console.log('⚠️ Password change required');
         throw new Error(
           'Password change required. Please contact your administrator to reset your password.'

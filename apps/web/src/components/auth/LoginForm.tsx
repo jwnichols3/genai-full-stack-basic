@@ -169,6 +169,18 @@ export function LoginForm({ onSubmit, loading = false, error }: LoginFormProps) 
               EC2 Manager
             </Typography>
 
+            <Typography
+              variant="h6"
+              component="h2"
+              gutterBottom
+              textAlign="center"
+              color="primary"
+              fontWeight="medium"
+              sx={{ marginBottom: 1 }}
+            >
+              Sign In
+            </Typography>
+
             <Typography variant="body2" color="text.secondary" textAlign="center">
               Enter your credentials to access the EC2 Instance Manager
             </Typography>
