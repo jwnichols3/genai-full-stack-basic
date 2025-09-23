@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -21,7 +21,7 @@ import { DataGrid, GridColDef, GridToolbar, GridRenderCellParams } from '@mui/x-
 import { EC2Instance } from '@ec2-manager/shared';
 import { useInstances } from '../hooks/useInstances';
 import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { InstanceStatusBadge } from '../components/instances/InstanceStatusBadge';
 import { getInstanceName, formatInstanceIp, formatLaunchTime, getInstanceAge } from '../utils/instanceUtils';
 import { useResponsive } from '../utils/responsive';
@@ -29,6 +29,7 @@ import { useResponsive } from '../utils/responsive';
 const Dashboard: React.FC = () => {
   const { isMobile, isTablet } = useResponsive();
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = useAuth();
   const {
     instances,
@@ -39,6 +40,16 @@ const Dashboard: React.FC = () => {
   } = useInstances(30000); // 30-second auto-refresh
 
   const [refreshing, setRefreshing] = useState(false);
+
+  // Restore scroll position when returning from instance detail
+  useEffect(() => {
+    const state = location.state as { scrollPosition?: number } | undefined;
+    if (state?.scrollPosition) {
+      window.scrollTo(0, state.scrollPosition);
+      // Clear the state to prevent restoration on subsequent visits
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const handleManualRefresh = async () => {
     setRefreshing(true);
@@ -55,6 +66,14 @@ const Dashboard: React.FC = () => {
       // Force navigation to login even if logout fails
       navigate('/login');
     }
+  };
+
+  const handleInstanceRowClick = (instanceId: string) => {
+    // Store current scroll position for restoration when returning
+    const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+    navigate(`/instances/${instanceId}`, {
+      state: { scrollPosition }
+    });
   };
 
   const columns: GridColDef[] = useMemo(() => {
@@ -250,6 +269,7 @@ const Dashboard: React.FC = () => {
             checkboxSelection={false}
             disableRowSelectionOnClick
             loading={loading}
+            onRowClick={(params) => handleInstanceRowClick(params.row.instanceId)}
             slots={{
               toolbar: GridToolbar,
             }}
@@ -263,6 +283,9 @@ const Dashboard: React.FC = () => {
               border: 0,
               '& .MuiDataGrid-cell': {
                 borderColor: 'rgba(224, 224, 224, 1)',
+              },
+              '& .MuiDataGrid-row': {
+                cursor: 'pointer',
               },
               '& .MuiDataGrid-row:hover': {
                 backgroundColor: 'rgba(0, 0, 0, 0.04)',

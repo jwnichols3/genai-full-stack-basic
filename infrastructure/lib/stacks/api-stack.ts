@@ -181,6 +181,22 @@ export class ApiStack extends cdk.Stack {
       description: 'List EC2 instances for EC2Manager API',
     });
 
+    // Create get instance detail Lambda function
+    const getInstanceFunction = new nodejs.NodejsFunction(this, 'GetInstanceFunction', {
+      functionName: `ec2-manager-get-instance-${environment}`,
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'handler',
+      entry: path.join(__dirname, '../../../apps/api/src/functions/instances/get.ts'),
+      role: this.lambdaExecutionRole,
+      environment: {
+        NODE_ENV: environment,
+        REGION: this.region,
+      },
+      timeout: cdk.Duration.seconds(30),
+      memorySize: 512,
+      description: 'Get EC2 instance details for EC2Manager API',
+    });
+
     // Add a health endpoint for testing API Gateway-Lambda integration
     const healthResource = v1Resource.addResource('health');
     const healthIntegration = new apigateway.LambdaIntegration(healthCheckFunction, {
@@ -272,6 +288,60 @@ export class ApiStack extends cdk.Stack {
         },
       ],
       requestParameters: {
+        'method.request.querystring.region': false,
+      },
+    });
+
+    // Add instance detail endpoint with get method for /instances/{instanceId}
+    const instanceResource = instancesResource.addResource('{instanceId}');
+    const getInstanceIntegration = new apigateway.LambdaIntegration(getInstanceFunction, {
+      requestTemplates: {
+        'application/json': '{"statusCode": "200"}',
+      },
+      proxy: true,
+    });
+
+    instanceResource.addMethod('GET', getInstanceIntegration, {
+      authorizer: this.authorizer,
+      authorizationType: apigateway.AuthorizationType.CUSTOM,
+      methodResponses: [
+        {
+          statusCode: '200',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Origin': true,
+            'method.response.header.Access-Control-Allow-Headers': true,
+            'method.response.header.Access-Control-Allow-Methods': true,
+            'method.response.header.X-Request-Id': true,
+            'method.response.header.Cache-Control': true,
+          },
+        },
+        {
+          statusCode: '400',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Origin': true,
+          },
+        },
+        {
+          statusCode: '403',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Origin': true,
+          },
+        },
+        {
+          statusCode: '404',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Origin': true,
+          },
+        },
+        {
+          statusCode: '500',
+          responseParameters: {
+            'method.response.header.Access-Control-Allow-Origin': true,
+          },
+        },
+      ],
+      requestParameters: {
+        'method.request.path.instanceId': true,
         'method.request.querystring.region': false,
       },
     });

@@ -8,6 +8,26 @@ interface ListInstancesResponse {
   instances: EC2Instance[];
 }
 
+export interface EC2InstanceDetail extends EC2Instance {
+  availabilityZone: string;
+  publicIp?: string | null;
+  privateIp: string;
+  monitoring?: {
+    state: 'enabled' | 'disabled';
+  };
+  vpcId?: string;
+  subnetId?: string;
+  securityGroups?: Array<{
+    groupId: string;
+    groupName: string;
+  }>;
+  keyName?: string;
+  instanceProfile?: {
+    arn: string;
+    id: string;
+  };
+}
+
 interface FilterOptions {
   state?: string;
   tag?: string;
@@ -75,6 +95,19 @@ class EC2Service {
     const response = await this.makeRequest<ListInstancesResponse>(`/api/v1/instances${queryString}`);
 
     return response.instances;
+  }
+
+  async getInstanceDetails(instanceId: string, region?: string): Promise<EC2InstanceDetail> {
+    const params = new URLSearchParams();
+
+    if (region) {
+      params.append('region', region);
+    }
+
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    const response = await this.makeRequest<EC2InstanceDetail>(`/api/v1/instances/${instanceId}${queryString}`);
+
+    return response;
   }
 }
 
