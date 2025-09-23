@@ -55,11 +55,7 @@ import Dashboard from '../../../src/pages/Dashboard';
 const theme = createTheme();
 
 const renderWithTheme = (component: React.ReactElement) => {
-  return render(
-    <ThemeProvider theme={theme}>
-      {component}
-    </ThemeProvider>
-  );
+  return render(<ThemeProvider theme={theme}>{component}</ThemeProvider>);
 };
 
 describe('Dashboard - Basic Functionality', () => {

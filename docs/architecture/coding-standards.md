@@ -49,6 +49,7 @@
 ```
 
 **Common Invalid Nesting Patterns to Avoid**:
+
 - `<Chip>` inside `<Typography>`
 - `<Button>` inside `<Typography>`
 - `<IconButton>` inside `<Typography>`
@@ -58,6 +59,7 @@
 ### Component Structure Patterns
 
 **Layout Components**:
+
 ```typescript
 // Use Box for layout containers
 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -70,6 +72,7 @@
 ```
 
 **Card Headers with Counts**:
+
 ```typescript
 // Standard pattern for cards with counts
 <Card>
@@ -86,6 +89,7 @@
 ### Typography Component Guidelines
 
 **When to use `component` prop**:
+
 ```typescript
 // For semantic HTML structure
 <Typography variant="h6" component="h3">  {/* h6 styling, h3 semantics */}
@@ -93,6 +97,7 @@
 ```
 
 **Text-only in Typography**:
+
 - Only put plain text and inline elements (`<span>`, `<em>`, `<strong>`) inside Typography
 - Use separate Typography elements for each text block
 
@@ -101,15 +106,17 @@
 ### Region Configuration
 
 **Always Set Explicit Defaults**:
+
 ```typescript
 // Match your infrastructure deployment region
 const getRegionFromQuery = (event: APIGatewayProxyEvent): string => {
   const queryRegion = event.queryStringParameters?.region;
-  return queryRegion ?? 'us-west-2';  // Same as CDK deployment region
+  return queryRegion ?? 'us-west-2'; // Same as CDK deployment region
 };
 ```
 
 **Environment Variables**:
+
 ```typescript
 // Use environment variables when possible
 const region = process.env.AWS_REGION || process.env.CDK_DEFAULT_REGION || 'us-west-2';
@@ -118,6 +125,7 @@ const region = process.env.AWS_REGION || process.env.CDK_DEFAULT_REGION || 'us-w
 ### Debug Logging
 
 **Always Include Region Info**:
+
 ```typescript
 console.log('Request details', {
   requestId,
@@ -131,6 +139,7 @@ console.log('Request details', {
 ### Error Handling
 
 **Distinguish Error Types**:
+
 ```typescript
 // Handle different AWS error types
 if (error.name === 'UnauthorizedOperation') {

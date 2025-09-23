@@ -68,24 +68,26 @@ const getStateConfig = (state: string) => {
   }
 };
 
-export const InstanceStatusBadge: React.FC<InstanceStatusBadgeProps> = React.memo(({ state, size = 'small' }) => {
-  const config = getStateConfig(state);
+export const InstanceStatusBadge: React.FC<InstanceStatusBadgeProps> = React.memo(
+  ({ state, size = 'small' }) => {
+    const config = getStateConfig(state);
 
-  return (
-    <Chip
-      icon={config.icon ?? undefined}
-      label={config.label}
-      size={size}
-      sx={{
-        color: config.color,
-        backgroundColor: config.backgroundColor,
-        fontWeight: 500,
-        '& .MuiChip-icon': {
+    return (
+      <Chip
+        icon={config.icon ?? undefined}
+        label={config.label}
+        size={size}
+        sx={{
           color: config.color,
-        },
-      }}
-    />
-  );
-});
+          backgroundColor: config.backgroundColor,
+          fontWeight: 500,
+          '& .MuiChip-icon': {
+            color: config.color,
+          },
+        }}
+      />
+    );
+  }
+);
 
 InstanceStatusBadge.displayName = 'InstanceStatusBadge';

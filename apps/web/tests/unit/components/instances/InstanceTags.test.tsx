@@ -5,9 +5,7 @@ import { theme } from '../../../../src/styles/theme';
 import { InstanceTags } from '../../../../src/components/instances/InstanceTags';
 
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <ThemeProvider theme={theme}>
-    {children}
-  </ThemeProvider>
+  <ThemeProvider theme={theme}>{children}</ThemeProvider>
 );
 
 describe('InstanceTags', () => {
@@ -26,7 +24,7 @@ describe('InstanceTags', () => {
     const tags = {
       Name: 'Test Instance',
       Environment: 'production',
-      Project: 'MyProject'
+      Project: 'MyProject',
     };
 
     render(
@@ -57,7 +55,7 @@ describe('InstanceTags', () => {
       Env: 'prod',
       Project: 'test',
       Owner: 'user',
-      Type: 'web'
+      Type: 'web',
     };
 
     render(
@@ -76,7 +74,7 @@ describe('InstanceTags', () => {
       Project: 'test',
       Owner: 'user',
       Type: 'web',
-      CostCenter: '123'
+      CostCenter: '123',
     };
 
     render(
@@ -95,7 +93,7 @@ describe('InstanceTags', () => {
       Project: 'MyProject',
       Owner: 'john.doe',
       Type: 'web-server',
-      CostCenter: '12345'
+      CostCenter: '12345',
     };
 
     render(
@@ -122,7 +120,7 @@ describe('InstanceTags', () => {
     const tags = {
       Name: 'Test Instance',
       Environment: 'production',
-      Project: 'MyProject'
+      Project: 'MyProject',
     };
 
     render(
@@ -149,7 +147,7 @@ describe('InstanceTags', () => {
     const tags = {
       Name: 'Test Instance',
       Environment: 'production',
-      Project: 'MyProject'
+      Project: 'MyProject',
     };
 
     render(
@@ -174,7 +172,7 @@ describe('InstanceTags', () => {
       Project: 'MyProject',
       Owner: 'john.doe',
       Type: 'web-server',
-      CostCenter: '12345'
+      CostCenter: '12345',
     };
 
     render(
@@ -195,7 +193,7 @@ describe('InstanceTags', () => {
     const tags = {
       Name: 'Test Instance',
       Environment: 'production',
-      Project: 'MyProject'
+      Project: 'MyProject',
     };
 
     render(
@@ -243,7 +241,7 @@ describe('InstanceTags', () => {
   it('should render tag count chip with correct count', () => {
     const tags = {
       Name: 'Test',
-      Environment: 'prod'
+      Environment: 'prod',
     };
 
     render(
@@ -269,8 +267,9 @@ describe('InstanceTags', () => {
 
   it('should handle long tag keys and values with proper text wrapping', () => {
     const tags = {
-      'very-long-tag-key-that-might-cause-layout-issues': 'very-long-tag-value-that-might-also-cause-layout-issues-and-should-wrap-properly',
-      'another-long-key': 'short-value'
+      'very-long-tag-key-that-might-cause-layout-issues':
+        'very-long-tag-value-that-might-also-cause-layout-issues-and-should-wrap-properly',
+      'another-long-key': 'short-value',
     };
 
     render(
@@ -279,14 +278,20 @@ describe('InstanceTags', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText('very-long-tag-key-that-might-cause-layout-issues')).toBeInTheDocument();
-    expect(screen.getByText('very-long-tag-value-that-might-also-cause-layout-issues-and-should-wrap-properly')).toBeInTheDocument();
+    expect(
+      screen.getByText('very-long-tag-key-that-might-cause-layout-issues')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'very-long-tag-value-that-might-also-cause-layout-issues-and-should-wrap-properly'
+      )
+    ).toBeInTheDocument();
   });
 
   it('should be case-insensitive in search', () => {
     const tags = {
       Name: 'Test Instance',
-      Environment: 'PRODUCTION'
+      Environment: 'PRODUCTION',
     };
 
     render(

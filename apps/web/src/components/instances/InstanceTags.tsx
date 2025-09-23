@@ -35,9 +35,7 @@ export const InstanceTags: React.FC<InstanceTagsProps> = ({ tags }) => {
 
     const query = searchQuery.toLowerCase();
     return tagEntries.filter(
-      ([key, value]) =>
-        key.toLowerCase().includes(query) ||
-        value.toLowerCase().includes(query)
+      ([key, value]) => key.toLowerCase().includes(query) || value.toLowerCase().includes(query)
     );
   }, [tagEntries, searchQuery]);
 
@@ -87,11 +85,7 @@ export const InstanceTags: React.FC<InstanceTagsProps> = ({ tags }) => {
               Tags
             </Typography>
             {tagEntries.length > 0 && (
-              <Chip
-                label={tagEntries.length}
-                size="small"
-                color="primary"
-              />
+              <Chip label={tagEntries.length} size="small" color="primary" />
             )}
           </Box>
         </Box>

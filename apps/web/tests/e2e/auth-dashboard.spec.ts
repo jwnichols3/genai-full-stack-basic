@@ -73,7 +73,9 @@ test.describe('EC2 Manager - Authentication Flow', () => {
       await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible();
 
       // Check descriptive text
-      await expect(page.getByText(/enter your credentials to access the ec2 instance manager/i)).toBeVisible();
+      await expect(
+        page.getByText(/enter your credentials to access the ec2 instance manager/i)
+      ).toBeVisible();
 
       // Check lock icon is present
       await expect(page.locator('[data-testid="LockIcon"]')).toBeVisible();
@@ -307,7 +309,9 @@ test.describe('EC2 Manager - Dashboard Functionality', () => {
       } else {
         // If no instances, check empty state message
         await expect(emptyState).toBeVisible();
-        await expect(page.getByText(/you don't have any ec2 instances in your account/i)).toBeVisible();
+        await expect(
+          page.getByText(/you don't have any ec2 instances in your account/i)
+        ).toBeVisible();
       }
     });
 
@@ -407,11 +411,11 @@ test.describe('EC2 Manager - Dashboard Functionality', () => {
   test.describe('Error Handling', () => {
     test('should display error message when API fails', async ({ page }) => {
       // Intercept API calls to simulate failure
-      await page.route('**/api/**', route => {
+      await page.route('**/api/**', (route) => {
         route.fulfill({
           status: 500,
           contentType: 'application/json',
-          body: JSON.stringify({ error: 'Internal Server Error' })
+          body: JSON.stringify({ error: 'Internal Server Error' }),
         });
       });
 

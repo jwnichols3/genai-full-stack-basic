@@ -1,5 +1,11 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { EC2Client, DescribeInstancesCommand, Instance, Tag, SecurityGroup } from '@aws-sdk/client-ec2';
+import {
+  EC2Client,
+  DescribeInstancesCommand,
+  Instance,
+  Tag,
+  SecurityGroup,
+} from '@aws-sdk/client-ec2';
 import { randomUUID } from 'crypto';
 
 interface EC2InstanceDetailResponse {
@@ -71,13 +77,15 @@ const formatTags = (tags: Tag[] | undefined): Record<string, string> => {
   return formatted;
 };
 
-const formatSecurityGroups = (groups: SecurityGroup[] | undefined): Array<{
+const formatSecurityGroups = (
+  groups: SecurityGroup[] | undefined
+): Array<{
   groupId: string;
   groupName: string;
 }> => {
   if (!groups) return [];
 
-  return groups.map(group => ({
+  return groups.map((group) => ({
     groupId: group.GroupId ?? '',
     groupName: group.GroupName ?? '',
   }));
@@ -249,7 +257,7 @@ export const handler = async (
 
     // Extract the instance from the first reservation
     const reservation = response.Reservations[0];
-    if (!reservation.Instances || reservation.Instances.length === 0) {
+    if (!reservation?.Instances?.length) {
       logAuditEvent(
         'VIEW_INSTANCE',
         userContext,
@@ -266,6 +274,13 @@ export const handler = async (
     }
 
     const instance = reservation.Instances[0];
+    if (!instance) {
+      return createResponse(404, {
+        error: 'INSTANCE_NOT_FOUND',
+        message: `Instance ${instanceId} not found`,
+      });
+    }
+
     const formattedInstance = formatInstanceDetail(instance);
 
     // Log successful audit event

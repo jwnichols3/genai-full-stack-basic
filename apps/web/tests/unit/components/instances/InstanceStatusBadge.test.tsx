@@ -7,11 +7,7 @@ import { InstanceStatusBadge } from '../../../../src/components/instances/Instan
 const theme = createTheme();
 
 const renderWithTheme = (component: React.ReactElement) => {
-  return render(
-    <ThemeProvider theme={theme}>
-      {component}
-    </ThemeProvider>
-  );
+  return render(<ThemeProvider theme={theme}>{component}</ThemeProvider>);
 };
 
 describe('InstanceStatusBadge', () => {

@@ -32,7 +32,7 @@ async function loginUser(page: Page, email: string, password: string) {
   await Promise.all([
     page.waitForURL('**/dashboard', {
       timeout: TEST_CONFIG.navigationTimeout,
-      waitUntil: 'networkidle'
+      waitUntil: 'networkidle',
     }),
     page.getByRole('button', { name: /sign in/i }).click(),
   ]);
@@ -96,12 +96,14 @@ test.describe('EC2 Manager - Core Functionality', () => {
     }
 
     // Should show some kind of error message
-    await expect(page.locator('[role="alert"], .MuiAlert-root').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[role="alert"], .MuiAlert-root').first()).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('should successfully login and navigate to dashboard', async ({ page }) => {
     // Capture all console messages for debugging
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       console.log(`Browser console [${msg.type()}]: ${msg.text()}`);
     });
 
@@ -115,13 +117,16 @@ test.describe('EC2 Manager - Core Functionality', () => {
     await page.getByLabel(/password/i).fill(TEST_CREDENTIALS.password);
 
     // Listen for authentication-related network requests
-    const responsePromise = page.waitForResponse(response =>
-      response.url().includes('cognito') ||
-      response.url().includes('auth') ||
-      response.url().includes('InitiateAuth') ||
-      response.url().includes('identity'),
-      { timeout: 10000 }
-    ).catch(() => null);
+    const responsePromise = page
+      .waitForResponse(
+        (response) =>
+          response.url().includes('cognito') ||
+          response.url().includes('auth') ||
+          response.url().includes('InitiateAuth') ||
+          response.url().includes('identity'),
+        { timeout: 10000 }
+      )
+      .catch(() => null);
 
     // Submit form
     await page.getByRole('button', { name: /sign in/i }).click();
@@ -158,14 +163,16 @@ test.describe('EC2 Manager - Core Functionality', () => {
     try {
       await page.waitForURL('**/dashboard', {
         timeout: TEST_CONFIG.navigationTimeout,
-        waitUntil: 'domcontentloaded'
+        waitUntil: 'domcontentloaded',
       });
 
       // Verify we're on dashboard
       await expect(page).toHaveURL(/\/dashboard$/);
 
       // Check dashboard elements are present
-      await expect(page.getByRole('heading', { name: /ec2 instances/i })).toBeVisible({ timeout: 10000 });
+      await expect(page.getByRole('heading', { name: /ec2 instances/i })).toBeVisible({
+        timeout: 10000,
+      });
 
       // Check for either instance table or empty state
       const instanceTable = page.getByRole('table');
@@ -236,11 +243,13 @@ test.describe('EC2 Manager - Core Functionality', () => {
 
     // Click refresh and wait for network activity
     await Promise.all([
-      page.waitForResponse(response =>
-        response.url().includes('/instances') && response.status() === 200,
-        { timeout: 10000 }
-      ).catch(() => {}), // Don't fail if no instances endpoint
-      refreshButton.click()
+      page
+        .waitForResponse(
+          (response) => response.url().includes('/instances') && response.status() === 200,
+          { timeout: 10000 }
+        )
+        .catch(() => {}), // Don't fail if no instances endpoint
+      refreshButton.click(),
     ]);
 
     // Verify refresh happened (button should be enabled again)
@@ -262,9 +271,9 @@ test.describe('EC2 Manager - Core Functionality', () => {
     await Promise.all([
       page.waitForURL('**/login', {
         timeout: TEST_CONFIG.navigationTimeout,
-        waitUntil: 'networkidle'
+        waitUntil: 'networkidle',
       }),
-      logoutButton.click()
+      logoutButton.click(),
     ]);
 
     // Verify we're back on login page
@@ -285,7 +294,7 @@ test.describe('EC2 Manager - Core Functionality', () => {
     await Promise.all([
       page.waitForURL('**/dashboard', {
         timeout: TEST_CONFIG.navigationTimeout,
-        waitUntil: 'networkidle'
+        waitUntil: 'networkidle',
       }),
       page.getByRole('button', { name: /sign in/i }).click(),
     ]);
@@ -303,9 +312,9 @@ test.describe('EC2 Manager - Core Functionality', () => {
     await Promise.all([
       page.waitForURL('**/login', {
         timeout: TEST_CONFIG.navigationTimeout,
-        waitUntil: 'networkidle'
+        waitUntil: 'networkidle',
       }),
-      page.getByRole('button', { name: /logout/i }).click()
+      page.getByRole('button', { name: /logout/i }).click(),
     ]);
 
     // 6. Verify back at login

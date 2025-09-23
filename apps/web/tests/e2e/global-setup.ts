@@ -12,11 +12,11 @@ async function globalSetup(_config: FullConfig) {
 
   // Validate required environment variables
   const requiredEnvVars = ['E2E_TEST_EMAIL', 'E2E_TEST_PASSWORD'];
-  const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+  const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
 
   if (missingEnvVars.length > 0) {
     console.error('❌ Missing required environment variables:');
-    missingEnvVars.forEach(envVar => {
+    missingEnvVars.forEach((envVar) => {
       console.error(`   - ${envVar}`);
     });
     console.error('\nPlease create a .env.test file based on .env.test.example');

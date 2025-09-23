@@ -10,9 +10,9 @@ Focused on areas relevant to the EC2 Instance Management Platform as defined in 
 
 ### Change Log
 
-| Date       | Version | Description                          | Author      |
-| ---------- | ------- | ------------------------------------ | ----------- |
-| 2025-01-23 | 1.0     | Initial brownfield analysis         | BMad Master |
+| Date       | Version | Description                 | Author      |
+| ---------- | ------- | --------------------------- | ----------- |
+| 2025-01-23 | 1.0     | Initial brownfield analysis | BMad Master |
 
 ## Quick Reference - Key Files and Entry Points
 
@@ -34,6 +34,7 @@ Focused on areas relevant to the EC2 Instance Management Platform as defined in 
 ### Enhancement Impact Areas (Based on PRD)
 
 For implementing remaining Epic 3 (Instance Management) and Epic 4 (Monitoring):
+
 - **New Lambda Functions Needed**: `apps/api/src/functions/instances/reboot.ts`, `stop.ts`, `start.ts`
 - **UI Components to Modify**: `InstanceTable.tsx` for action buttons
 - **New Components Required**: Confirmation dialogs, metrics charts
@@ -47,19 +48,19 @@ A serverless AWS application built as a monorepo, providing web-based EC2 instan
 
 ### Actual Tech Stack (from package.json files)
 
-| Category       | Technology        | Version   | Notes                                    |
-| -------------- | ----------------- | --------- | ---------------------------------------- |
-| Runtime        | Node.js           | 20.x      | Lambda runtime                          |
-| Frontend       | React             | 18.2.0    | With TypeScript strict mode             |
-| UI Framework   | Material-UI       | 5.15.21+  | Full component library                  |
-| Build Tool     | Vite              | 5.0.8     | Fast HMR, optimized production builds   |
-| Backend        | AWS Lambda        | Node 20.x | Serverless functions                    |
-| Auth           | AWS Cognito       | SDK v3    | User pools with custom attributes       |
-| Database       | None currently    | N/A       | DynamoDB planned for audit logs         |
-| Testing        | Jest              | 29.7.0    | With React Testing Library              |
-| E2E Testing    | Playwright        | 1.49.1    | Cross-browser testing                   |
-| IaC            | AWS CDK           | 2.173.4   | TypeScript-based infrastructure         |
-| Package Mgmt   | npm               | 10.x      | Workspaces for monorepo                 |
+| Category     | Technology     | Version   | Notes                                 |
+| ------------ | -------------- | --------- | ------------------------------------- |
+| Runtime      | Node.js        | 20.x      | Lambda runtime                        |
+| Frontend     | React          | 18.2.0    | With TypeScript strict mode           |
+| UI Framework | Material-UI    | 5.15.21+  | Full component library                |
+| Build Tool   | Vite           | 5.0.8     | Fast HMR, optimized production builds |
+| Backend      | AWS Lambda     | Node 20.x | Serverless functions                  |
+| Auth         | AWS Cognito    | SDK v3    | User pools with custom attributes     |
+| Database     | None currently | N/A       | DynamoDB planned for audit logs       |
+| Testing      | Jest           | 29.7.0    | With React Testing Library            |
+| E2E Testing  | Playwright     | 1.49.1    | Cross-browser testing                 |
+| IaC          | AWS CDK        | 2.173.4   | TypeScript-based infrastructure       |
+| Package Mgmt | npm            | 10.x      | Workspaces for monorepo               |
 
 ### Repository Structure Reality Check
 
@@ -130,11 +131,12 @@ genai-full-stack-basic/
 Current models are TypeScript interfaces, no database yet:
 
 - **User Model**: See `packages/shared/src/types/auth.ts`
+
   ```typescript
   interface User {
     email: string;
     role: 'admin' | 'readonly';
-    sub: string;  // Cognito user ID
+    sub: string; // Cognito user ID
   }
   ```
 
@@ -177,7 +179,7 @@ All endpoints except /health require Authorization header with Cognito ID token.
 
 ### Workarounds and Gotchas
 
-- **Environment Variables**: Frontend uses import.meta.env, must prefix with VITE_
+- **Environment Variables**: Frontend uses import.meta.env, must prefix with VITE\_
 - **CORS Configuration**: API Gateway CORS must exactly match CloudFront distribution URL
 - **Token Validation**: MUST use ID tokens for custom claims (role attribute)
 - **Region Hardcoded**: Currently hardcoded to us-west-2, should be configurable
@@ -188,15 +190,15 @@ All endpoints except /health require Authorization header with Cognito ID token.
 
 ### External AWS Services
 
-| Service      | Purpose                    | Integration Type | Key Files                                |
-| ------------ | -------------------------- | ---------------- | ---------------------------------------- |
-| Cognito      | User authentication        | SDK v3           | `apps/web/src/services/auth.ts`         |
-| EC2          | Instance management        | SDK v3           | `apps/api/src/functions/instances/list.ts` |
-| API Gateway  | REST API                   | CDK              | `infrastructure/lib/stacks/api-stack.ts` |
-| Lambda       | Serverless compute         | CDK              | All files in `apps/api/src/functions/`  |
-| CloudFront   | CDN for frontend           | CDK              | `infrastructure/lib/stacks/web-stack.ts` |
-| S3           | Static website hosting     | CDK              | `infrastructure/lib/stacks/web-stack.ts` |
-| CloudWatch   | Logging and monitoring     | SDK v3           | All Lambda functions                     |
+| Service     | Purpose                | Integration Type | Key Files                                  |
+| ----------- | ---------------------- | ---------------- | ------------------------------------------ |
+| Cognito     | User authentication    | SDK v3           | `apps/web/src/services/auth.ts`            |
+| EC2         | Instance management    | SDK v3           | `apps/api/src/functions/instances/list.ts` |
+| API Gateway | REST API               | CDK              | `infrastructure/lib/stacks/api-stack.ts`   |
+| Lambda      | Serverless compute     | CDK              | All files in `apps/api/src/functions/`     |
+| CloudFront  | CDN for frontend       | CDK              | `infrastructure/lib/stacks/web-stack.ts`   |
+| S3          | Static website hosting | CDK              | `infrastructure/lib/stacks/web-stack.ts`   |
+| CloudWatch  | Logging and monitoring | SDK v3           | All Lambda functions                       |
 
 ### Internal Integration Points
 
@@ -210,6 +212,7 @@ All endpoints except /health require Authorization header with Cognito ID token.
 ### Local Development Setup
 
 1. **Prerequisites**:
+
    ```bash
    node --version  # Must be 20.x
    npm --version   # Must be 10.x
@@ -218,11 +221,13 @@ All endpoints except /health require Authorization header with Cognito ID token.
    ```
 
 2. **Install Dependencies**:
+
    ```bash
    npm install  # Installs all workspace dependencies
    ```
 
 3. **Environment Setup**:
+
    ```bash
    cp apps/web/.env.example apps/web/.env
    # Edit .env with your Cognito and API Gateway URLs
@@ -234,6 +239,7 @@ All endpoints except /health require Authorization header with Cognito ID token.
    ```
 
 **Known Issues**:
+
 - Must have AWS credentials configured for CDK commands
 - Python scripts require manual boto3 installation
 - Vite dev server sometimes needs restart after env changes
@@ -241,6 +247,7 @@ All endpoints except /health require Authorization header with Cognito ID token.
 ### Build and Deployment Process
 
 - **Build Commands**:
+
   ```bash
   npm run build -w web  # Build frontend
   npm run build -w api  # Build Lambda functions
@@ -248,6 +255,7 @@ All endpoints except /health require Authorization header with Cognito ID token.
   ```
 
 - **Deployment**:
+
   ```bash
   python3 scripts/deploy-web.py  # Deploy frontend to S3/CloudFront
   npm run deploy -w infrastructure  # Deploy CDK stacks
@@ -285,6 +293,7 @@ npm run test:coverage  # Generate coverage report
 ```
 
 **Test Issues**:
+
 - E2E tests require deployed environment
 - Some tests use hardcoded test data
 - No performance testing implemented
@@ -369,31 +378,35 @@ aws logs tail /aws/lambda/EC2Manager-API-dev  # Watch Lambda logs
 
 ### Test Credentials
 
-| Email                    | Password       | Role     |
-|-------------------------|----------------|----------|
-| admin@ec2manager.com    | AdminPass123!  | admin    |
-| readonly@ec2manager.com | ReadPass123!   | readonly |
+| Email                   | Password        | Role     |
+| ----------------------- | --------------- | -------- |
+| admin@ec2manager.com    | AdminPass123!   | admin    |
+| readonly@ec2manager.com | ReadPass123!    | readonly |
 | manager@ec2manager.com  | ManagerPass123! | admin    |
-| viewer@ec2manager.com   | ViewerPass123! | readonly |
+| viewer@ec2manager.com   | ViewerPass123!  | readonly |
 
 ## Architecture Decisions Record (ADR)
 
 ### ADR-001: Use ID Tokens Instead of Access Tokens
+
 - **Context**: Lambda authorizer needs user claims (email, role)
 - **Decision**: Use ID tokens which contain custom attributes
 - **Consequences**: Simpler authorization but tokens contain more data
 
 ### ADR-002: SessionStorage for Token Storage
+
 - **Context**: Need to store JWT tokens client-side
 - **Decision**: Use sessionStorage instead of localStorage
 - **Consequences**: More secure (clears on tab close) but no persistence
 
 ### ADR-003: Monorepo Structure
+
 - **Context**: Multiple related applications and shared code
 - **Decision**: Use npm workspaces monorepo
 - **Consequences**: Simpler dependency management but larger repo
 
 ### ADR-004: Material-UI Component Library
+
 - **Context**: Need consistent, accessible UI components
 - **Decision**: Use MUI v5 with DataGrid
 - **Consequences**: Professional look but larger bundle size

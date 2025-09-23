@@ -9,12 +9,14 @@
 ## Technical Details
 
 ### Symptoms
+
 - API requests returned 200 OK with empty results
 - Lambda logs showed: `region: 'us-east-1', instanceCount: 0`
 - Frontend displayed "No instances found" message
 - AWS Console showed instances in us-west-2 region
 
 ### Investigation Steps
+
 1. **Checked API authentication** - Working correctly (JWT tokens validated)
 2. **Verified IAM permissions** - Found and fixed permission issue with condition policy
 3. **Examined Lambda logs** - Revealed region mismatch in successful requests
@@ -23,14 +25,16 @@
 ### Root Cause Analysis
 
 **Lambda Function Logic** (`apps/api/src/functions/instances/list.ts`):
+
 ```typescript
 const getRegionFromQuery = (event: APIGatewayProxyEvent): string => {
   const queryRegion = event.queryStringParameters?.region;
-  return queryRegion ?? 'us-east-1';  // ← PROBLEM: Wrong default
+  return queryRegion ?? 'us-east-1'; // ← PROBLEM: Wrong default
 };
 ```
 
 **Frontend Code** (`apps/web/src/hooks/useInstances.ts`):
+
 ```typescript
 // Frontend was not passing region parameter
 const data = await ec2Service.listInstances(filters); // No region specified
@@ -39,9 +43,11 @@ const data = await ec2Service.listInstances(filters); // No region specified
 ## Solution
 
 ### Fix Applied
+
 Modified the frontend to automatically include the correct region from environment configuration:
 
 **File**: `apps/web/src/hooks/useInstances.ts`
+
 ```typescript
 import { config } from '../config/environment';
 
@@ -67,9 +73,11 @@ const fetchInstances = useCallback(async () => {
 ```
 
 ### Additional Fix Required
+
 **IAM Permission Issue**: Removed problematic condition from Lambda execution role that was blocking EC2 API calls.
 
 **File**: `infrastructure/lib/stacks/api-stack.ts`
+
 ```typescript
 // Removed this condition that was causing permission issues:
 // conditions: {
@@ -82,6 +90,7 @@ const fetchInstances = useCallback(async () => {
 ## Verification
 
 ### Before Fix
+
 ```json
 {
   "region": "us-east-1",
@@ -90,6 +99,7 @@ const fetchInstances = useCallback(async () => {
 ```
 
 ### After Fix
+
 ```json
 {
   "region": "us-west-2",
@@ -100,9 +110,11 @@ const fetchInstances = useCallback(async () => {
 ## Prevention
 
 ### Environment Configuration
+
 The fix leverages existing environment configuration:
 
 **File**: `apps/web/src/config/environment.ts`
+
 ```typescript
 cognito: {
   region: getEnvironmentVariable('VITE_AWS_REGION', 'us-west-2'),
@@ -110,6 +122,7 @@ cognito: {
 ```
 
 ### Alternative Solutions Considered
+
 1. **Change Lambda default** - Could break other regions
 2. **Hard-code region** - Less flexible
 3. **Environment variable** - ✅ **Chosen solution** - Uses existing config pattern
@@ -117,13 +130,16 @@ cognito: {
 ## Testing
 
 ### Manual Testing
+
 1. Refresh dashboard page
 2. Verify instances appear in the UI
 3. Check Lambda logs for correct region usage
 4. Confirm all instance states and details display correctly
 
 ### Automated Testing
+
 Consider adding integration tests that verify:
+
 - Region parameter is passed correctly from frontend
 - Lambda function respects region parameter
 - Different regions can be queried
@@ -135,8 +151,10 @@ Consider adding integration tests that verify:
 - Frontend environment configuration patterns
 
 ## Date
+
 September 23, 2025
 
 ## Contributors
+
 - BMad Master (AI Assistant)
 - jwnichols3 (User)

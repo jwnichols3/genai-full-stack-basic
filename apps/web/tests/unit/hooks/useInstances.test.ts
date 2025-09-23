@@ -86,15 +86,18 @@ describe('useInstances', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    mockEc2Service.listInstances.mockResolvedValue([...mockInstances, {
-      instanceId: 'i-newinstance',
-      instanceType: 't3.nano',
-      state: 'pending' as const,
-      launchTime: '2024-01-02T00:00:00Z',
-      publicIpAddress: undefined,
-      privateIpAddress: '10.0.1.3',
-      tags: { Name: 'New Instance' },
-    }]);
+    mockEc2Service.listInstances.mockResolvedValue([
+      ...mockInstances,
+      {
+        instanceId: 'i-newinstance',
+        instanceType: 't3.nano',
+        state: 'pending' as const,
+        launchTime: '2024-01-02T00:00:00Z',
+        publicIpAddress: undefined,
+        privateIpAddress: '10.0.1.3',
+        tags: { Name: 'New Instance' },
+      },
+    ]);
 
     await act(async () => {
       await result.current.refresh();

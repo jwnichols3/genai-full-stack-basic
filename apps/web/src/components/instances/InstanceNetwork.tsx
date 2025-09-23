@@ -43,7 +43,11 @@ export const InstanceNetwork: React.FC<InstanceNetworkProps> = ({ instance }) =>
     }
   };
 
-  const renderCopyableField = (label: string, value: string | null | undefined, icon?: React.ReactNode) => {
+  const renderCopyableField = (
+    label: string,
+    value: string | null | undefined,
+    icon?: React.ReactNode
+  ) => {
     if (!value) {
       return (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -68,17 +72,13 @@ export const InstanceNetwork: React.FC<InstanceNetworkProps> = ({ instance }) =>
             {label}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography
-              variant="body2"
-              fontFamily="monospace"
-              sx={{ wordBreak: 'break-all' }}
-            >
+            <Typography variant="body2" fontFamily="monospace" sx={{ wordBreak: 'break-all' }}>
               {value}
             </Typography>
             <Tooltip title={`Copy ${label.toLowerCase()}`}>
               <IconButton
                 size="small"
-                onClick={() => handleCopyToClipboard(value, label)}
+                onClick={() => void handleCopyToClipboard(value, label)}
                 sx={{ p: 0.5 }}
               >
                 <CopyIcon fontSize="small" />
@@ -107,17 +107,13 @@ export const InstanceNetwork: React.FC<InstanceNetworkProps> = ({ instance }) =>
               <ListItemText
                 primary={
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography
-                      variant="body2"
-                      fontFamily="monospace"
-                      sx={{ fontWeight: 500 }}
-                    >
+                    <Typography variant="body2" fontFamily="monospace" sx={{ fontWeight: 500 }}>
                       {sg.groupId}
                     </Typography>
                     <Tooltip title={`Copy security group ID`}>
                       <IconButton
                         size="small"
-                        onClick={() => handleCopyToClipboard(sg.groupId, 'Security Group ID')}
+                        onClick={() => void handleCopyToClipboard(sg.groupId, 'Security Group ID')}
                         sx={{ p: 0.5 }}
                       >
                         <CopyIcon fontSize="small" />
@@ -128,7 +124,7 @@ export const InstanceNetwork: React.FC<InstanceNetworkProps> = ({ instance }) =>
                 secondary={sg.groupName}
               />
             </ListItem>
-            {index < (instance.securityGroups?.length || 0) - 1 && <Divider />}
+            {index < (instance.securityGroups?.length ?? 0) - 1 && <Divider />}
           </React.Fragment>
         ))}
       </List>
@@ -149,7 +145,7 @@ export const InstanceNetwork: React.FC<InstanceNetworkProps> = ({ instance }) =>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {renderCopyableField(
                   'Public IP Address',
-                  instance.publicIp || instance.publicIpAddress,
+                  instance.publicIp ?? instance.publicIpAddress,
                   <PublicIcon fontSize="small" color="primary" />
                 )}
                 {renderCopyableField(
@@ -185,11 +181,7 @@ export const InstanceNetwork: React.FC<InstanceNetworkProps> = ({ instance }) =>
                     Security Groups
                   </Typography>
                   {instance.securityGroups && instance.securityGroups.length > 0 && (
-                    <Chip
-                      label={instance.securityGroups.length}
-                      size="small"
-                      color="primary"
-                    />
+                    <Chip label={instance.securityGroups.length} size="small" color="primary" />
                   )}
                 </Box>
                 {renderSecurityGroups()}
@@ -197,14 +189,12 @@ export const InstanceNetwork: React.FC<InstanceNetworkProps> = ({ instance }) =>
             </Grid>
 
             {/* Additional Network Info */}
-            {(instance.keyName || instance.instanceProfile) && (
+            {(instance.keyName ?? instance.instanceProfile) && (
               <Grid item xs={12}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {instance.keyName && renderCopyableField('Key Pair', instance.keyName)}
-                  {instance.instanceProfile && renderCopyableField(
-                    'IAM Instance Profile',
-                    instance.instanceProfile.arn
-                  )}
+                  {instance.instanceProfile &&
+                    renderCopyableField('IAM Instance Profile', instance.instanceProfile.arn)}
                 </Box>
               </Grid>
             )}
@@ -212,8 +202,8 @@ export const InstanceNetwork: React.FC<InstanceNetworkProps> = ({ instance }) =>
 
           {!instance.vpcId && !instance.subnetId && !instance.securityGroups?.length && (
             <Alert severity="info" sx={{ mt: 2 }}>
-              Network information is not available for this instance.
-              This may be due to the instance being in a terminated state or insufficient permissions.
+              Network information is not available for this instance. This may be due to the
+              instance being in a terminated state or insufficient permissions.
             </Alert>
           )}
         </CardContent>

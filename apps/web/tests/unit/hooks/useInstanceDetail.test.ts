@@ -19,20 +19,20 @@ describe('useInstanceDetail', () => {
     availabilityZone: 'us-east-1a',
     tags: {
       Name: 'Test Instance',
-      Environment: 'test'
+      Environment: 'test',
     },
     monitoring: {
-      state: 'enabled' as const
+      state: 'enabled' as const,
     },
     vpcId: 'vpc-12345',
     subnetId: 'subnet-67890',
     securityGroups: [
       {
         groupId: 'sg-123456',
-        groupName: 'test-sg'
-      }
+        groupName: 'test-sg',
+      },
     ],
-    keyName: 'test-key'
+    keyName: 'test-key',
   };
 
   beforeEach(() => {
@@ -42,9 +42,7 @@ describe('useInstanceDetail', () => {
   it('should fetch instance details successfully', async () => {
     mockEc2Service.getInstanceDetails.mockResolvedValueOnce(mockInstanceDetail);
 
-    const { result } = renderHook(() =>
-      useInstanceDetail('i-1234567890abcdef0')
-    );
+    const { result } = renderHook(() => useInstanceDetail('i-1234567890abcdef0'));
 
     // Initially loading
     expect(result.current.loading).toBe(true);
@@ -68,9 +66,7 @@ describe('useInstanceDetail', () => {
     const error404 = new Error('API Error: 404 Not Found');
     mockEc2Service.getInstanceDetails.mockRejectedValueOnce(error404);
 
-    const { result } = renderHook(() =>
-      useInstanceDetail('i-nonexistent')
-    );
+    const { result } = renderHook(() => useInstanceDetail('i-nonexistent'));
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -84,25 +80,23 @@ describe('useInstanceDetail', () => {
     const error403 = new Error('API Error: 403 Forbidden');
     mockEc2Service.getInstanceDetails.mockRejectedValueOnce(error403);
 
-    const { result } = renderHook(() =>
-      useInstanceDetail('i-1234567890abcdef0')
-    );
+    const { result } = renderHook(() => useInstanceDetail('i-1234567890abcdef0'));
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
     expect(result.current.instance).toBeNull();
-    expect(result.current.error).toBe('Access denied. Insufficient permissions to view instance details');
+    expect(result.current.error).toBe(
+      'Access denied. Insufficient permissions to view instance details'
+    );
   });
 
   it('should handle authentication failed error', async () => {
     const authError = new Error('Authentication failed');
     mockEc2Service.getInstanceDetails.mockRejectedValueOnce(authError);
 
-    const { result } = renderHook(() =>
-      useInstanceDetail('i-1234567890abcdef0')
-    );
+    const { result } = renderHook(() => useInstanceDetail('i-1234567890abcdef0'));
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -116,9 +110,7 @@ describe('useInstanceDetail', () => {
     const networkError = new Error('Network error');
     mockEc2Service.getInstanceDetails.mockRejectedValueOnce(networkError);
 
-    const { result } = renderHook(() =>
-      useInstanceDetail('i-1234567890abcdef0')
-    );
+    const { result } = renderHook(() => useInstanceDetail('i-1234567890abcdef0'));
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -131,9 +123,7 @@ describe('useInstanceDetail', () => {
   it('should handle unknown error', async () => {
     mockEc2Service.getInstanceDetails.mockRejectedValueOnce('Unknown error');
 
-    const { result } = renderHook(() =>
-      useInstanceDetail('i-1234567890abcdef0')
-    );
+    const { result } = renderHook(() => useInstanceDetail('i-1234567890abcdef0'));
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -146,9 +136,7 @@ describe('useInstanceDetail', () => {
   it('should include region parameter when provided', async () => {
     mockEc2Service.getInstanceDetails.mockResolvedValueOnce(mockInstanceDetail);
 
-    const { result } = renderHook(() =>
-      useInstanceDetail('i-1234567890abcdef0', 'us-west-2')
-    );
+    const { result } = renderHook(() => useInstanceDetail('i-1234567890abcdef0', 'us-west-2'));
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -163,9 +151,7 @@ describe('useInstanceDetail', () => {
   it('should refresh instance details when refresh is called', async () => {
     mockEc2Service.getInstanceDetails.mockResolvedValue(mockInstanceDetail);
 
-    const { result } = renderHook(() =>
-      useInstanceDetail('i-1234567890abcdef0')
-    );
+    const { result } = renderHook(() => useInstanceDetail('i-1234567890abcdef0'));
 
     // Wait for initial load
     await waitFor(() => {
@@ -181,9 +167,7 @@ describe('useInstanceDetail', () => {
   });
 
   it('should not fetch when instanceId is empty', async () => {
-    const { result } = renderHook(() =>
-      useInstanceDetail('')
-    );
+    const { result } = renderHook(() => useInstanceDetail(''));
 
     // Should not be loading and should not call the service
     expect(result.current.loading).toBe(false);
@@ -195,12 +179,9 @@ describe('useInstanceDetail', () => {
   it('should refetch when instanceId changes', async () => {
     mockEc2Service.getInstanceDetails.mockResolvedValue(mockInstanceDetail);
 
-    const { result, rerender } = renderHook(
-      ({ instanceId }) => useInstanceDetail(instanceId),
-      {
-        initialProps: { instanceId: 'i-1234567890abcdef0' }
-      }
-    );
+    const { result, rerender } = renderHook(({ instanceId }) => useInstanceDetail(instanceId), {
+      initialProps: { instanceId: 'i-1234567890abcdef0' },
+    });
 
     // Wait for initial load
     await waitFor(() => {
@@ -231,7 +212,7 @@ describe('useInstanceDetail', () => {
     const { result, rerender } = renderHook(
       ({ region }) => useInstanceDetail('i-1234567890abcdef0', region),
       {
-        initialProps: { region: 'us-east-1' }
+        initialProps: { region: 'us-east-1' },
       }
     );
 
@@ -263,18 +244,13 @@ describe('useInstanceDetail', () => {
     const error = new Error('API Error');
     mockEc2Service.getInstanceDetails.mockRejectedValueOnce(error);
 
-    const { result } = renderHook(() =>
-      useInstanceDetail('i-1234567890abcdef0')
-    );
+    const { result } = renderHook(() => useInstanceDetail('i-1234567890abcdef0'));
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Failed to fetch instance details:',
-      error
-    );
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to fetch instance details:', error);
 
     consoleErrorSpy.mockRestore();
   });

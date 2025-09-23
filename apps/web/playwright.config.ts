@@ -20,7 +20,7 @@ export default defineConfig({
 
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
-    ['html', { open: 'never' }],  // Don't auto-open the HTML report
+    ['html', { open: 'never' }], // Don't auto-open the HTML report
     ['json', { outputFile: 'test-results/results.json' }],
     ['junit', { outputFile: 'test-results/results.xml' }],
   ],

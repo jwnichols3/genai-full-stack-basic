@@ -5,6 +5,7 @@ This directory contains comprehensive end-to-end tests for the EC2 Manager appli
 ## 🎯 Test Coverage
 
 The test suite covers:
+
 - **Authentication Flow**: Login validation, error handling, success flows
 - **Protected Routes**: Route protection and redirects
 - **Dashboard Functionality**: Instance display, data grid features, refresh functionality
@@ -75,33 +76,41 @@ npm run test:e2e:report
 ## 🎨 Test Execution Modes
 
 ### Headless Mode (CI/Production)
+
 ```bash
 npm run test:e2e
 ```
+
 - Runs in background without browser UI
 - Fastest execution
 - Best for CI/CD pipelines
 
 ### Headed Mode (Development)
+
 ```bash
 npm run test:e2e:headed
 ```
+
 - Shows browser UI during test execution
 - Useful for watching test behavior
 - Good for debugging visual issues
 
 ### Debug Mode (Troubleshooting)
+
 ```bash
 npm run test:e2e:debug
 ```
+
 - Step-by-step execution
 - Pause at breakpoints
 - Interactive debugging capabilities
 
 ### UI Mode (Interactive)
+
 ```bash
 npm run test:e2e:ui
 ```
+
 - Web-based test runner
 - Visual test exploration
 - Real-time test editing and execution
@@ -115,6 +124,7 @@ npm run test:e2e:report
 ```
 
 Reports include:
+
 - Test execution summary
 - Screenshots of failures
 - Video recordings (on failure)
@@ -138,6 +148,7 @@ tests/e2e/
 ## 🧪 Test Scenarios
 
 ### Authentication Tests
+
 - ✅ Login form validation
 - ✅ Invalid credential handling
 - ✅ Successful authentication flow
@@ -145,6 +156,7 @@ tests/e2e/
 - ✅ Protected route access
 
 ### Dashboard Tests
+
 - ✅ Dashboard layout and components
 - ✅ Instance data display (with data or empty state)
 - ✅ Data grid functionality
@@ -153,22 +165,26 @@ tests/e2e/
 - ✅ Loading states and error handling
 
 ### Logout Tests
+
 - ✅ Logout process
 - ✅ Session cleanup
 - ✅ Redirect to login page
 - ✅ Route protection after logout
 
 ### Responsive Design Tests
+
 - ✅ Mobile navigation
 - ✅ Tablet layouts
 - ✅ Desktop functionality
 
 ### Complete User Journey
+
 - ✅ End-to-end workflow: Login → Dashboard → Interact → Logout
 
 ## ⚙️ Configuration
 
 ### Playwright Configuration
+
 The main configuration is in `/apps/web/playwright.config.ts`:
 
 - **Base URL**: `https://d2pbh2fudgytg0.cloudfront.net`
@@ -179,6 +195,7 @@ The main configuration is in `/apps/web/playwright.config.ts`:
 - **Reporters**: HTML, JSON, JUnit
 
 ### Environment Variables
+
 Available in `.env.test`:
 
 ```env
@@ -192,7 +209,9 @@ E2E_TIMEOUT=60000
 ```
 
 ### Browser Configuration
+
 By default, tests run with:
+
 - **Headless**: `false` (for development)
 - **Viewport**: 1280x720 (desktop), device-specific (mobile)
 - **Screenshots**: On failure only
@@ -202,24 +221,29 @@ By default, tests run with:
 ## 🐛 Debugging Failed Tests
 
 ### 1. View Test Report
+
 ```bash
 npm run test:e2e:report
 ```
 
 ### 2. Run Specific Test
+
 ```bash
 npx playwright test --grep "should successfully login"
 ```
 
 ### 3. Run in Debug Mode
+
 ```bash
 npm run test:e2e:debug
 ```
 
 ### 4. View Screenshots and Videos
+
 Check `test-results/` directory for failure artifacts.
 
 ### 5. Use Trace Viewer
+
 ```bash
 npx playwright show-trace test-results/traces/trace.zip
 ```
@@ -227,25 +251,33 @@ npx playwright show-trace test-results/traces/trace.zip
 ## 🔧 Common Issues and Solutions
 
 ### Issue: "Missing environment variables"
+
 **Solution**: Create `.env.test` file with valid credentials
 
 ### Issue: "Application not reachable"
+
 **Solution**: Verify the application URL is correct and accessible
 
 ### Issue: "Login fails with valid credentials"
+
 **Solution**:
+
 - Verify credentials work in browser manually
 - Check if account is active/confirmed
 - Ensure test user has necessary permissions
 
 ### Issue: "Tests timeout"
+
 **Solution**:
+
 - Increase timeout in playwright.config.ts
 - Check network connectivity
 - Verify application performance
 
 ### Issue: "Browser installation fails"
+
 **Solution**:
+
 ```bash
 # Re-install browsers
 npx playwright install --force
@@ -254,6 +286,7 @@ npx playwright install --force
 ## 🚀 CI/CD Integration
 
 ### GitHub Actions Example
+
 ```yaml
 - name: Install dependencies
   run: npm ci

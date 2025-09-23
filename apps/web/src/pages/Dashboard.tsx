@@ -23,7 +23,12 @@ import { useInstances } from '../hooks/useInstances';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { InstanceStatusBadge } from '../components/instances/InstanceStatusBadge';
-import { getInstanceName, formatInstanceIp, formatLaunchTime, getInstanceAge } from '../utils/instanceUtils';
+import {
+  getInstanceName,
+  formatInstanceIp,
+  formatLaunchTime,
+  getInstanceAge,
+} from '../utils/instanceUtils';
 import { useResponsive } from '../utils/responsive';
 
 const Dashboard: React.FC = () => {
@@ -31,13 +36,7 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
-  const {
-    instances,
-    loading,
-    error,
-    lastUpdated,
-    refresh,
-  } = useInstances(30000); // 30-second auto-refresh
+  const { instances, loading, error, lastUpdated, refresh } = useInstances(30000); // 30-second auto-refresh
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -72,7 +71,7 @@ const Dashboard: React.FC = () => {
     // Store current scroll position for restoration when returning
     const scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
     navigate(`/instances/${instanceId}`, {
-      state: { scrollPosition }
+      state: { scrollPosition },
     });
   };
 
@@ -96,7 +95,17 @@ const Dashboard: React.FC = () => {
         headerName: 'Status',
         width: 140,
         renderCell: (params: GridRenderCellParams) => (
-          <InstanceStatusBadge state={params.value as 'pending' | 'running' | 'stopping' | 'stopped' | 'shutting-down' | 'terminated'} />
+          <InstanceStatusBadge
+            state={
+              params.value as
+                | 'pending'
+                | 'running'
+                | 'stopping'
+                | 'stopped'
+                | 'shutting-down'
+                | 'terminated'
+            }
+          />
         ),
         hideable: false,
       },
@@ -133,13 +142,9 @@ const Dashboard: React.FC = () => {
 
     // Hide columns on smaller screens
     if (isMobile) {
-      return baseColumns.filter(col =>
-        ['instanceId', 'name', 'state'].includes(col.field)
-      );
+      return baseColumns.filter((col) => ['instanceId', 'name', 'state'].includes(col.field));
     } else if (isTablet) {
-      return baseColumns.filter(col =>
-        !['age', 'launchTime'].includes(col.field)
-      );
+      return baseColumns.filter((col) => !['age', 'launchTime'].includes(col.field));
     }
 
     return baseColumns;
@@ -172,7 +177,9 @@ const Dashboard: React.FC = () => {
         <IconButton
           color="inherit"
           size="small"
-          onClick={() => { void handleManualRefresh(); }}
+          onClick={() => {
+            void handleManualRefresh();
+          }}
           disabled={refreshing}
         >
           <RefreshIcon />
@@ -187,10 +194,7 @@ const Dashboard: React.FC = () => {
     <Container maxWidth="xl" sx={{ py: 3 }}>
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography
-            variant={isMobile ? 'h5' : 'h4'}
-            component="h1"
-          >
+          <Typography variant={isMobile ? 'h5' : 'h4'} component="h1">
             EC2 Instances
           </Typography>
 
@@ -208,16 +212,14 @@ const Dashboard: React.FC = () => {
 
             <Tooltip title="Refresh instances">
               <IconButton
-                onClick={() => { void handleManualRefresh(); }}
+                onClick={() => {
+                  void handleManualRefresh();
+                }}
                 disabled={refreshing || loading}
                 color="primary"
                 aria-label="refresh"
               >
-                {refreshing ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <RefreshIcon />
-                )}
+                {refreshing ? <CircularProgress size={20} /> : <RefreshIcon />}
               </IconButton>
             </Tooltip>
 
@@ -225,7 +227,9 @@ const Dashboard: React.FC = () => {
               variant="outlined"
               color="secondary"
               startIcon={<LogoutIcon />}
-              onClick={() => { void handleLogout(); }}
+              onClick={() => {
+                void handleLogout();
+              }}
               size="small"
             >
               Logout
@@ -269,7 +273,10 @@ const Dashboard: React.FC = () => {
             checkboxSelection={false}
             disableRowSelectionOnClick
             loading={loading}
-            onRowClick={(params) => handleInstanceRowClick(params.row.instanceId)}
+            onRowClick={(params) => {
+              const instance = params.row as EC2Instance;
+              handleInstanceRowClick(instance.instanceId);
+            }}
             slots={{
               toolbar: GridToolbar,
             }}

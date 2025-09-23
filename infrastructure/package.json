@@ -20,6 +20,7 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"lib/**/*.ts\" \"bin/**/*.ts\"",
+    "format:check": "prettier --check \"lib/**/*.ts\" \"bin/**/*.ts\"",
     "type-check": "tsc --noEmit",
     "seed-users": "npx ts-node ../scripts/seed-users.ts",
     "seed-users:dev": "NODE_ENV=dev npx ts-node ../scripts/seed-users.ts",

@@ -47,7 +47,9 @@ export const formatAbsoluteTime = (dateString: string): string => {
  * @param dateString - ISO date string
  * @returns Object with relative and absolute time
  */
-export const getTimeDisplay = (dateString: string): {
+export const getTimeDisplay = (
+  dateString: string
+): {
   relative: string;
   absolute: string;
 } => {

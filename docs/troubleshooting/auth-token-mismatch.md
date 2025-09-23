@@ -19,10 +19,10 @@
 
 The API Gateway Custom Authorizer and frontend were using incompatible token types:
 
-| Component | Expected | Actual | Result |
-|-----------|----------|---------|---------|
-| Authorizer | Access Token with user claims | Access Token (limited claims) | Missing claims → 401 |
-| Frontend | Sends Access Token | Access Token has no user claims | Authorization fails |
+| Component  | Expected                      | Actual                          | Result               |
+| ---------- | ----------------------------- | ------------------------------- | -------------------- |
+| Authorizer | Access Token with user claims | Access Token (limited claims)   | Missing claims → 401 |
+| Frontend   | Sends Access Token            | Access Token has no user claims | Authorization fails  |
 
 ## The Fix
 
@@ -34,7 +34,7 @@ The API Gateway Custom Authorizer and frontend were using incompatible token typ
 // Change from 'access' to 'id'
 verifier = CognitoJwtVerifier.create({
   userPoolId: config.userPoolId,
-  tokenUse: 'id',  // ← CHANGE THIS
+  tokenUse: 'id', // ← CHANGE THIS
   clientId: config.clientId,
 });
 ```
@@ -80,6 +80,7 @@ python3 scripts/deploy-web.py dev
 ### Access Token vs ID Token
 
 **Access Token**:
+
 ```json
 {
   "sub": "user-id",
@@ -93,14 +94,15 @@ python3 scripts/deploy-web.py dev
 ```
 
 **ID Token**:
+
 ```json
 {
   "sub": "user-id",
   "token_use": "id",
   "email": "user@example.com",
-  "custom:role": "admin",        // ← Custom claims
-  "given_name": "John",          // ← User attributes
-  "family_name": "Doe",          // ← User attributes
+  "custom:role": "admin", // ← Custom claims
+  "given_name": "John", // ← User attributes
+  "family_name": "Doe", // ← User attributes
   "email_verified": true,
   "auth_time": 1234567890,
   "exp": 1234567890
@@ -108,6 +110,7 @@ python3 scripts/deploy-web.py dev
 ```
 
 The authorizer needs `email` and `custom:role` claims to:
+
 1. Identify the user
 2. Generate proper IAM policies
 3. Pass user context to Lambda functions
@@ -124,7 +127,7 @@ const accessToken = sessionStorage.getItem('access_token');
 // Decode and compare
 const decode = (token) => JSON.parse(atob(token.split('.')[1]));
 
-console.log('ID Token has email?', decode(idToken).email);        // ✅ Should be present
+console.log('ID Token has email?', decode(idToken).email); // ✅ Should be present
 console.log('Access Token has email?', decode(accessToken).email); // ❌ Will be undefined
 ```
 
@@ -150,30 +153,34 @@ aws logs tail /aws/lambda/ec2-manager-authorizer-dev --follow
 ## Common Mistakes
 
 ### ❌ Don't Use Access Token for User Claims
+
 ```typescript
 // WRONG - Access token doesn't have user claims
 const token = authService.getAccessToken();
 ```
 
 ### ❌ Don't Configure Authorizer for Wrong Token Type
+
 ```typescript
 // WRONG - If you need user claims
-tokenUse: 'access'
+tokenUse: 'access';
 ```
 
 ### ✅ Do Use ID Token When You Need User Identity
+
 ```typescript
 // CORRECT - ID token has full user profile
 const token = authService.getIdToken();
 ```
 
 ### ✅ Do Match Token Types Between Frontend and Backend
+
 ```typescript
 // Frontend sends ID token
-authService.getIdToken()
+authService.getIdToken();
 
 // Backend expects ID token
-tokenUse: 'id'
+tokenUse: 'id';
 ```
 
 ## Prevention

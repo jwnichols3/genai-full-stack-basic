@@ -2,7 +2,9 @@ import { EC2Instance } from '@ec2-manager/shared';
 import { authService } from './auth';
 
 // API Base URL from environment or default
-const API_BASE_URL = (import.meta.env.VITE_API_URL as string) ?? 'https://xg34xg3ngh.execute-api.us-west-2.amazonaws.com/dev';
+const API_BASE_URL =
+  (import.meta.env.VITE_API_URL as string) ??
+  'https://xg34xg3ngh.execute-api.us-west-2.amazonaws.com/dev';
 
 interface ListInstancesResponse {
   instances: EC2Instance[];
@@ -60,7 +62,7 @@ class EC2Service {
       ...options,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         ...options.headers,
       },
     });
@@ -92,7 +94,9 @@ class EC2Service {
     }
 
     const queryString = params.toString() ? `?${params.toString()}` : '';
-    const response = await this.makeRequest<ListInstancesResponse>(`/api/v1/instances${queryString}`);
+    const response = await this.makeRequest<ListInstancesResponse>(
+      `/api/v1/instances${queryString}`
+    );
 
     return response.instances;
   }
@@ -105,7 +109,9 @@ class EC2Service {
     }
 
     const queryString = params.toString() ? `?${params.toString()}` : '';
-    const response = await this.makeRequest<EC2InstanceDetail>(`/api/v1/instances/${instanceId}${queryString}`);
+    const response = await this.makeRequest<EC2InstanceDetail>(
+      `/api/v1/instances/${instanceId}${queryString}`
+    );
 
     return response;
   }

@@ -3,7 +3,7 @@ import {
   formatAbsoluteTime,
   getTimeDisplay,
   isVeryRecent,
-  isVeryOld
+  isVeryOld,
 } from '../../../src/utils/timeUtils';
 
 // Mock date-fns functions for consistent testing
@@ -11,12 +11,14 @@ jest.mock('date-fns', () => ({
   formatDistanceToNow: jest.fn(),
   format: jest.fn(),
   isValid: jest.fn(),
-  parseISO: jest.fn()
+  parseISO: jest.fn(),
 }));
 
 import { formatDistanceToNow, format, isValid, parseISO } from 'date-fns';
 
-const mockFormatDistanceToNow = formatDistanceToNow as jest.MockedFunction<typeof formatDistanceToNow>;
+const mockFormatDistanceToNow = formatDistanceToNow as jest.MockedFunction<
+  typeof formatDistanceToNow
+>;
 const mockFormat = format as jest.MockedFunction<typeof format>;
 const mockIsValid = isValid as jest.MockedFunction<typeof isValid>;
 const mockParseISO = parseISO as jest.MockedFunction<typeof parseISO>;
@@ -120,7 +122,7 @@ describe('timeUtils', () => {
 
       expect(result).toEqual({
         relative: '2 hours ago',
-        absolute: 'Jan 1, 2023 at 12:00 PM'
+        absolute: 'Jan 1, 2023 at 12:00 PM',
       });
     });
 
@@ -129,7 +131,7 @@ describe('timeUtils', () => {
 
       expect(result).toEqual({
         relative: 'Unknown',
-        absolute: 'Unknown'
+        absolute: 'Unknown',
       });
     });
   });

@@ -7,6 +7,7 @@ This document explains the authentication and authorization flow for the EC2 Ins
 ## Architecture Components
 
 ### 1. AWS Cognito User Pool
+
 - **Purpose**: Manages user authentication and issues JWT tokens
 - **Token Types Issued**:
   - **Access Token**: Contains scopes and groups for API access
@@ -14,6 +15,7 @@ This document explains the authentication and authorization flow for the EC2 Ins
   - **Refresh Token**: Used to obtain new access/ID tokens
 
 ### 2. Frontend Authentication Service (`apps/web/src/services/auth.ts`)
+
 - **Purpose**: Handles login, logout, and token management
 - **Key Methods**:
   - `login()`: Authenticates with Cognito using USER_PASSWORD_AUTH flow
@@ -22,11 +24,13 @@ This document explains the authentication and authorization flow for the EC2 Ins
   - `getCurrentUser()`: Retrieves user info from access token
 
 ### 3. API Gateway Custom Authorizer (`apps/api/src/functions/auth/authorizer.ts`)
+
 - **Purpose**: Validates JWT tokens and generates IAM policies
 - **Token Type**: Validates **ID tokens** (`tokenUse: 'id'`)
 - **Claims Used**: email, custom:role, sub (user ID)
 
 ### 4. EC2 Service (`apps/web/src/services/ec2.ts`)
+
 - **Purpose**: Makes authenticated API calls to backend
 - **Authentication**: Sends ID token in Authorization header
 
@@ -57,13 +61,16 @@ sequenceDiagram
 ## Critical Fix: Token Type Mismatch
 
 ### Problem Identified
+
 The application was experiencing authentication failures with the following symptoms:
+
 1. Successful Cognito authentication (200 response)
 2. 401 Unauthorized errors from API Gateway
 3. Users redirected back to login page
 4. Authorizer logs: "JWT string does not consist of exactly 3 parts"
 
 ### Root Cause
+
 - **Authorizer Configuration**: Expected access tokens (`tokenUse: 'access'`)
 - **Frontend Behavior**: Sent access tokens via `getAccessToken()`
 - **Issue**: Access tokens don't contain the user claims (email, custom:role) needed by the authorizer
@@ -71,23 +78,25 @@ The application was experiencing authentication failures with the following symp
 ### Solution Implemented
 
 #### 1. Authorizer Update
+
 ```typescript
 // Before (INCORRECT)
 verifier = CognitoJwtVerifier.create({
   userPoolId: config.userPoolId,
-  tokenUse: 'access',  // Wrong token type
+  tokenUse: 'access', // Wrong token type
   clientId: config.clientId,
 });
 
 // After (CORRECT)
 verifier = CognitoJwtVerifier.create({
   userPoolId: config.userPoolId,
-  tokenUse: 'id',  // Correct token type for user claims
+  tokenUse: 'id', // Correct token type for user claims
   clientId: config.clientId,
 });
 ```
 
 #### 2. Frontend Service Update
+
 ```typescript
 // Before (INCORRECT)
 private async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -105,12 +114,14 @@ private async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 ## Token Types Explained
 
 ### Access Token
+
 - **Purpose**: API access authorization
 - **Contains**: Scopes, groups, client ID
 - **Format**: JWT with limited claims
 - **Use Case**: API rate limiting, OAuth scopes
 
 ### ID Token
+
 - **Purpose**: User identity verification
 - **Contains**: User attributes (email, name, custom claims)
 - **Format**: JWT with full user profile
@@ -125,6 +136,7 @@ private async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promi
 ## Token Storage
 
 Tokens are stored in `sessionStorage` to ensure:
+
 - Automatic cleanup on browser/tab close
 - No persistence across sessions
 - Security against XSS (still vulnerable but limited scope)
@@ -144,6 +156,7 @@ sessionStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
 ## Debugging Authentication Issues
 
 ### 1. Check Token Type
+
 ```javascript
 // In browser console
 const idToken = sessionStorage.getItem('id_token');
@@ -154,7 +167,7 @@ const decodeToken = (token) => {
   const parts = token.split('.');
   return {
     header: JSON.parse(atob(parts[0])),
-    payload: JSON.parse(atob(parts[1]))
+    payload: JSON.parse(atob(parts[1])),
   };
 };
 
@@ -163,6 +176,7 @@ console.log('Access Token Claims:', decodeToken(accessToken));
 ```
 
 ### 2. Verify Authorizer Logs
+
 ```bash
 # View authorizer Lambda logs
 aws logs tail /aws/lambda/ec2-manager-authorizer-dev --follow
@@ -170,12 +184,12 @@ aws logs tail /aws/lambda/ec2-manager-authorizer-dev --follow
 
 ### 3. Common Issues and Solutions
 
-| Issue | Symptom | Solution |
-|-------|---------|----------|
+| Issue            | Symptom          | Solution                              |
+| ---------------- | ---------------- | ------------------------------------- |
 | Wrong token type | 401 Unauthorized | Ensure ID token is sent for API calls |
-| Token expired | 401 after time | Implement token refresh logic |
-| Missing claims | 403 Forbidden | Verify custom attributes in Cognito |
-| CORS errors | Network failed | Check API Gateway CORS configuration |
+| Token expired    | 401 after time   | Implement token refresh logic         |
+| Missing claims   | 403 Forbidden    | Verify custom attributes in Cognito   |
+| CORS errors      | Network failed   | Check API Gateway CORS configuration  |
 
 ## Security Considerations
 
@@ -188,6 +202,7 @@ aws logs tail /aws/lambda/ec2-manager-authorizer-dev --follow
 ## Environment Variables
 
 ### Frontend (.env)
+
 ```bash
 VITE_COGNITO_USER_POOL_ID=us-west-2_xxxxx
 VITE_COGNITO_CLIENT_ID=xxxxxxxxxxxxx
@@ -197,6 +212,7 @@ VITE_API_URL=https://xxx.execute-api.us-west-2.amazonaws.com/dev
 ```
 
 ### Backend (Lambda Environment)
+
 ```bash
 COGNITO_USER_POOL_ID=us-west-2_xxxxx
 COGNITO_CLIENT_ID=xxxxxxxxxxxxx
@@ -205,6 +221,7 @@ COGNITO_CLIENT_ID=xxxxxxxxxxxxx
 ## Testing Authentication
 
 ### Manual Testing
+
 1. Open browser Developer Tools
 2. Navigate to Network tab
 3. Login with valid credentials
@@ -213,6 +230,7 @@ COGNITO_CLIENT_ID=xxxxxxxxxxxxx
    - Response should be 200 OK (or 403 if no permissions, not 401)
 
 ### Automated Testing (Playwright)
+
 ```typescript
 test('should successfully login and navigate to dashboard', async ({ page }) => {
   await page.goto('/login');

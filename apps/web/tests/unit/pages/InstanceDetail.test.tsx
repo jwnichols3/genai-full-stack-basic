@@ -14,7 +14,7 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({ instanceId: 'i-1234567890abcdef0' }),
   useNavigate: () => jest.fn(),
-  useLocation: () => ({ state: null })
+  useLocation: () => ({ state: null }),
 }));
 
 const mockUseInstanceDetail = useInstanceDetail as jest.MockedFunction<typeof useInstanceDetail>;
@@ -23,9 +23,7 @@ const mockUseResponsive = useResponsive as jest.MockedFunction<typeof useRespons
 // Test wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <ThemeProvider theme={theme}>
-    <MemoryRouter initialEntries={['/instances/i-1234567890abcdef0']}>
-      {children}
-    </MemoryRouter>
+    <MemoryRouter initialEntries={['/instances/i-1234567890abcdef0']}>{children}</MemoryRouter>
   </ThemeProvider>
 );
 
@@ -43,20 +41,20 @@ describe('InstanceDetail', () => {
     tags: {
       Name: 'Test Instance',
       Environment: 'test',
-      Project: 'TestProject'
+      Project: 'TestProject',
     },
     monitoring: {
-      state: 'enabled' as const
+      state: 'enabled' as const,
     },
     vpcId: 'vpc-12345',
     subnetId: 'subnet-67890',
     securityGroups: [
       {
         groupId: 'sg-123456',
-        groupName: 'test-sg'
-      }
+        groupName: 'test-sg',
+      },
     ],
-    keyName: 'test-key'
+    keyName: 'test-key',
   };
 
   beforeEach(() => {
@@ -65,7 +63,7 @@ describe('InstanceDetail', () => {
       isTablet: false,
       isDesktop: true,
       isLargeDesktop: false,
-      isExtraLarge: false
+      isExtraLarge: false,
     });
   });
 
@@ -78,7 +76,7 @@ describe('InstanceDetail', () => {
       instance: null,
       loading: true,
       error: null,
-      refresh: jest.fn()
+      refresh: jest.fn(),
     });
 
     render(
@@ -99,7 +97,7 @@ describe('InstanceDetail', () => {
       instance: null,
       loading: false,
       error: 'Instance not found',
-      refresh: jest.fn()
+      refresh: jest.fn(),
     });
 
     render(
@@ -117,7 +115,7 @@ describe('InstanceDetail', () => {
       instance: mockInstanceDetail,
       loading: false,
       error: null,
-      refresh: jest.fn()
+      refresh: jest.fn(),
     });
 
     render(
@@ -158,7 +156,7 @@ describe('InstanceDetail', () => {
       instance: mockInstanceDetail,
       loading: false,
       error: null,
-      refresh: mockRefresh
+      refresh: mockRefresh,
     });
 
     render(
@@ -178,7 +176,7 @@ describe('InstanceDetail', () => {
       instance: mockInstanceDetail,
       loading: true,
       error: null,
-      refresh: jest.fn()
+      refresh: jest.fn(),
     });
 
     render(
@@ -195,14 +193,14 @@ describe('InstanceDetail', () => {
     const instanceWithoutPublicIp = {
       ...mockInstanceDetail,
       publicIp: undefined,
-      publicIpAddress: undefined
+      publicIpAddress: undefined,
     };
 
     mockUseInstanceDetail.mockReturnValue({
       instance: instanceWithoutPublicIp,
       loading: false,
       error: null,
-      refresh: jest.fn()
+      refresh: jest.fn(),
     });
 
     render(
@@ -218,14 +216,14 @@ describe('InstanceDetail', () => {
   it('should handle instance with no tags', () => {
     const instanceWithoutTags = {
       ...mockInstanceDetail,
-      tags: {}
+      tags: {},
     };
 
     mockUseInstanceDetail.mockReturnValue({
       instance: instanceWithoutTags,
       loading: false,
       error: null,
-      refresh: jest.fn()
+      refresh: jest.fn(),
     });
 
     render(
@@ -240,14 +238,14 @@ describe('InstanceDetail', () => {
   it('should handle instance with no security groups', () => {
     const instanceWithoutSecurityGroups = {
       ...mockInstanceDetail,
-      securityGroups: []
+      securityGroups: [],
     };
 
     mockUseInstanceDetail.mockReturnValue({
       instance: instanceWithoutSecurityGroups,
       loading: false,
       error: null,
-      refresh: jest.fn()
+      refresh: jest.fn(),
     });
 
     render(
@@ -265,14 +263,14 @@ describe('InstanceDetail', () => {
       isTablet: false,
       isDesktop: false,
       isLargeDesktop: false,
-      isExtraLarge: false
+      isExtraLarge: false,
     });
 
     mockUseInstanceDetail.mockReturnValue({
       instance: mockInstanceDetail,
       loading: false,
       error: null,
-      refresh: jest.fn()
+      refresh: jest.fn(),
     });
 
     render(
@@ -291,7 +289,7 @@ describe('InstanceDetail', () => {
       instance: mockInstanceDetail,
       loading: false,
       error: null,
-      refresh: jest.fn()
+      refresh: jest.fn(),
     });
 
     render(
@@ -309,7 +307,7 @@ describe('InstanceDetail', () => {
       instance: mockInstanceDetail,
       loading: false,
       error: null,
-      refresh: jest.fn()
+      refresh: jest.fn(),
     });
 
     render(
@@ -325,14 +323,14 @@ describe('InstanceDetail', () => {
   it('should handle instance without monitoring data', () => {
     const instanceWithoutMonitoring = {
       ...mockInstanceDetail,
-      monitoring: undefined
+      monitoring: undefined,
     };
 
     mockUseInstanceDetail.mockReturnValue({
       instance: instanceWithoutMonitoring,
       loading: false,
       error: null,
-      refresh: jest.fn()
+      refresh: jest.fn(),
     });
 
     render(
@@ -350,7 +348,7 @@ describe('InstanceDetail', () => {
       instance: mockInstanceDetail,
       loading: false,
       error: 'Failed to refresh',
-      refresh: jest.fn()
+      refresh: jest.fn(),
     });
 
     render(
@@ -359,7 +357,9 @@ describe('InstanceDetail', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText('Failed to refresh instance details: Failed to refresh')).toBeInTheDocument();
+    expect(
+      screen.getByText('Failed to refresh instance details: Failed to refresh')
+    ).toBeInTheDocument();
     // Instance data should still be shown
     expect(screen.getByText('Test Instance')).toBeInTheDocument();
   });
@@ -369,7 +369,7 @@ describe('InstanceDetail', () => {
       instance: mockInstanceDetail,
       loading: false,
       error: null,
-      refresh: jest.fn()
+      refresh: jest.fn(),
     });
 
     render(

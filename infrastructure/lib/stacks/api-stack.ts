@@ -354,15 +354,16 @@ export class ApiStack extends cdk.Stack {
       statusCode: '401',
       responseHeaders: {
         'Access-Control-Allow-Origin': "'*'",
-        'Access-Control-Allow-Headers': "'Authorization,Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
+        'Access-Control-Allow-Headers':
+          "'Authorization,Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
         'Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
       },
       templates: {
         'application/json': JSON.stringify({
           message: '$context.error.message',
-          error: 'Unauthorized'
-        })
-      }
+          error: 'Unauthorized',
+        }),
+      },
     });
 
     new apigateway.GatewayResponse(this, 'DefaultForbiddenResponse', {
@@ -371,15 +372,16 @@ export class ApiStack extends cdk.Stack {
       statusCode: '403',
       responseHeaders: {
         'Access-Control-Allow-Origin': "'*'",
-        'Access-Control-Allow-Headers': "'Authorization,Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
+        'Access-Control-Allow-Headers':
+          "'Authorization,Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
         'Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
       },
       templates: {
         'application/json': JSON.stringify({
           message: '$context.error.message',
-          error: 'Forbidden'
-        })
-      }
+          error: 'Forbidden',
+        }),
+      },
     });
 
     new apigateway.GatewayResponse(this, 'Default4xxResponse', {
@@ -387,9 +389,10 @@ export class ApiStack extends cdk.Stack {
       type: apigateway.ResponseType.DEFAULT_4XX,
       responseHeaders: {
         'Access-Control-Allow-Origin': "'*'",
-        'Access-Control-Allow-Headers': "'Authorization,Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
+        'Access-Control-Allow-Headers':
+          "'Authorization,Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
         'Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
-      }
+      },
     });
 
     new apigateway.GatewayResponse(this, 'Default5xxResponse', {
@@ -397,9 +400,10 @@ export class ApiStack extends cdk.Stack {
       type: apigateway.ResponseType.DEFAULT_5XX,
       responseHeaders: {
         'Access-Control-Allow-Origin': "'*'",
-        'Access-Control-Allow-Headers': "'Authorization,Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
+        'Access-Control-Allow-Headers':
+          "'Authorization,Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'",
         'Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
-      }
+      },
     });
 
     // Store API URL for outputs

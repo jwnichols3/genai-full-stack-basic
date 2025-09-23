@@ -41,7 +41,7 @@ const InstanceDetail: React.FC = () => {
   const location = useLocation();
   const { isMobile } = useResponsive();
 
-  const { instance, loading, error, refresh } = useInstanceDetail(instanceId || '');
+  const { instance, loading, error, refresh } = useInstanceDetail(instanceId ?? '');
 
   useEffect(() => {
     if (!instanceId) {
@@ -53,7 +53,7 @@ const InstanceDetail: React.FC = () => {
     // Restore dashboard scroll position if available in location state
     const dashboardState = location.state as { scrollPosition?: number } | undefined;
     navigate('/dashboard', {
-      state: dashboardState ? { scrollPosition: dashboardState.scrollPosition } : undefined
+      state: dashboardState ? { scrollPosition: dashboardState.scrollPosition } : undefined,
     });
   };
 
@@ -90,11 +90,7 @@ const InstanceDetail: React.FC = () => {
   const renderError = () => (
     <Container maxWidth="xl" sx={{ py: 3 }}>
       <Box sx={{ mb: 3 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={handleBack}
-          sx={{ mb: 2 }}
-        >
+        <Button startIcon={<ArrowBackIcon />} onClick={handleBack} sx={{ mb: 2 }}>
           Back to Dashboard
         </Button>
       </Box>
@@ -169,37 +165,21 @@ const InstanceDetail: React.FC = () => {
           spacing={2}
         >
           <Box>
-            <Typography
-              variant={isMobile ? 'h5' : 'h4'}
-              component="h1"
-              sx={{ mb: 1 }}
-            >
+            <Typography variant={isMobile ? 'h5' : 'h4'} component="h1" sx={{ mb: 1 }}>
               {instanceName}
             </Typography>
             <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-              <Typography
-                variant="body2"
-                color="textSecondary"
-                fontFamily="monospace"
-              >
+              <Typography variant="body2" color="textSecondary" fontFamily="monospace">
                 {instance.instanceId}
               </Typography>
-              <InstanceStatusBadge state={instance.state as any} />
+              <InstanceStatusBadge state={instance.state} />
             </Stack>
           </Box>
 
           <Stack direction="row" spacing={1} alignItems="center">
             <Tooltip title="Refresh instance details">
-              <IconButton
-                onClick={() => void refresh()}
-                disabled={loading}
-                color="primary"
-              >
-                {loading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <RefreshIcon />
-                )}
+              <IconButton onClick={() => void refresh()} disabled={loading} color="primary">
+                {loading ? <CircularProgress size={20} /> : <RefreshIcon />}
               </IconButton>
             </Tooltip>
 
