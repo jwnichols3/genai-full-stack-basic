@@ -35,9 +35,7 @@ export function isTimeoutError(error: unknown): boolean {
 export function isAuthError(error: ApiError): boolean {
   if (isApiError(error)) {
     return (
-      error.code === 'TOKEN_EXPIRED' ||
-      error.code === 'INVALID_CREDENTIALS' ||
-      error.status === 401
+      error.code === 'TOKEN_EXPIRED' || error.code === 'INVALID_CREDENTIALS' || error.status === 401
     );
   }
   return false;
@@ -48,10 +46,7 @@ export function isAuthError(error: ApiError): boolean {
  */
 export function isAuthorizationError(error: ApiError): boolean {
   if (isApiError(error)) {
-    return (
-      error.code === 'INSUFFICIENT_PRIVILEGES' ||
-      error.status === 403
-    );
+    return error.code === 'INSUFFICIENT_PRIVILEGES' || error.status === 403;
   }
   return false;
 }
@@ -84,12 +79,7 @@ export function isServerError(error: ApiError): boolean {
  * Type guard to check if error is ApiError
  */
 export function isApiError(error: unknown): error is ApiError {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    'message' in error
-  );
+  return typeof error === 'object' && error !== null && 'code' in error && 'message' in error;
 }
 
 /**
@@ -156,7 +146,7 @@ export function getSuggestedAction(error: ApiError): string {
     case 'VALIDATION_ERROR':
       return 'Please check your input and try again.';
     case 'RESOURCE_NOT_FOUND':
-      return 'The item you\'re looking for may have been moved or deleted.';
+      return "The item you're looking for may have been moved or deleted.";
     case 'SERVER_ERROR':
       return 'Please try again later or contact support if the problem persists.';
     case 'SERVICE_UNAVAILABLE':

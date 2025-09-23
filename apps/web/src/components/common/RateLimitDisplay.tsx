@@ -1,13 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  Alert,
-  AlertTitle,
-  LinearProgress,
-  Chip,
-} from '@mui/material';
+import { Box, Typography, Button, Alert, AlertTitle, LinearProgress, Chip } from '@mui/material';
 import { Schedule as ScheduleIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 
 export interface RateLimitDisplayProps {
@@ -71,12 +63,7 @@ export function RateLimitDisplay({
       sx={{ my: 2 }}
       action={
         canRetry && onRetry ? (
-          <Button
-            color="inherit"
-            size="small"
-            onClick={onRetry}
-            startIcon={<RefreshIcon />}
-          >
+          <Button color="inherit" size="small" onClick={onRetry} startIcon={<RefreshIcon />}>
             Retry Now
           </Button>
         ) : undefined
@@ -145,10 +132,7 @@ export interface RateLimitToastProps {
 /**
  * Simplified rate limit component for toast notifications
  */
-export function RateLimitToast({
-  retryAfter,
-  operation = 'this operation',
-}: RateLimitToastProps) {
+export function RateLimitToast({ retryAfter, operation = 'this operation' }: RateLimitToastProps) {
   const [timeRemaining, setTimeRemaining] = useState(retryAfter);
 
   useEffect(() => {
@@ -175,9 +159,7 @@ export function RateLimitToast({
 
   return (
     <Box>
-      <Typography variant="body2">
-        Rate limit exceeded for {operation}
-      </Typography>
+      <Typography variant="body2">Rate limit exceeded for {operation}</Typography>
       <Typography variant="caption" color="text.secondary">
         {timeRemaining > 0 ? `Retry in ${formatTime(timeRemaining)}` : 'You can retry now'}
       </Typography>

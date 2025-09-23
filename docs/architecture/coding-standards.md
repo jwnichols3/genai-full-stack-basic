@@ -14,6 +14,7 @@
 - **Test Coverage:** Minimum 80% coverage for critical business logic
 - **HTML Validation:** Never nest block elements inside Typography components
 - **Region Configuration:** Always specify default regions that match infrastructure deployment
+- **CORS Headers:** Never add custom headers to API requests without backend team coordination
 
 ## Naming Conventions
 
@@ -121,6 +122,78 @@ const getRegionFromQuery = (event: APIGatewayProxyEvent): string => {
 // Use environment variables when possible
 const region = process.env.AWS_REGION || process.env.CDK_DEFAULT_REGION || 'us-west-2';
 ```
+
+## CORS and API Headers Best Practices
+
+### Critical Rule: Custom Headers Require Backend Coordination
+
+**Never add custom headers to API requests without backend team approval and CORS configuration.**
+
+```typescript
+// ❌ WRONG - Will cause CORS errors
+const response = await fetch(url, {
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+    'X-Request-ID': generateId(), // Custom header not allowed by CORS
+    'X-Correlation-ID': correlationId, // Custom header not allowed by CORS
+  },
+});
+
+// ✅ CORRECT - Use only approved headers
+const response = await fetch(url, {
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  },
+});
+```
+
+### Safe Header Usage
+
+**Standard headers that typically don't require special CORS configuration:**
+
+```typescript
+// These headers are generally safe to use
+const safeHeaders = {
+  'Content-Type': 'application/json',
+  Accept: 'application/json',
+  Authorization: `Bearer ${token}`, // Usually configured
+};
+```
+
+### Alternative Approaches for Request Tracking
+
+**Instead of custom headers, use these approaches:**
+
+```typescript
+// Option 1: Use URL parameters for tracking
+const correlationId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+const url = `${API_BASE_URL}/endpoint?correlation-id=${correlationId}`;
+
+// Option 2: Include tracking in request body
+const requestBody = {
+  ...data,
+  metadata: {
+    correlationId,
+    timestamp: new Date().toISOString(),
+  },
+};
+
+// Option 3: Log correlation ID for debugging without sending to backend
+console.log('API Request correlation ID:', correlationId, { url, data });
+```
+
+### CORS Troubleshooting Workflow
+
+1. **Before Adding Headers**: Check with backend team if header is supported
+2. **If CORS Error Occurs**:
+   - Check browser console for specific header causing issue
+   - Determine if header is essential for functionality
+   - Remove non-essential headers immediately
+   - Coordinate with backend for essential headers
+3. **Testing**: Always test API calls after header changes
+4. **Documentation**: Document any new headers in troubleshooting guide
 
 ### Debug Logging
 

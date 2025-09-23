@@ -42,11 +42,15 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 class ErrorHandler {
-  private notificationProvider: ((message: string, severity: 'error' | 'warning' | 'info' | 'success') => void) | null = null;
+  private notificationProvider:
+    | ((message: string, severity: 'error' | 'warning' | 'info' | 'success') => void)
+    | null = null;
   private retryCallbacks: Map<string, () => Promise<void>> = new Map();
   private currentUser: { role?: string; email?: string } | null = null;
 
-  setNotificationProvider(provider: (message: string, severity: 'error' | 'warning' | 'info' | 'success') => void) {
+  setNotificationProvider(
+    provider: (message: string, severity: 'error' | 'warning' | 'info' | 'success') => void
+  ) {
     this.notificationProvider = provider;
   }
 
@@ -179,7 +183,9 @@ class ErrorHandler {
 
     // Fall back to status code mapping
     const errorCode = this.mapStatusToErrorCode(status);
-    return ERROR_MESSAGES[errorCode] ?? ERROR_MESSAGES.UNKNOWN_ERROR ?? 'An unexpected error occurred';
+    return (
+      ERROR_MESSAGES[errorCode] ?? ERROR_MESSAGES.UNKNOWN_ERROR ?? 'An unexpected error occurred'
+    );
   }
 
   /**
@@ -187,7 +193,8 @@ class ErrorHandler {
    */
   private getAuthorizationErrorMessage(errorData: Record<string, unknown>): string {
     const currentRole = this.currentUser?.role;
-    const requiredRole = typeof errorData?.requiredRole === 'string' ? errorData.requiredRole : undefined;
+    const requiredRole =
+      typeof errorData?.requiredRole === 'string' ? errorData.requiredRole : undefined;
 
     if (currentRole && requiredRole) {
       return `Access denied. Your role (${currentRole}) does not have sufficient permissions. Required role: ${requiredRole}. Contact your administrator for access.`;
@@ -285,7 +292,8 @@ class ErrorHandler {
   private handleRateLimiting(_apiError: ApiError): void {
     if (this.notificationProvider) {
       // Extract retry-after header if available
-      const retryAfter = typeof _apiError.details?.retryAfter === 'number' ? _apiError.details.retryAfter : 60;
+      const retryAfter =
+        typeof _apiError.details?.retryAfter === 'number' ? _apiError.details.retryAfter : 60;
 
       this.notificationProvider(
         `Rate limit exceeded. Please wait ${retryAfter} seconds before retrying.`,
@@ -356,7 +364,7 @@ class ErrorHandler {
 
         // Exponential backoff: 1s, 2s, 4s, etc.
         const delay = Math.pow(2, attempt) * 1000;
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   }

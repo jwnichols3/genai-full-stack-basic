@@ -39,10 +39,7 @@ interface FilterOptions {
 }
 
 class EC2Service {
-  private async makeRequest<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  private async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const token = authService.getIdToken();
     console.log('🔑 EC2 Service using ID token:', token ? 'Token present' : 'No token');
 
@@ -94,10 +91,10 @@ class EC2Service {
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
           // Timeout error
-          const timeoutError = await errorHandler.handleApiError(
-            new Error('Request timed out'),
-            { showToast: true, logToCloudWatch: true }
-          );
+          const timeoutError = await errorHandler.handleApiError(new Error('Request timed out'), {
+            showToast: true,
+            logToCloudWatch: true,
+          });
           throw timeoutError;
         }
 
@@ -122,7 +119,6 @@ class EC2Service {
       throw unexpectedError;
     }
   }
-
 
   async listInstances(filters?: FilterOptions): Promise<EC2Instance[]> {
     const params = new URLSearchParams();

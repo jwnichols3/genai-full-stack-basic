@@ -135,7 +135,7 @@ Please describe what you were doing when this error occurred:
   };
 
   private toggleDetails = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       showDetails: !prevState.showDetails,
     }));
   };
@@ -180,7 +180,8 @@ ${errorInfo?.componentStack ?? 'No component stack available'}
             <CardContent>
               <Alert severity="error" sx={{ mb: 3 }}>
                 <AlertTitle>Something went wrong</AlertTitle>
-                An unexpected error occurred. You can try reloading the page or report this issue to our support team.
+                An unexpected error occurred. You can try reloading the page or report this issue to
+                our support team.
               </Alert>
 
               <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
@@ -192,11 +193,7 @@ ${errorInfo?.componentStack ?? 'No component stack available'}
                 >
                   Reload Page
                 </Button>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={this.handleReset}
-                >
+                <Button variant="outlined" color="primary" onClick={this.handleReset}>
                   Try Again
                 </Button>
                 <Button

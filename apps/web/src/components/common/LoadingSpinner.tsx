@@ -39,13 +39,7 @@ export function LoadingSpinner({
   };
 
   const content = (
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      gap={2}
-    >
+    <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap={2}>
       <CircularProgress
         size={getSize()}
         thickness={4}
@@ -55,12 +49,7 @@ export function LoadingSpinner({
         }}
       />
       {message && (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          textAlign="center"
-          aria-live="polite"
-        >
+        <Typography variant="body2" color="text.secondary" textAlign="center" aria-live="polite">
           {message}
         </Typography>
       )}
@@ -109,11 +98,7 @@ export function ButtonLoading({
 
   return (
     <Box display="flex" alignItems="center" gap={1}>
-      <CircularProgress
-        size={spinnerSize}
-        color="inherit"
-        aria-label="Loading"
-      />
+      <CircularProgress size={spinnerSize} color="inherit" aria-label="Loading" />
       <span>{loadingText ?? 'Loading...'}</span>
     </Box>
   );
@@ -139,16 +124,9 @@ export function SkeletonCard({
     <Card>
       <CardContent>
         <Box display="flex" alignItems="flex-start" gap={2}>
-          {showAvatar && (
-            <Skeleton variant="circular" width={40} height={40} />
-          )}
+          {showAvatar && <Skeleton variant="circular" width={40} height={40} />}
           <Box flex={1}>
-            <Skeleton
-              variant="text"
-              width="60%"
-              height={24}
-              sx={{ mb: 1 }}
-            />
+            <Skeleton variant="text" width="60%" height={24} sx={{ mb: 1 }} />
             {Array.from({ length: lines }).map((_, index) => (
               <Skeleton
                 key={index}
@@ -196,11 +174,7 @@ export function SkeletonTable({ rows = 5, columns = 4 }: SkeletonTableProps) {
         <Box key={rowIndex} display="flex" gap={2} mb={1} p={2}>
           {Array.from({ length: columns }).map((_, colIndex) => (
             <Box key={colIndex} flex={1}>
-              <Skeleton
-                variant="text"
-                width={colIndex === 0 ? '60%' : '90%'}
-                height={20}
-              />
+              <Skeleton variant="text" width={colIndex === 0 ? '60%' : '90%'} height={20} />
             </Box>
           ))}
         </Box>
@@ -219,12 +193,7 @@ export interface LoadingOverlayProps {
 /**
  * Loading overlay that covers content during async operations
  */
-export function LoadingOverlay({
-  loading,
-  children,
-  message,
-  opacity = 0.7,
-}: LoadingOverlayProps) {
+export function LoadingOverlay({ loading, children, message, opacity = 0.7 }: LoadingOverlayProps) {
   return (
     <Box position="relative">
       {children}
@@ -294,8 +263,8 @@ export function LoadingTimeout({
           Operation Taking Longer Than Expected
         </Typography>
         <Typography variant="body2" color="text.secondary" textAlign="center">
-          The operation is taking longer than usual. Please check your connection
-          or try again later.
+          The operation is taking longer than usual. Please check your connection or try again
+          later.
         </Typography>
       </Box>
     );

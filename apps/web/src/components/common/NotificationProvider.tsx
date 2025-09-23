@@ -33,33 +33,32 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
   // Maximum number of notifications to show simultaneously
   const MAX_NOTIFICATIONS = 5;
 
-  const showNotification = useCallback((
-    message: string,
-    severity: AlertColor = 'info',
-    duration: number = 6000
-  ) => {
-    const id = Date.now().toString();
-    const notification: Notification = {
-      id,
-      message,
-      severity,
-      duration,
-      timestamp: Date.now(),
-      persist: duration === 0,
-    };
+  const showNotification = useCallback(
+    (message: string, severity: AlertColor = 'info', duration: number = 6000) => {
+      const id = Date.now().toString();
+      const notification: Notification = {
+        id,
+        message,
+        severity,
+        duration,
+        timestamp: Date.now(),
+        persist: duration === 0,
+      };
 
-    setNotifications((prev) => {
-      // Remove oldest notification if we're at the limit
-      const current = prev.length >= MAX_NOTIFICATIONS ? prev.slice(1) : prev;
-      return [...current, notification];
-    });
+      setNotifications((prev) => {
+        // Remove oldest notification if we're at the limit
+        const current = prev.length >= MAX_NOTIFICATIONS ? prev.slice(1) : prev;
+        return [...current, notification];
+      });
 
-    if (duration > 0) {
-      setTimeout(() => {
-        removeNotification(id);
-      }, duration);
-    }
-  }, []);
+      if (duration > 0) {
+        setTimeout(() => {
+          removeNotification(id);
+        }, duration);
+      }
+    },
+    []
+  );
 
   // Setup error handler integration
   useEffect(() => {

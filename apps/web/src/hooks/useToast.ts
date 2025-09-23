@@ -10,7 +10,11 @@ export interface ToastOptions {
 }
 
 export interface ToastHook {
-  showToast: (message: string, severity?: 'success' | 'error' | 'warning' | 'info', options?: ToastOptions) => void;
+  showToast: (
+    message: string,
+    severity?: 'success' | 'error' | 'warning' | 'info',
+    options?: ToastOptions
+  ) => void;
   showSuccess: (message: string, options?: ToastOptions) => void;
   showError: (message: string, options?: ToastOptions) => void;
   showWarning: (message: string, options?: ToastOptions) => void;
@@ -51,22 +55,22 @@ export function useToast(): ToastHook {
   };
 
   const showSuccess = (message: string, options?: ToastOptions) => {
-    const duration = options?.persist ? 0 : options?.duration ?? 5000;
+    const duration = options?.persist ? 0 : (options?.duration ?? 5000);
     notification.showSuccess(message, duration);
   };
 
   const showError = (message: string, options?: ToastOptions) => {
-    const duration = options?.persist ? 0 : options?.duration ?? 8000; // Errors show longer
+    const duration = options?.persist ? 0 : (options?.duration ?? 8000); // Errors show longer
     notification.showError(message, duration);
   };
 
   const showWarning = (message: string, options?: ToastOptions) => {
-    const duration = options?.persist ? 0 : options?.duration ?? 6000;
+    const duration = options?.persist ? 0 : (options?.duration ?? 6000);
     notification.showWarning(message, duration);
   };
 
   const showInfo = (message: string, options?: ToastOptions) => {
-    const duration = options?.persist ? 0 : options?.duration ?? 5000;
+    const duration = options?.persist ? 0 : (options?.duration ?? 5000);
     notification.showInfo(message, duration);
   };
 
