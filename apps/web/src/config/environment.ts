@@ -37,7 +37,7 @@ const getEnvironmentVariable = (key: string, defaultValue: string = ''): string 
 
 export const config: EnvironmentConfig = {
   // API Configuration
-  apiBaseUrl: getEnvironmentVariable('VITE_API_BASE_URL', 'http://localhost:3001/api'),
+  apiBaseUrl: getEnvironmentVariable('VITE_API_URL', 'http://localhost:3001/api'),
 
   // AWS Cognito Configuration
   cognito: {

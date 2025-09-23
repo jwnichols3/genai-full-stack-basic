@@ -24,7 +24,7 @@ EC2 Instance Manager provides a secure, user-friendly interface for managing AWS
 - **Frontend**: React 18.2+, TypeScript 5.3+, Material-UI 5.15+, Vite 5.0+
 - **Backend**: AWS Lambda (Node.js 20.x), TypeScript 5.3+, DynamoDB
 - **Infrastructure**: AWS CDK 2.100+, CloudFormation
-- **Authentication**: AWS Cognito
+- **Authentication**: AWS Cognito (ID token-based authorization)
 - **Testing**: Jest 29.x, React Testing Library, Playwright
 
 ## Project Structure
@@ -127,6 +127,11 @@ npm run format
 # Type checking
 npm run type-check
 ```
+
+## Documentation
+
+- [Authentication Implementation](./docs/authentication-implementation.md) - Complete guide to the authentication flow
+- [Troubleshooting Auth Issues](./docs/troubleshooting/auth-token-mismatch.md) - Common authentication problems and solutions
 
 ## Deployment
 

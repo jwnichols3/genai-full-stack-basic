@@ -1,5 +1,10 @@
 import '@testing-library/jest-dom';
 
+// Polyfill for TextEncoder/TextDecoder
+import { TextEncoder, TextDecoder } from 'util';
+(global as any).TextEncoder = TextEncoder;
+(global as any).TextDecoder = TextDecoder;
+
 // Mock import.meta for Jest environment
 (globalThis as any).import = {
   meta: {
@@ -9,6 +14,7 @@ import '@testing-library/jest-dom';
       VITE_COGNITO_DOMAIN: 'test-domain',
       VITE_AWS_REGION: 'us-west-2',
       VITE_API_BASE_URL: 'http://localhost:3001/api',
+      VITE_API_URL: 'http://localhost:3001/api',
       VITE_APP_NAME: 'EC2 Instance Manager',
       VITE_APP_VERSION: '1.0.0',
       DEV: true,

@@ -10,7 +10,7 @@ const app = new cdk.App();
 // Get environment from context or default to 'dev'
 const environment = app.node.tryGetContext('environment') || 'dev';
 
-new AppStack(app, `EC2Manager-${environment}`, {
+const appStack = new AppStack(app, `EC2Manager-${environment}`, {
   environment,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
@@ -41,6 +41,8 @@ const webStack = new WebStack(app, `EC2Manager-Web-${environment}`, {
 new ApiStack(app, `EC2Manager-Api-${environment}`, {
   environment,
   cloudfrontDistributionUrl: webStack.distributionUrl,
+  cognitoUserPoolId: appStack.userPool.userPoolId,
+  cognitoClientId: appStack.userPoolClient.userPoolClientId,
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION || 'us-west-2',

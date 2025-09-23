@@ -9,6 +9,7 @@ import sys
 import subprocess
 import json
 import argparse
+import time
 from pathlib import Path
 import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
@@ -98,7 +99,7 @@ def sync_to_s3(bucket_name, dist_path, profile=None):
 
 
 def invalidate_cloudfront(distribution_id, profile=None):
-    """Create CloudFront invalidation"""
+    """Create CloudFront invalidation and return invalidation ID"""
     print(f"\n=== Invalidating CloudFront: {distribution_id} ===")
 
     try:
@@ -118,10 +119,80 @@ def invalidate_cloudfront(distribution_id, profile=None):
 
         invalidation_id = response['Invalidation']['Id']
         print(f"✓ CloudFront invalidation created: {invalidation_id}")
+        return invalidation_id
 
     except ClientError as e:
         print(f"CloudFront invalidation failed: {e}")
         # Don't exit - deployment can succeed without invalidation
+        return None
+
+
+def wait_for_invalidation(distribution_id, invalidation_id, profile=None):
+    """Wait for CloudFront invalidation to complete"""
+    if not invalidation_id:
+        print("No invalidation ID provided - skipping wait")
+        return
+
+    print(f"\n=== Waiting for invalidation {invalidation_id} to complete ===")
+
+    max_wait_time = 300  # 5 minutes maximum
+    poll_interval = 10   # 10 seconds between polls
+    elapsed_time = 0
+
+    try:
+        session = boto3.Session(profile_name=profile)
+        cf_client = session.client('cloudfront')
+
+        while elapsed_time < max_wait_time:
+            try:
+                response = cf_client.get_invalidation(
+                    DistributionId=distribution_id,
+                    Id=invalidation_id
+                )
+
+                status = response['Invalidation']['Status']
+                print(f"Invalidation status: {status} (elapsed: {elapsed_time}s)")
+
+                if status == 'Completed':
+                    print("✓ Invalidation completed successfully")
+                    return
+
+                time.sleep(poll_interval)
+                elapsed_time += poll_interval
+
+            except ClientError as e:
+                print(f"Error checking invalidation status: {e}")
+                break
+
+        print(f"WARNING: Invalidation did not complete within {max_wait_time} seconds")
+        print("The deployment was successful, but cache invalidation may still be in progress")
+
+    except ClientError as e:
+        print(f"Error waiting for invalidation: {e}")
+        print("The deployment was successful, but could not verify cache invalidation")
+
+
+def verify_deployment(cloudfront_url):
+    """Verify that the deployed site is accessible"""
+    print(f"\n=== Verifying deployment at {cloudfront_url} ===")
+
+    try:
+        import requests
+        response = requests.get(cloudfront_url, timeout=30)
+        if response.status_code == 200:
+            print("✓ Deployment verification successful - site is accessible")
+            return True
+        else:
+            print(f"WARNING: Got HTTP {response.status_code} from {cloudfront_url}")
+            return False
+    except ImportError:
+        print("WARNING: requests module not available - skipping HTTP verification")
+        print("Install requests with: pip install requests")
+        return True
+    except Exception as e:
+        print(f"WARNING: Deployment verification failed - {str(e)}")
+        print("The deployment may still be successful, but the site could not be verified")
+        return False
 
 
 def inject_environment_variables(environment):
@@ -221,15 +292,35 @@ def main():
     sync_to_s3(bucket_name, dist_path, args.profile)
 
     # Invalidate CloudFront
+    invalidation_id = None
     if not args.skip_invalidation:
-        invalidate_cloudfront(distribution_id, args.profile)
+        invalidation_id = invalidate_cloudfront(distribution_id, args.profile)
+
+        # Wait for invalidation to complete
+        if invalidation_id:
+            wait_for_invalidation(distribution_id, invalidation_id, args.profile)
     else:
         print("Skipping CloudFront invalidation...")
 
+    # Verify deployment
+    print(f"\n=== Verifying Deployment ===")
+    verification_success = verify_deployment(cloudfront_url)
+
     print("\n=== Deployment Complete ===")
     print(f"Your app is available at: {cloudfront_url}")
+
+    if invalidation_id and verification_success:
+        print("✓ Cache invalidation completed and site verified accessible")
+    elif invalidation_id:
+        print("✓ Cache invalidation completed")
+    elif verification_success:
+        print("✓ Site verified accessible (invalidation skipped)")
+
     print("")
-    print("Note: CloudFront changes may take 5-15 minutes to propagate globally.")
+    if not args.skip_invalidation:
+        print("✓ CloudFront cache has been invalidated - changes should be visible immediately")
+    else:
+        print("Note: CloudFront cache was not invalidated - changes may take time to appear")
 
 
 if __name__ == "__main__":

@@ -1,154 +1,285 @@
-import React from 'react';
-import { Container, Typography, Box, Card, CardContent, Grid, Paper } from '@mui/material';
+import React, { useState, useMemo } from 'react';
 import {
-  Dashboard as DashboardIcon,
-  Computer as ComputerIcon,
-  CloudQueue as CloudIcon,
-  Assessment as AssessmentIcon,
+  Container,
+  Typography,
+  Box,
+  Paper,
+  IconButton,
+  Tooltip,
+  Chip,
+  Alert,
+  CircularProgress,
+  Stack,
+  Button,
+} from '@mui/material';
+import {
+  Refresh as RefreshIcon,
+  Schedule as ScheduleIcon,
+  Logout as LogoutIcon,
 } from '@mui/icons-material';
-import { useResponsive, getResponsiveContainerStyles } from '../utils/responsive';
+import { DataGrid, GridColDef, GridToolbar, GridRenderCellParams } from '@mui/x-data-grid';
+import { EC2Instance } from '@ec2-manager/shared';
+import { useInstances } from '../hooks/useInstances';
+import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { InstanceStatusBadge } from '../components/instances/InstanceStatusBadge';
+import { getInstanceName, formatInstanceIp, formatLaunchTime, getInstanceAge } from '../utils/instanceUtils';
+import { useResponsive } from '../utils/responsive';
 
 const Dashboard: React.FC = () => {
   const { isMobile, isTablet } = useResponsive();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const {
+    instances,
+    loading,
+    error,
+    lastUpdated,
+    refresh,
+  } = useInstances(30000); // 30-second auto-refresh
 
-  const statsCards = [
-    {
-      title: 'Running Instances',
-      value: '12',
-      icon: <ComputerIcon />,
-      color: '#1B660F',
-    },
-    {
-      title: 'Stopped Instances',
-      value: '3',
-      icon: <CloudIcon />,
-      color: '#FF9900',
-    },
-    {
-      title: 'Total Instances',
-      value: '15',
-      icon: <DashboardIcon />,
-      color: '#232F3E',
-    },
-    {
-      title: 'Monthly Cost',
-      value: '$247.85',
-      icon: <AssessmentIcon />,
-      color: '#D13212',
-    },
-  ];
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleManualRefresh = async () => {
+    setRefreshing(true);
+    await refresh();
+    setRefreshing(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force navigation to login even if logout fails
+      navigate('/login');
+    }
+  };
+
+  const columns: GridColDef[] = useMemo(() => {
+    const baseColumns: GridColDef[] = [
+      {
+        field: 'instanceId',
+        headerName: 'Instance ID',
+        width: 200,
+        hideable: false,
+      },
+      {
+        field: 'name',
+        headerName: 'Name',
+        width: 200,
+        valueGetter: (_, row: EC2Instance) => getInstanceName(row),
+        hideable: false,
+      },
+      {
+        field: 'state',
+        headerName: 'Status',
+        width: 140,
+        renderCell: (params: GridRenderCellParams) => (
+          <InstanceStatusBadge state={params.value as 'pending' | 'running' | 'stopping' | 'stopped' | 'shutting-down' | 'terminated'} />
+        ),
+        hideable: false,
+      },
+      {
+        field: 'instanceType',
+        headerName: 'Type',
+        width: 120,
+      },
+      {
+        field: 'publicIpAddress',
+        headerName: 'Public IP',
+        width: 140,
+        valueGetter: (value) => formatInstanceIp(value),
+      },
+      {
+        field: 'privateIpAddress',
+        headerName: 'Private IP',
+        width: 140,
+        valueGetter: (value) => formatInstanceIp(value),
+      },
+      {
+        field: 'launchTime',
+        headerName: 'Launch Time',
+        width: 180,
+        valueGetter: (value) => formatLaunchTime(value),
+      },
+      {
+        field: 'age',
+        headerName: 'Age',
+        width: 100,
+        valueGetter: (_, row: EC2Instance) => getInstanceAge(row.launchTime),
+      },
+    ];
+
+    // Hide columns on smaller screens
+    if (isMobile) {
+      return baseColumns.filter(col =>
+        ['instanceId', 'name', 'state'].includes(col.field)
+      );
+    } else if (isTablet) {
+      return baseColumns.filter(col =>
+        !['age', 'launchTime'].includes(col.field)
+      );
+    }
+
+    return baseColumns;
+  }, [isMobile, isTablet]);
+
+  const renderEmptyState = () => (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 400,
+        textAlign: 'center',
+      }}
+    >
+      <Typography variant="h6" color="textSecondary" gutterBottom>
+        No instances found
+      </Typography>
+      <Typography variant="body2" color="textSecondary">
+        You don&apos;t have any EC2 instances in your account, or they may be in a different region.
+      </Typography>
+    </Box>
+  );
+
+  const renderError = () => (
+    <Alert
+      severity="error"
+      action={
+        <IconButton
+          color="inherit"
+          size="small"
+          onClick={() => { void handleManualRefresh(); }}
+          disabled={refreshing}
+        >
+          <RefreshIcon />
+        </IconButton>
+      }
+    >
+      {error}
+    </Alert>
+  );
 
   return (
-    <Container maxWidth="lg" sx={getResponsiveContainerStyles()}>
-      <Typography
-        variant={isMobile ? 'h5' : 'h4'}
-        component="h1"
-        gutterBottom
-        sx={{ mb: { xs: 2, md: 4 } }}
-      >
-        Dashboard
-      </Typography>
+    <Container maxWidth="xl" sx={{ py: 3 }}>
+      <Box sx={{ mb: 3 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography
+            variant={isMobile ? 'h5' : 'h4'}
+            component="h1"
+          >
+            EC2 Instances
+          </Typography>
 
-      {/* Stats Cards */}
-      <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: { xs: 3, md: 4 } }}>
-        {statsCards.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card
-              elevation={2}
-              sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                '&:hover': {
-                  elevation: 4,
-                  transform: 'translateY(-2px)',
-                  transition: 'all 0.3s ease-in-out',
-                },
-              }}
-            >
-              <CardContent
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  p: { xs: 2, md: 3 },
-                }}
+          <Stack direction="row" spacing={1} alignItems="center">
+            {lastUpdated && (
+              <Tooltip title={`Last updated: ${lastUpdated.toLocaleString()}`}>
+                <Chip
+                  icon={<ScheduleIcon />}
+                  label={`Last updated ${lastUpdated.toLocaleTimeString()}`}
+                  size="small"
+                  variant="outlined"
+                />
+              </Tooltip>
+            )}
+
+            <Tooltip title="Refresh instances">
+              <IconButton
+                onClick={() => { void handleManualRefresh(); }}
+                disabled={refreshing || loading}
+                color="primary"
+                aria-label="refresh"
               >
-                <Box>
-                  <Typography
-                    variant="h6"
-                    component="div"
-                    sx={{
-                      fontWeight: 600,
-                      fontSize: { xs: '1.1rem', md: '1.25rem' },
-                      color: stat.color,
-                    }}
-                  >
-                    {stat.value}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    sx={{
-                      fontSize: { xs: '0.75rem', md: '0.875rem' },
-                    }}
-                  >
-                    {stat.title}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    color: stat.color,
-                    opacity: 0.7,
-                    fontSize: { xs: '1.5rem', md: '2rem' },
-                  }}
-                >
-                  {stat.icon}
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+                {refreshing ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  <RefreshIcon />
+                )}
+              </IconButton>
+            </Tooltip>
 
-      {/* Main Content Area */}
-      <Grid container spacing={{ xs: 2, md: 3 }}>
-        <Grid item xs={12} md={8}>
-          <Paper
-            elevation={2}
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={<LogoutIcon />}
+              onClick={() => { void handleLogout(); }}
+              size="small"
+            >
+              Logout
+            </Button>
+          </Stack>
+        </Stack>
+
+        {error && renderError()}
+      </Box>
+
+      <Paper sx={{ height: 600, width: '100%' }}>
+        {loading && instances.length === 0 ? (
+          <Box
             sx={{
-              p: { xs: 2, md: 3 },
-              height: { xs: 'auto', md: 400 },
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
             }}
           >
-            <Typography variant="h6" component="h2" gutterBottom>
-              Instance Overview
-            </Typography>
-            <Typography variant="body1" color="textSecondary">
-              Monitor and manage your AWS EC2 instances from this dashboard.
-              {!isMobile &&
-                !isTablet &&
-                ' Use the navigation sidebar to access different features and manage your cloud infrastructure efficiently.'}
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Paper
-            elevation={2}
-            sx={{
-              p: { xs: 2, md: 3 },
-              height: { xs: 'auto', md: 400 },
+            <CircularProgress />
+          </Box>
+        ) : instances.length === 0 && !error ? (
+          renderEmptyState()
+        ) : (
+          <DataGrid
+            rows={instances}
+            columns={columns}
+            getRowId={(row: EC2Instance) => row.instanceId}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 25,
+                },
+              },
+              sorting: {
+                sortModel: [{ field: 'name', sort: 'asc' }],
+              },
             }}
-          >
-            <Typography variant="h6" component="h2" gutterBottom>
-              Quick Actions
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Launch new instances, manage existing ones, and configure your AWS environment.
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
+            pageSizeOptions={[10, 25, 50, 100]}
+            checkboxSelection={false}
+            disableRowSelectionOnClick
+            loading={loading}
+            slots={{
+              toolbar: GridToolbar,
+            }}
+            slotProps={{
+              toolbar: {
+                showQuickFilter: true,
+                quickFilterProps: { debounceMs: 500 },
+              },
+            }}
+            sx={{
+              border: 0,
+              '& .MuiDataGrid-cell': {
+                borderColor: 'rgba(224, 224, 224, 1)',
+              },
+              '& .MuiDataGrid-row:hover': {
+                backgroundColor: 'rgba(0, 0, 0, 0.04)',
+              },
+            }}
+          />
+        )}
+      </Paper>
+
+      {instances.length > 0 && (
+        <Box sx={{ mt: 2, textAlign: 'center' }}>
+          <Typography variant="body2" color="textSecondary">
+            Showing {instances.length} instance{instances.length !== 1 ? 's' : ''}
+            {lastUpdated && ` • Auto-refresh every 30 seconds`}
+          </Typography>
+        </Box>
+      )}
     </Container>
   );
 };

@@ -40,7 +40,7 @@ export function LoginForm({ onSubmit, loading = false, error }: LoginFormProps) 
 
   const validateEmail = (email: string): string | undefined => {
     if (!email) {
-      return 'Email is required';
+      return 'email is required';
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -53,7 +53,7 @@ export function LoginForm({ onSubmit, loading = false, error }: LoginFormProps) 
 
   const validatePassword = (password: string): string | undefined => {
     if (!password) {
-      return 'Password is required';
+      return 'password is required';
     }
 
     if (password.length < 8) {
@@ -155,7 +155,7 @@ export function LoginForm({ onSubmit, loading = false, error }: LoginFormProps) 
               textAlign="center"
               fontWeight="bold"
             >
-              Sign In
+              EC2 Manager
             </Typography>
 
             <Typography variant="body2" color="text.secondary" textAlign="center">

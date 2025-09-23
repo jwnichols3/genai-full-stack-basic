@@ -45,6 +45,8 @@ class AuthService {
    */
   async login(credentials: LoginCredentials): Promise<{ user: User; tokens: AuthTokens }> {
     try {
+      console.log('🔐 Starting login process for:', credentials.email);
+
       const command = new InitiateAuthCommand({
         AuthFlow: AuthFlowType.USER_PASSWORD_AUTH,
         ClientId: config.cognito.clientId,
@@ -54,25 +56,31 @@ class AuthService {
         },
       });
 
+      console.log('📡 Sending auth request to Cognito...');
       const response = await this.cognitoClient.send(command);
+      console.log('✅ Cognito auth response received');
 
       // Handle NEW_PASSWORD_REQUIRED challenge
       if (response.ChallengeName === 'NEW_PASSWORD_REQUIRED') {
+        console.log('⚠️ Password change required');
         throw new Error(
           'Password change required. Please contact your administrator to reset your password.'
         );
       }
 
       if (!response.AuthenticationResult) {
+        console.log('❌ No authentication result in response');
         throw new Error('Authentication failed');
       }
 
       const { AccessToken, IdToken, RefreshToken } = response.AuthenticationResult;
 
       if (!AccessToken || !IdToken || !RefreshToken) {
+        console.log('❌ Missing tokens in authentication result');
         throw new Error('Invalid authentication response');
       }
 
+      console.log('🔑 Tokens received, storing...');
       const tokens: AuthTokens = {
         accessToken: AccessToken,
         idToken: IdToken,
@@ -81,12 +89,24 @@ class AuthService {
 
       // Store tokens securely
       this.storeTokens(tokens);
+      console.log('💾 Tokens stored successfully');
+      console.log('🔍 Token types received from Cognito:', {
+        accessTokenLength: AccessToken.length,
+        accessTokenPrefix: AccessToken.substring(0, 50),
+        idTokenLength: IdToken.length,
+        idTokenPrefix: IdToken.substring(0, 50),
+        refreshTokenLength: RefreshToken.length,
+        refreshTokenPrefix: RefreshToken.substring(0, 50),
+      });
 
       // Get user information
+      console.log('👤 Getting user information...');
       const user = await this.getCurrentUser();
+      console.log('✅ User information retrieved:', { email: user.email, role: user.role });
 
       return { user, tokens };
     } catch (error) {
+      console.log('❌ Login failed:', error);
       const authError = this.handleCognitoError(error);
       throw authError;
     }
@@ -221,6 +241,13 @@ class AuthService {
    */
   getAccessToken(): string | null {
     return this.accessToken;
+  }
+
+  /**
+   * Get current ID token (contains user claims)
+   */
+  getIdToken(): string | null {
+    return this.idToken;
   }
 
   /**

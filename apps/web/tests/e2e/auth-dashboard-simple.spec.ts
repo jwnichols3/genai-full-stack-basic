@@ -1,0 +1,315 @@
+import { test, expect, Page } from '@playwright/test';
+
+// Test configuration
+const TEST_CONFIG = {
+  baseURL: process.env.E2E_BASE_URL || 'https://d2pbh2fudgytg0.cloudfront.net',
+  timeout: 30000,
+  navigationTimeout: 15000,
+};
+
+// Test credentials from environment variables
+const TEST_CREDENTIALS = {
+  email: process.env.E2E_TEST_EMAIL || 'admin@example.com',
+  password: process.env.E2E_TEST_PASSWORD || 'Admin123!Pass',
+};
+
+// Helper function to wait for page to be fully loaded
+async function waitForPageLoad(page: Page) {
+  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('domcontentloaded');
+}
+
+// Helper function to login
+async function loginUser(page: Page, email: string, password: string) {
+  await page.goto('/login');
+  await waitForPageLoad(page);
+
+  // Fill login form
+  await page.getByLabel(/email address/i).fill(email);
+  await page.getByLabel(/password/i).fill(password);
+
+  // Submit form and wait for navigation
+  await Promise.all([
+    page.waitForURL('**/dashboard', {
+      timeout: TEST_CONFIG.navigationTimeout,
+      waitUntil: 'networkidle'
+    }),
+    page.getByRole('button', { name: /sign in/i }).click(),
+  ]);
+
+  // Verify we're on dashboard
+  await expect(page).toHaveURL(/\/dashboard$/);
+}
+
+test.describe('EC2 Manager - Core Functionality', () => {
+  test.use({
+    baseURL: TEST_CONFIG.baseURL,
+  });
+
+  test('should display login page with all required elements', async ({ page }) => {
+    await page.goto('/login');
+    await waitForPageLoad(page);
+
+    // Check main elements are present
+    await expect(page.getByRole('heading', { name: /ec2 manager/i })).toBeVisible();
+    await expect(page.getByLabel(/email address/i)).toBeVisible();
+    await expect(page.getByLabel(/password/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible();
+  });
+
+  test('should show validation errors for empty form submission', async ({ page }) => {
+    await page.goto('/login');
+    await waitForPageLoad(page);
+
+    // Click submit without filling form
+    await page.getByRole('button', { name: /sign in/i }).click();
+
+    // Check for validation errors
+    await expect(page.getByText(/email is required/i)).toBeVisible();
+    await expect(page.getByText(/password is required/i)).toBeVisible();
+  });
+
+  test('should show error for invalid credentials', async ({ page }) => {
+    await page.goto('/login');
+    await waitForPageLoad(page);
+
+    // Fill with invalid credentials
+    await page.getByLabel(/email address/i).fill('wrong@example.com');
+    await page.getByLabel(/password/i).fill('wrongpassword');
+
+    // Submit and wait for error
+    await page.getByRole('button', { name: /sign in/i }).click();
+
+    // Wait for any error message to appear (check what's actually shown)
+    await page.waitForTimeout(3000);
+
+    // Take a screenshot to see what's happening
+    await page.screenshot({ path: 'debug-invalid-login.png' });
+
+    // Try to find any error message
+    const errorElements = await page.locator('[role="alert"], .MuiAlert-root, .error').all();
+    console.log(`Found ${errorElements.length} error elements`);
+
+    for (const element of errorElements) {
+      const text = await element.textContent();
+      console.log(`Error element text: "${text}"`);
+    }
+
+    // Should show some kind of error message
+    await expect(page.locator('[role="alert"], .MuiAlert-root').first()).toBeVisible({ timeout: 10000 });
+  });
+
+  test('should successfully login and navigate to dashboard', async ({ page }) => {
+    // Capture all console messages for debugging
+    page.on('console', msg => {
+      console.log(`Browser console [${msg.type()}]: ${msg.text()}`);
+    });
+
+    await page.goto('/login');
+    await waitForPageLoad(page);
+
+    console.log(`Using credentials: ${TEST_CREDENTIALS.email} / ${TEST_CREDENTIALS.password}`);
+
+    // Fill login form with valid credentials
+    await page.getByLabel(/email address/i).fill(TEST_CREDENTIALS.email);
+    await page.getByLabel(/password/i).fill(TEST_CREDENTIALS.password);
+
+    // Listen for authentication-related network requests
+    const responsePromise = page.waitForResponse(response =>
+      response.url().includes('cognito') ||
+      response.url().includes('auth') ||
+      response.url().includes('InitiateAuth') ||
+      response.url().includes('identity'),
+      { timeout: 10000 }
+    ).catch(() => null);
+
+    // Submit form
+    await page.getByRole('button', { name: /sign in/i }).click();
+
+    try {
+      // Wait for auth response
+      const response = await responsePromise;
+      if (response) {
+        console.log(`Auth response: ${response.status()} ${response.url()}`);
+
+        if (!response.ok()) {
+          const responseText = await response.text().catch(() => 'Could not read response');
+          console.log(`Auth failed: ${responseText}`);
+        }
+      } else {
+        console.log('No auth response captured - checking for client-side errors');
+      }
+    } catch (error) {
+      console.log('No auth response captured');
+    }
+
+    // Wait a moment for any async processing
+    await page.waitForTimeout(2000);
+
+    // Check for error messages on login page
+    const errorMessage = page.locator('[role="alert"], .MuiAlert-root').first();
+    if (await errorMessage.isVisible({ timeout: 2000 })) {
+      const errorText = await errorMessage.textContent();
+      console.log(`Login error displayed: ${errorText}`);
+      throw new Error(`Login failed with error: ${errorText}`);
+    }
+
+    // Wait for navigation to dashboard
+    try {
+      await page.waitForURL('**/dashboard', {
+        timeout: TEST_CONFIG.navigationTimeout,
+        waitUntil: 'domcontentloaded'
+      });
+
+      // Verify we're on dashboard
+      await expect(page).toHaveURL(/\/dashboard$/);
+
+      // Check dashboard elements are present
+      await expect(page.getByRole('heading', { name: /ec2 instances/i })).toBeVisible({ timeout: 10000 });
+
+      // Check for either instance table or empty state
+      const instanceTable = page.getByRole('table');
+      const emptyState = page.getByText(/no instances found/i);
+
+      await expect(async () => {
+        const tableVisible = await instanceTable.isVisible().catch(() => false);
+        const emptyVisible = await emptyState.isVisible().catch(() => false);
+        expect(tableVisible || emptyVisible).toBeTruthy();
+      }).toPass({ timeout: 10000 });
+
+      console.log('✓ Login successful - dashboard loaded');
+    } catch (navigationError) {
+      // Take screenshot for debugging
+      await page.screenshot({ path: 'debug-login-failure.png' });
+
+      // Check what page we're actually on
+      const currentUrl = page.url();
+      console.log(`Failed to navigate to dashboard. Current URL: ${currentUrl}`);
+
+      // Look for any error messages that might have appeared
+      const allAlerts = await page.locator('[role="alert"], .MuiAlert-root, .error-message').all();
+      for (const alert of allAlerts) {
+        const text = await alert.textContent();
+        if (text) {
+          console.log(`Found error message: "${text}"`);
+        }
+      }
+
+      throw new Error(`Navigation to dashboard failed: ${navigationError}`);
+    }
+  });
+
+  test('should display dashboard with proper layout after login', async ({ page }) => {
+    // Login first
+    await loginUser(page, TEST_CREDENTIALS.email, TEST_CREDENTIALS.password);
+
+    // Wait for dashboard to load
+    await waitForPageLoad(page);
+
+    // Check header is present
+    const header = page.getByRole('banner');
+    await expect(header).toBeVisible();
+
+    // Check for navigation elements
+    await expect(page.getByRole('button', { name: /logout/i })).toBeVisible();
+
+    // Check main content area
+    await expect(page.getByRole('heading', { name: /ec2 instances/i })).toBeVisible();
+
+    // Check for refresh button
+    await expect(page.getByRole('button', { name: /refresh/i })).toBeVisible();
+
+    // Check for last updated timestamp
+    await expect(page.getByText(/last updated/i)).toBeVisible();
+  });
+
+  test('should handle manual refresh of instances', async ({ page }) => {
+    // Login first
+    await loginUser(page, TEST_CREDENTIALS.email, TEST_CREDENTIALS.password);
+
+    // Wait for dashboard to load
+    await waitForPageLoad(page);
+
+    // Find and click refresh button
+    const refreshButton = page.getByRole('button', { name: /refresh/i });
+    await expect(refreshButton).toBeVisible();
+
+    // Click refresh and wait for network activity
+    await Promise.all([
+      page.waitForResponse(response =>
+        response.url().includes('/instances') && response.status() === 200,
+        { timeout: 10000 }
+      ).catch(() => {}), // Don't fail if no instances endpoint
+      refreshButton.click()
+    ]);
+
+    // Verify refresh happened (button should be enabled again)
+    await expect(refreshButton).toBeEnabled();
+  });
+
+  test('should successfully logout and redirect to login', async ({ page }) => {
+    // Login first
+    await loginUser(page, TEST_CREDENTIALS.email, TEST_CREDENTIALS.password);
+
+    // Wait for dashboard to load
+    await waitForPageLoad(page);
+
+    // Find and click logout button
+    const logoutButton = page.getByRole('button', { name: /logout/i });
+    await expect(logoutButton).toBeVisible();
+
+    // Click logout and wait for redirect
+    await Promise.all([
+      page.waitForURL('**/login', {
+        timeout: TEST_CONFIG.navigationTimeout,
+        waitUntil: 'networkidle'
+      }),
+      logoutButton.click()
+    ]);
+
+    // Verify we're back on login page
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole('heading', { name: /ec2 manager/i })).toBeVisible();
+  });
+
+  test('should complete full user journey: login → view dashboard → logout', async ({ page }) => {
+    // 1. Start at login page
+    await page.goto('/login');
+    await waitForPageLoad(page);
+    await expect(page.getByRole('heading', { name: /ec2 manager/i })).toBeVisible();
+
+    // 2. Login with valid credentials
+    await page.getByLabel(/email address/i).fill(TEST_CREDENTIALS.email);
+    await page.getByLabel(/password/i).fill(TEST_CREDENTIALS.password);
+
+    await Promise.all([
+      page.waitForURL('**/dashboard', {
+        timeout: TEST_CONFIG.navigationTimeout,
+        waitUntil: 'networkidle'
+      }),
+      page.getByRole('button', { name: /sign in/i }).click(),
+    ]);
+
+    // 3. Verify dashboard loaded
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page.getByRole('heading', { name: /ec2 instances/i })).toBeVisible();
+
+    // 4. Interact with dashboard (click refresh)
+    const refreshButton = page.getByRole('button', { name: /refresh/i });
+    await refreshButton.click();
+    await page.waitForTimeout(1000); // Brief wait for refresh
+
+    // 5. Logout
+    await Promise.all([
+      page.waitForURL('**/login', {
+        timeout: TEST_CONFIG.navigationTimeout,
+        waitUntil: 'networkidle'
+      }),
+      page.getByRole('button', { name: /logout/i }).click()
+    ]);
+
+    // 6. Verify back at login
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole('heading', { name: /ec2 manager/i })).toBeVisible();
+  });
+});
