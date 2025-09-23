@@ -73,7 +73,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   };
 
   return (
-    <AppBar position="sticky" elevation={1}>
+    <AppBar position="static" elevation={1}>
       <Toolbar>
         {isMobile && (
           <IconButton

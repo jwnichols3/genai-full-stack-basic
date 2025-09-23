@@ -65,7 +65,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const drawer = (
     <Box>
-      <Box sx={{ height: 64 }} /> {/* Spacer for AppBar height */}
       <List>
         {navigationItems.map((item) => (
           <ListItem key={item.text} disablePadding>
@@ -106,8 +105,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Header onMenuToggle={handleDrawerToggle} />
-
       {isMobile ? (
         <Drawer
           variant="temporary"
@@ -148,10 +145,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           display: 'flex',
           flexDirection: 'column',
           width: { md: `calc(100% - ${drawerWidth}px)` },
+          minWidth: 0, // Prevent flex item from overflowing
         }}
       >
-        {/* Spacer for AppBar */}
-        <Box sx={{ height: 64 }} />
+        <Header onMenuToggle={handleDrawerToggle} />
 
         {/* Main content area */}
         <Box sx={{ flexGrow: 1, overflow: 'auto' }}>{children}</Box>

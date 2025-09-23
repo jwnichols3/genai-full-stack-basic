@@ -16,6 +16,6 @@
       "@config/*": ["../../packages/config/src/*"]
     }
   },
-  "include": ["src", "tests", "vite.config.ts"],
+  "include": ["src", "tests", "vite.config.ts", "playwright.config.ts"],
   "references": [{ "path": "../../packages/shared" }, { "path": "../../packages/config" }]
 }
