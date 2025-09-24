@@ -15,10 +15,27 @@ const TEST_CREDENTIALS = {
 
 // Helper function to clear session storage and start fresh
 async function clearAuthState(page: Page) {
-  await page.evaluate(() => {
-    sessionStorage.clear();
-    localStorage.clear();
-  });
+  try {
+    await page.evaluate(() => {
+      try {
+        sessionStorage.clear();
+        localStorage.clear();
+      } catch (error) {
+        // Ignore localStorage/sessionStorage access errors in sandboxed environments
+        console.log('Warning: Could not clear localStorage/sessionStorage:', error);
+      }
+    });
+  } catch (error) {
+    // Ignore if we can't execute the clear operation
+    console.log('Warning: Could not execute clearAuthState:', error);
+  }
+
+  try {
+    await page.context().clearCookies();
+  } catch (error) {
+    // Ignore cookie clearing errors
+    console.log('Warning: Could not clear cookies:', error);
+  }
 }
 
 // Helper function to wait for page to be fully loaded

@@ -55,8 +55,8 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        // Use full browser instead of headless for initial development
-        headless: false,
+        // Use headless in CI, headed for development
+        headless: !!process.env.CI,
         // Set viewport size for consistent testing
         viewport: { width: 1280, height: 720 },
         // Launch options
@@ -72,7 +72,7 @@ export default defineConfig({
       name: 'firefox',
       use: {
         ...devices['Desktop Firefox'],
-        headless: false,
+        headless: !!process.env.CI,
         viewport: { width: 1280, height: 720 },
       },
     },
@@ -81,7 +81,7 @@ export default defineConfig({
       name: 'webkit',
       use: {
         ...devices['Desktop Safari'],
-        headless: false,
+        headless: !!process.env.CI,
         viewport: { width: 1280, height: 720 },
       },
     },
@@ -91,14 +91,14 @@ export default defineConfig({
       name: 'Mobile Chrome',
       use: {
         ...devices['Pixel 5'],
-        headless: false,
+        headless: !!process.env.CI,
       },
     },
     {
       name: 'Mobile Safari',
       use: {
         ...devices['iPhone 12'],
-        headless: false,
+        headless: !!process.env.CI,
       },
     },
 

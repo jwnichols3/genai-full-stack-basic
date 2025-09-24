@@ -112,6 +112,26 @@ npm run test:infra
 npm run test -- --coverage
 ```
 
+### End-to-End Testing
+
+The project includes comprehensive E2E tests using Playwright:
+
+```bash
+# Run basic E2E tests (recommended for development) - ~30-60 seconds
+npm run test:e2e:basic
+
+# Run all E2E tests (comprehensive coverage) - ~5-10 minutes
+npm run test:e2e
+
+# Run E2E tests with visible browser (for debugging)
+npm run test:e2e:headed
+
+# Run E2E tests in interactive UI mode
+npm run test:e2e:ui
+```
+
+**Quick Testing**: Use `npm run test:e2e:basic` when making changes to verify core functionality (login → dashboard → logout) still works.
+
 ### Linting and Formatting
 
 ```bash

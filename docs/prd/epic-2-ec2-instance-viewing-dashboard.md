@@ -106,7 +106,13 @@
 7. Rate limiting errors show appropriate retry message
 8. Loading spinners consistent across all async operations
 
-## Story 2.7: Implement Role-Based UI Adaptation
+## Story 2.7: Implement E2E Functionality Testing
+
+**As a** developer,
+**I want** to test the end-to-end functionality of the website in a modular and scalable way,
+**So that** I have confidence in my code and design quality across all user journeys.
+
+## Story 2.8: Implement Role-Based UI Adaptation
 
 **As a** read-only user,
 **I want** to see only the features available to my role,

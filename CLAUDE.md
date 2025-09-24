@@ -23,7 +23,9 @@ python scripts/deploy-web.py {dev|prod}
 
 ### Testing
 
-- Check package.json for available test commands
+- **Basic E2E Tests** (recommended for development): `npm run test:e2e:basic`
+- **Full E2E Tests**: `npm run test:e2e`
+- **Unit Tests**: Check package.json for available test commands
 
 ### Build
 
