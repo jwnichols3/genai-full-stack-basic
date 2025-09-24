@@ -12,6 +12,7 @@ import {
   useMediaQuery,
   Avatar,
   Divider,
+  Chip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -24,6 +25,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { useNotification } from '../NotificationProvider';
+import { RoleGuard } from '../RoleGuard';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -116,9 +118,18 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
           {state.user && (
             <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
               {!isMobile && (
-                <Typography variant="body2" sx={{ mr: 1 }}>
-                  {state.user.firstName} {state.user.lastName}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 1 }}>
+                  <Typography variant="body2">
+                    {state.user.firstName} {state.user.lastName}
+                  </Typography>
+                  <Chip
+                    label={state.user.role}
+                    size="small"
+                    color={state.user.role === 'admin' ? 'primary' : 'default'}
+                    variant="outlined"
+                    sx={{ fontSize: '0.75rem', height: '20px' }}
+                  />
+                </Box>
               )}
               <IconButton
                 size="large"
@@ -180,10 +191,12 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
               <AccountIcon sx={{ mr: 1 }} />
               Profile
             </MenuItem>
-            <MenuItem onClick={() => handleNavigation('/settings')}>
-              <SettingsIcon sx={{ mr: 1 }} />
-              Settings
-            </MenuItem>
+            <RoleGuard requiredRole="admin">
+              <MenuItem onClick={() => handleNavigation('/settings')}>
+                <SettingsIcon sx={{ mr: 1 }} />
+                Settings
+              </MenuItem>
+            </RoleGuard>
             <Divider />
             <MenuItem onClick={() => void handleLogout()}>
               <LogoutIcon sx={{ mr: 1 }} />

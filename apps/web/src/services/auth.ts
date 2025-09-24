@@ -1,4 +1,5 @@
 // Authentication service using AWS Cognito SDK
+/* eslint-disable no-console */
 import {
   CognitoIdentityProviderClient,
   InitiateAuthCommand,

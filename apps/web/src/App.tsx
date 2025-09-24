@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { theme } from './styles/theme';
-import { Login, Dashboard, InstanceDetail, NotFound } from './pages';
+import { Login, Dashboard, InstanceDetail, Profile, NotFound } from './pages';
 import { Layout } from './components/common/Layout';
 import { AuthProvider } from './store/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -37,6 +37,16 @@ const App: React.FC = () => {
                     <ProtectedRoute>
                       <Layout>
                         <InstanceDetail />
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <Profile />
                       </Layout>
                     </ProtectedRoute>
                   }

@@ -26,6 +26,9 @@ import {
   Schedule as ScheduleIcon,
   Visibility as VisibilityIcon,
   LocationOn as LocationIcon,
+  PlayArrow as StartIcon,
+  Stop as StopIcon,
+  RestartAlt as RebootIcon,
 } from '@mui/icons-material';
 import { useInstanceDetail } from '../hooks/useInstanceDetail';
 import { InstanceStatusBadge } from '../components/instances/InstanceStatusBadge';
@@ -34,6 +37,8 @@ import { InstanceNetwork } from '../components/instances/InstanceNetwork';
 import { getInstanceName } from '../utils/instanceUtils';
 import { formatRelativeTime, formatAbsoluteTime } from '../utils/timeUtils';
 import { useResponsive } from '../utils/responsive';
+import { RoleGuard } from '../components/common/RoleGuard';
+import { PermissionTooltip } from '../components/common/PermissionTooltip';
 
 const InstanceDetail: React.FC = () => {
   const { instanceId } = useParams<{ instanceId: string }>();
@@ -182,6 +187,62 @@ const InstanceDetail: React.FC = () => {
                 {loading ? <CircularProgress size={20} /> : <RefreshIcon />}
               </IconButton>
             </Tooltip>
+
+            {/* Admin Actions */}
+            <RoleGuard requiredRole="admin">
+              <Stack direction="row" spacing={1}>
+                {instance.state === 'stopped' && (
+                  <PermissionTooltip requiredRole="admin" message="Start this EC2 instance">
+                    <Button
+                      variant="outlined"
+                      startIcon={<StartIcon />}
+                      color="success"
+                      size={isMobile ? 'small' : 'medium'}
+                      onClick={() => {
+                        // TODO: Implement start instance functionality
+                        // console.log('Start instance:', instance.instanceId);
+                      }}
+                    >
+                      Start
+                    </Button>
+                  </PermissionTooltip>
+                )}
+
+                {instance.state === 'running' && (
+                  <>
+                    <PermissionTooltip requiredRole="admin" message="Reboot this EC2 instance">
+                      <Button
+                        variant="outlined"
+                        startIcon={<RebootIcon />}
+                        color="warning"
+                        size={isMobile ? 'small' : 'medium'}
+                        onClick={() => {
+                          // TODO: Implement reboot instance functionality
+                          // console.log('Reboot instance:', instance.instanceId);
+                        }}
+                      >
+                        Reboot
+                      </Button>
+                    </PermissionTooltip>
+
+                    <PermissionTooltip requiredRole="admin" message="Stop this EC2 instance">
+                      <Button
+                        variant="outlined"
+                        startIcon={<StopIcon />}
+                        color="error"
+                        size={isMobile ? 'small' : 'medium'}
+                        onClick={() => {
+                          // TODO: Implement stop instance functionality
+                          // console.log('Stop instance:', instance.instanceId);
+                        }}
+                      >
+                        Stop
+                      </Button>
+                    </PermissionTooltip>
+                  </>
+                )}
+              </Stack>
+            </RoleGuard>
 
             <Button
               variant="outlined"

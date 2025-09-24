@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { EC2Instance } from '@ec2-manager/shared';
 import { authService } from './auth';
 import { errorHandler } from './errorHandler';
